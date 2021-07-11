@@ -1,0 +1,1 @@
+web: java -jar target\thiTracker-1.war
