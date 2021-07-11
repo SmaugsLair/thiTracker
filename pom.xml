@@ -10,9 +10,9 @@
     </parent>
     <groupId>com.smaugslair</groupId>
     <artifactId>thiTracker</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1</version>
     <name>thiTracker</name>
-    <packaging>jar</packaging>
+    <packaging>war</packaging>
     <description>Demo project for Spring Boot</description>
     <properties>
         <java.version>8</java.version>
@@ -99,6 +99,7 @@
                     </execution>
                 </executions>
             </plugin>
+
         </plugins>
     </build>
 
