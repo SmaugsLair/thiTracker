@@ -13,7 +13,7 @@
     <version>1</version>
     <name>thiTracker</name>
     <packaging>war</packaging>
-    <description>Demo project for Spring Boot</description>
+    <description>Time Tracker for The Hero Instant, a Giantsdance RPG</description>
     <properties>
         <java.version>8</java.version>
         <vaadin.version>14.6.5</vaadin.version>
@@ -28,10 +28,10 @@
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-spring-boot-starter</artifactId>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-tomcat</artifactId>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
