@@ -12,7 +12,7 @@
     <artifactId>thiTracker</artifactId>
     <version>1</version>
     <name>thiTracker</name>
-    <packaging>war</packaging>
+    <!--<packaging>war</packaging>-->
     <description>Time Tracker for The Hero Instant, a Giantsdance RPG</description>
     <properties>
         <java.version>8</java.version>
