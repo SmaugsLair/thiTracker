@@ -8,4 +8,5 @@ public interface PlayerCharacterRepository extends JpaRepository<PlayerCharacter
 
     List<PlayerCharacter> findAllByUserId(Integer userId);
     List<PlayerCharacter> findAllByUserIdAndGameIdIsNull(Integer userId);
+    List<PlayerCharacter> findAllByGameId(Long gameId);
 }

@@ -50,9 +50,23 @@ public class ThiTrackerApplication {
                 user.setDisplayName("Kevin F");
                 user.setEmail("naganalf@gmail.com");
                 user.setAdmin(true);
+                user.setFriendCode("9876");
                 user = userRepository.save(user);
 
                 Credentials credentials = new Credentials();
+                credentials.setUserId(user.getId());
+                credentials.setEncodedPassword(SecurityUtils.encode("password"));
+                credentialsRepository.save(credentials);
+
+                user = new User();
+                user.setName("deadandy");
+                user.setDisplayName("Andy A");
+                user.setEmail("andya@giantsdancegames.com");
+                user.setAdmin(true);
+                user.setFriendCode("4321");
+                user = userRepository.save(user);
+
+                credentials = new Credentials();
                 credentials.setUserId(user.getId());
                 credentials.setEncodedPassword(SecurityUtils.encode("password"));
                 credentialsRepository.save(credentials);

@@ -1,5 +1,8 @@
 package com.smaugslair.thitracker.data.pc;
 
+import com.smaugslair.thitracker.data.user.User;
+import org.hibernate.annotations.Formula;
+
 import javax.persistence.*;
 import javax.persistence.criteria.CriteriaBuilder;
 
@@ -13,11 +16,13 @@ public class PlayerCharacter {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
-    private Integer userId;
+    @OneToOne
+    @JoinColumn(name="user_id")
+    private User user;
 
     @Column(nullable = true)
     private Long gameId;
+
 
     public Long getId() {
         return id;
@@ -43,11 +48,15 @@ public class PlayerCharacter {
         this.gameId = gameId;
     }
 
-    public Integer getUserId() {
-        return userId;
+    public User getUser() {
+        return user;
     }
 
-    public void setUserId(Integer userId) {
-        this.userId = userId;
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public String getCharacterAndPlayerName() {
+        return getName() + " (" + user.getDisplayName() + ")";
     }
 }

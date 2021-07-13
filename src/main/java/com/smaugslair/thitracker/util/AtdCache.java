@@ -11,11 +11,9 @@ public class AtdCache {
     private static List<ActionTimeDefault> atds;
 
     public static List<ActionTimeDefault> getAtds() {
-        //log.info("returning atds: "+atds);
         return atds;
     }
     public static void setAtds(List<ActionTimeDefault> atds) {
-        //log.info("setting atds: "+atds);
         AtdCache.atds = atds;
     }
 

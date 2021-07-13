@@ -59,7 +59,6 @@ public class ColorCollection {
         private final String name;
 
         public Color(String name) {
-            log.info(""+name);
             this.name = name;
         }
 

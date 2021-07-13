@@ -5,6 +5,9 @@ import com.smaugslair.thitracker.data.user.CredentialsRepository;
 import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.data.user.UserRepository;
 import com.smaugslair.thitracker.security.SecurityUtils;
+import com.smaugslair.thitracker.ui.users.PasswordForm;
+import com.smaugslair.thitracker.ui.users.UserForm;
+import com.smaugslair.thitracker.util.RepoService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.H1;
@@ -17,6 +20,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Route("login") 
 @PageTitle("Login")
@@ -24,13 +28,11 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 
 	private static final Logger log = LoggerFactory.getLogger(LoginView.class);
 
-	private final UserRepository userRepo;
-	private final CredentialsRepository credRepo;
+	private RepoService repoService;
+
 	private LoginForm login = new LoginForm(); 
 
-	public LoginView(UserRepository userRepository, CredentialsRepository credentialsRepository){
-		userRepo = userRepository;
-		credRepo = credentialsRepository;
+	public LoginView(){
 		addClassName("login-view");
 		setSizeFull();
 		setAlignItems(Alignment.CENTER); 
@@ -50,16 +52,14 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 		saveNewUser.addClickListener(event -> {
 			User user = userForm.getUser();
 			if (user != null) {
-				log.info("user captured: " +user );
 				String validPassword = passwordForm.getValidPassword();
-				log.info("validPassword: " +validPassword );
 				if (validPassword != null) {
-					user = userRepo.save(user);
+					user.setFriendCode(generateFriendCode());
+					user = repoService.getUserRepo().save(user);
 					Credentials credentials = new Credentials();
 					credentials.setUserId(user.getId());
 					credentials.setEncodedPassword(SecurityUtils.encode(validPassword));
-					log.info("password captured: " +credentials );
-					credRepo.save(credentials);
+					repoService.getCredRepo().save(credentials);
 
 					dialog.close();
 					Notification.show("Account created, please login", 5000, Notification.Position.TOP_CENTER);
@@ -81,5 +81,19 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
         .containsKey("error")) {
             login.setError(true);
         }
+	}
+
+	@Autowired
+	public void setRepoService(RepoService repoService) {
+		this.repoService = repoService;
+	}
+
+	private String generateFriendCode() {
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < 4; ++i) {
+			sb.append((int)(Math.random() * 10));
+		}
+		return sb.toString();
+
 	}
 }

@@ -29,19 +29,15 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        //log.info(authentication.getName());
-        //log.info(authentication.getCredentials().toString());
         //String username = ;
         String password = authentication.getCredentials().toString();
 
         User user = userRepository.findUserByName(authentication.getName());
         Credentials credentials = credentialsRepository.findByUserId(user.getId());
-        //log.info("user:"+user);
         if (user != null) {
             if (SecurityUtils.matches(authentication.getCredentials().toString(), credentials.getEncodedPassword())) {
                 return new UsernamePasswordAuthenticationToken(user, password, Collections.emptyList());
             }
-            //log.info("not a match");
         }
         throw new BadCredentialsException("NOPE");
     }

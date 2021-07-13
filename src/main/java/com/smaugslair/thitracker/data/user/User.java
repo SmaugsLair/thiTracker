@@ -1,6 +1,7 @@
 package com.smaugslair.thitracker.data.user;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
 public class User {
@@ -20,6 +21,9 @@ public class User {
 
     @Column(nullable = false)
     private Boolean admin = false;
+
+    @Column(nullable = false)
+    private String friendCode;
 
     public User() {
     }
@@ -60,8 +64,18 @@ public class User {
         return admin;
     }
 
+    public Boolean getAdmin() {return admin;}
+
     public void setAdmin(Boolean admin) {
         this.admin = admin;
+    }
+
+    public String getFriendCode() {
+        return friendCode;
+    }
+
+    public void setFriendCode(String friendCode) {
+        this.friendCode = friendCode;
     }
 
     @Override
@@ -72,6 +86,20 @@ public class User {
                 ", email='" + email + '\'' +
                 ", displayName='" + displayName + '\'' +
                 ", admin=" + admin +
+                ", friendCode='" + friendCode + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return id.equals(user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

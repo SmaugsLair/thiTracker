@@ -1,28 +1,29 @@
 package com.smaugslair.thitracker.ui;
 
-import com.smaugslair.thitracker.data.atd.AtdRepository;
 import com.smaugslair.thitracker.security.SecurityUtils;
+import com.smaugslair.thitracker.ui.friends.FriendsSession;
+import com.smaugslair.thitracker.ui.games.CollectionView;
+import com.smaugslair.thitracker.ui.users.UserDetailsView;
 import com.smaugslair.thitracker.util.AtdCache;
+import com.smaugslair.thitracker.util.RepoService;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.html.Anchor;
-import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.router.RouterLink;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.annotation.PostConstruct;
 
 @Push
 public class MainView extends AppLayout {
 
-    public MainView(AtdRepository atdRepository) {
+    private RepoService repoService;
 
-        if (AtdCache.getAtds() == null) {
-            AtdCache.setAtds(atdRepository.findAll());
-        }
-
+    public MainView() {
 
         setPrimarySection(AppLayout.Section.DRAWER);
         H3 h1 = new H3("The Hero Instant");
@@ -30,11 +31,27 @@ public class MainView extends AppLayout {
 
         Tabs tabs = new Tabs(
                 new Tab( new RouterLink("Home", HomeView.class)),
-                new Tab("Friends"),
+                new Tab(new RouterLink("Friends", FriendsSession.class)),
                 new Tab(new RouterLink("Collection (GMs)", CollectionView.class)),
-                new Tab(new RouterLink("User Details", UserDetailsView.class)),
-                new Tab( new Anchor("logout", "Logout "+ SecurityUtils.getLoggedInUser().getName())));
+                new Tab(new RouterLink("User Details", UserDetailsView.class)));
+        if (SecurityUtils.getLoggedInUser().isAdmin()) {
+            tabs.add(new Tab(new RouterLink("Admin", AdminSession.class)));
+        }
+        tabs.add(new Tab( new Anchor("logout", "Logout "+ SecurityUtils.getLoggedInUser().getName())));
         tabs.setOrientation(Tabs.Orientation.VERTICAL);
         addToDrawer(tabs);
     }
+
+    @PostConstruct
+    public void init() {
+        if (AtdCache.getAtds() == null) {
+            AtdCache.setAtds(repoService.getAtdRepo().findAll());
+        }
+    }
+
+    @Autowired
+    public void setRepoService(RepoService repoService) {
+        this.repoService = repoService;
+    }
+
 }
