@@ -26,6 +26,9 @@ public class DiceHistory extends VerticalLayout {
     private Registration tlbReg;
 
     public DiceHistory(RepoService repoService, SessionService sessionService) {
+        //setPadding(false);
+        setMargin(false);
+        setSpacing(false);
         this.sessionService = sessionService;
         this.repoService = repoService;
         List<Entry> entryList = repoService.getEntryRepo().findAllByGameIdAndTypeEqualsOrderByIdDesc(sessionService.getGameId(), EventType.DiceRoll);

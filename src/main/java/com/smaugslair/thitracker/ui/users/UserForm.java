@@ -4,6 +4,7 @@ import com.smaugslair.thitracker.data.user.User;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
@@ -70,7 +71,7 @@ public class UserForm extends FormLayout {
                 .bind("displayName");
 
         if (user != null) {
-            addFormItem(new Text(user.getFriendCode()), "Friend Code");
+            addFormItem(new Span(user.getFriendCode()), "Friend Code");
         }
 
         if (admin) {

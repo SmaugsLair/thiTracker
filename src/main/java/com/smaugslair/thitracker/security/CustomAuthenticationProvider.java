@@ -36,6 +36,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         Credentials credentials = credentialsRepository.findByUserId(user.getId());
         if (user != null) {
             if (SecurityUtils.matches(authentication.getCredentials().toString(), credentials.getEncodedPassword())) {
+                log.info(user.getName() + " logged in");
                 return new UsernamePasswordAuthenticationToken(user, password, Collections.emptyList());
             }
         }

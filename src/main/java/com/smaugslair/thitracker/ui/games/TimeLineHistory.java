@@ -15,6 +15,9 @@ public class TimeLineHistory extends VerticalLayout {
 
     public TimeLineHistory(GMTimeLineView gmTimeLineView) {
 
+        setSpacing(false);
+        setMargin(false);
+
         List<Entry> entryList = gmTimeLineView.getEntryRepo().findAllByGameIdAndTypeEqualsOrderByIdDesc(
                 gmTimeLineView.getGameID(), EventType.GMAction);
         for (Entry entry : entryList) {

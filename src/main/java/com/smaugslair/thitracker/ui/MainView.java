@@ -3,6 +3,8 @@ package com.smaugslair.thitracker.ui;
 import com.smaugslair.thitracker.security.SecurityUtils;
 import com.smaugslair.thitracker.ui.friends.FriendsSession;
 import com.smaugslair.thitracker.ui.games.CollectionView;
+import com.smaugslair.thitracker.ui.powers.PowerSetBrowserView;
+import com.smaugslair.thitracker.ui.powers.PowerBrowserView;
 import com.smaugslair.thitracker.ui.users.UserDetailsView;
 import com.smaugslair.thitracker.util.AtdCache;
 import com.smaugslair.thitracker.util.RepoService;
@@ -33,9 +35,12 @@ public class MainView extends AppLayout {
                 new Tab( new RouterLink("Home", HomeView.class)),
                 new Tab(new RouterLink("Friends", FriendsSession.class)),
                 new Tab(new RouterLink("Collection (GMs)", CollectionView.class)),
+                new Tab(new RouterLink("Power Sets", PowerSetBrowserView.class)),
+                new Tab(new RouterLink("Power Browser", PowerBrowserView.class)),
                 new Tab(new RouterLink("User Details", UserDetailsView.class)));
         if (SecurityUtils.getLoggedInUser().isAdmin()) {
-            tabs.add(new Tab(new RouterLink("Admin", AdminSession.class)));
+            tabs.add(new Tab(new RouterLink("User Admin", UserAdmin.class)));
+            tabs.add(new Tab(new RouterLink("Powers Upload", PowersUpload.class)));
         }
         tabs.add(new Tab( new Anchor("logout", "Logout "+ SecurityUtils.getLoggedInUser().getName())));
         tabs.setOrientation(Tabs.Orientation.VERTICAL);

@@ -2,8 +2,7 @@ package com.smaugslair.thitracker;
 
 import com.smaugslair.thitracker.data.atd.ActionTimeDefault;
 import com.smaugslair.thitracker.data.atd.AtdRepository;
-import com.smaugslair.thitracker.data.game.GameRepository;
-import com.smaugslair.thitracker.data.pc.PlayerCharacterRepository;
+import com.smaugslair.thitracker.data.powers.*;
 import com.smaugslair.thitracker.data.user.Credentials;
 import com.smaugslair.thitracker.data.user.CredentialsRepository;
 import com.smaugslair.thitracker.data.user.User;
@@ -31,7 +30,9 @@ public class ThiTrackerApplication {
     public CommandLineRunner loadData(
             AtdRepository repository,
             UserRepository userRepository,
-            CredentialsRepository credentialsRepository) {
+            CredentialsRepository credentialsRepository,
+            PowerSetRepository powerSetRepository,
+            PowerRepository powerRepository) {
         return (args) -> {
 
             if (repository.findAll().isEmpty()) {
@@ -70,7 +71,56 @@ public class ThiTrackerApplication {
                 credentials.setUserId(user.getId());
                 credentials.setEncodedPassword(SecurityUtils.encode("password"));
                 credentialsRepository.save(credentials);
-            }
+            }/*
+            if (powerRepository.findAll().isEmpty()) {
+
+                Power strength = new Power();
+                strength.setName("Strength");
+                strength.setSsid("str");
+                strength.setMakTaken("maxStr");
+                strength.setAbilityMods("Str:1");
+                strength.addToPowerSets("Animal", 3);
+                strength.addToPowerSets("Combo", 4);
+
+                Power speed = new Power();
+                speed.setName("Speed");
+                speed.setSsid("spe");
+                speed.setMakTaken("maxSpe");
+                speed.setAbilityMods("Spe:1");
+                speed.addToPowerSets("Flash", 2);
+                speed.addToPowerSets("Combo", 2);
+
+                PowerSet animal = new PowerSet();
+                animal.setName("Animal");
+                animal.setSsid("animal");
+                animal.setAbilityText("ability");
+                animal.setOpenText("open");
+                animal.setPowersText("powers");
+                animal.setAbilityMods("Str:1");
+
+                PowerSet flash = new PowerSet();
+                flash.setName("Flash");
+                flash.setSsid("flash");
+                flash.setAbilityText("ability");
+                flash.setOpenText("open");
+                flash.setPowersText("powers");
+                flash.setAbilityMods("Spe:1");
+
+                PowerSet combo = new PowerSet();
+                combo.setName("Combo");
+                combo.setSsid("combo");
+                combo.setAbilityText("ability");
+                combo.setOpenText("open");
+                combo.setPowersText("powers");
+                combo.setAbilityMods("Spe:1|Str:1");
+
+                powerRepository.save(speed);
+                powerRepository.save(strength);
+
+                powerSetRepository.save(animal);
+                powerSetRepository.save(flash);
+                powerSetRepository.save(combo);
+            }*/
         };
     }
 

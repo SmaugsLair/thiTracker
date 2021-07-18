@@ -12,6 +12,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.progressbar.ProgressBarVariant;
@@ -49,6 +50,11 @@ public class DiceRoller extends VerticalLayout {
         this.repoService = repoService;
         this.sessionService = sessionService;
 
+
+        //setPadding(false);
+        setMargin(false);
+        setSpacing(false);
+
         PlayerCharacter pc = sessionService.getPc();
 
         if (pc == null) {
@@ -57,7 +63,7 @@ public class DiceRoller extends VerticalLayout {
         }
 
         FormLayout rollLayout = new FormLayout();
-        rollLayout.addFormItem(new Text("Hero: "+pc.getName()), "Dice Roller");
+        rollLayout.addFormItem(new Span("Hero: "+pc.getName()), "Dice Roller");
         d10s.setValue(3);
         d10s.setHasControls(true);
         d10s.setMin(1);

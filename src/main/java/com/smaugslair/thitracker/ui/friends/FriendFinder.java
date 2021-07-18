@@ -8,6 +8,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import org.springframework.mail.SimpleMailMessage;
 
 import java.util.Optional;
 
@@ -32,7 +33,7 @@ public class FriendFinder extends VerticalLayout {
         add(nameField);
 
         TextField friendCode = new TextField();
-        nameField.setPlaceholder("Friend code");
+        friendCode.setPlaceholder("Friend code");
         add(friendCode);
 
         Label message = new Label();
@@ -46,6 +47,7 @@ public class FriendFinder extends VerticalLayout {
             friendship.setUser(self);
             friendship.setFriend(friend);
             repoService.getFriendsRepo().save(friendship);
+            //sendEmail(friend);
             friendsSession.refresh();
         });
         request.setVisible(false);
@@ -91,5 +93,17 @@ public class FriendFinder extends VerticalLayout {
         add(message);
         add(request);
 
+    }
+
+    private void sendEmail(User friend) {
+
+        SimpleMailMessage msg = new SimpleMailMessage();
+        msg.setTo("naganalf@gmail.com");
+        msg.setFrom("naganalf@gmail.com");
+
+        msg.setSubject("Testing from Spring Boot");
+        msg.setText("Hello World \n Spring Boot Email");
+
+        repoService.getJavaMailSender().send(msg);
     }
 }

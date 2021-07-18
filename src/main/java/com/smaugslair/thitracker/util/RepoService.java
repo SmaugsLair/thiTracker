@@ -1,16 +1,18 @@
 package com.smaugslair.thitracker.util;
 
 import com.smaugslair.thitracker.data.atd.AtdRepository;
-import com.smaugslair.thitracker.data.game.Game;
 import com.smaugslair.thitracker.data.game.GameRepository;
 import com.smaugslair.thitracker.data.game.TimeLineItemRepository;
 import com.smaugslair.thitracker.data.log.EntryRepository;
 import com.smaugslair.thitracker.data.pc.PlayerCharacterRepository;
+import com.smaugslair.thitracker.data.powers.PowerSetRepository;
+import com.smaugslair.thitracker.data.powers.PowerRepository;
 import com.smaugslair.thitracker.data.user.CollectedItemRepository;
 import com.smaugslair.thitracker.data.user.CredentialsRepository;
 import com.smaugslair.thitracker.data.user.FriendshipRepository;
 import com.smaugslair.thitracker.data.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,13 +21,15 @@ public class RepoService {
     private AtdRepository atdRepo;
     private CredentialsRepository credRepo;
     private UserRepository userRepo;
-    //private SessionService sessionService;
     private GameRepository gameRepo;
     private TimeLineItemRepository tliRepo;
     private EntryRepository entryRepo;
     private PlayerCharacterRepository pcRepo;
     private CollectedItemRepository ciRepo;
     private FriendshipRepository friendsRepo;
+    private PowerRepository powerRepo;
+    private PowerSetRepository powerSetRepo;
+    private JavaMailSender javaMailSender;
 
 
     public AtdRepository getAtdRepo() {
@@ -54,17 +58,6 @@ public class RepoService {
     public void setUserRepo(UserRepository userRepo) {
         this.userRepo = userRepo;
     }
-/*
-
-    public SessionService getSessionService() {
-        return sessionService;
-    }
-
-    @Autowired
-    public void setSessionService(SessionService sessionService) {
-        this.sessionService = sessionService;
-    }
-*/
 
     public GameRepository getGameRepo() {
         return gameRepo;
@@ -118,5 +111,32 @@ public class RepoService {
     @Autowired
     public void setFriendsRepo(FriendshipRepository friendsRepo) {
         this.friendsRepo = friendsRepo;
+    }
+
+    public PowerRepository getPowerRepo() {
+        return powerRepo;
+    }
+
+    @Autowired
+    public void setPowerRepo(PowerRepository powerRepo) {
+        this.powerRepo = powerRepo;
+    }
+
+    public PowerSetRepository getPowerSetRepo() {
+        return powerSetRepo;
+    }
+
+    @Autowired
+    public void setPowerSetRepo(PowerSetRepository powerSetRepo) {
+        this.powerSetRepo = powerSetRepo;
+    }
+
+    public JavaMailSender getJavaMailSender() {
+        return javaMailSender;
+    }
+
+    @Autowired
+    public void setJavaMailSender(JavaMailSender javaMailSender) {
+        this.javaMailSender = javaMailSender;
     }
 }

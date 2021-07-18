@@ -1,5 +1,6 @@
 package com.smaugslair.thitracker.ui.friends;
 
+import com.smaugslair.thitracker.data.pc.PlayerCharacter;
 import com.smaugslair.thitracker.data.user.Friendship;
 import com.smaugslair.thitracker.data.user.FriendshipRepository;
 import com.smaugslair.thitracker.data.user.User;
@@ -7,6 +8,7 @@ import com.smaugslair.thitracker.data.user.UserRepository;
 import com.smaugslair.thitracker.security.SecurityUtils;
 import com.smaugslair.thitracker.util.RepoService;
 import com.vaadin.flow.component.accordion.Accordion;
+import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
@@ -33,14 +35,14 @@ public class FriendsList extends VerticalLayout {
         User user = SecurityUtils.getLoggedInUser();
         List<Friendship> friends = repoService.getFriendsRepo().findAllByUserOrFriend(user, user);
 
-        Accordion accordion = new Accordion();
-        add(accordion);
 
         friends.forEach(friendship -> {
-            User name = friendship.getUser().equals(user) ? friendship.getFriend(): friendship.getUser();
-            accordion.add(name.getDisplayName(), new FriendsActions(friendship, this) );
+            User friend = friendship.getUser().equals(user) ? friendship.getFriend(): friendship.getUser();
+            List<PlayerCharacter> pcs = repoService.getPcRepo().findAllByUserId(friend.getId());
+            Details details = new Details(friend.getDisplayName(), new FriendsActions(friendship, pcs, this) );
+            details.setOpened(!friendship.getAccepted());
+            add(details);
         });
-        accordion.close();
 
 
     }
