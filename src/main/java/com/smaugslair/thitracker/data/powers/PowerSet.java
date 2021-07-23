@@ -1,7 +1,9 @@
 package com.smaugslair.thitracker.data.powers;
 
 import javax.persistence.*;
-import java.util.*;
+import java.util.Date;
+import java.util.Objects;
+import java.util.StringJoiner;
 
 @Entity
 public class PowerSet implements Sheetable {

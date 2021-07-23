@@ -1,15 +1,9 @@
 package com.smaugslair.thitracker.ui.games;
 
-import com.smaugslair.thitracker.data.game.GameRepository;
-import com.smaugslair.thitracker.data.game.TimeLineItemRepository;
 import com.smaugslair.thitracker.data.log.Entry;
-import com.smaugslair.thitracker.data.log.EntryRepository;
-import com.smaugslair.thitracker.data.pc.PlayerCharacterRepository;
-import com.smaugslair.thitracker.data.user.CollectedItemRepository;
-import com.smaugslair.thitracker.ui.*;
+import com.smaugslair.thitracker.ui.MainView;
 import com.smaugslair.thitracker.ui.components.DiceHistory;
-import com.smaugslair.thitracker.util.RepoService;
-import com.smaugslair.thitracker.util.SessionService;
+import com.smaugslair.thitracker.services.SessionService;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -19,14 +13,16 @@ import com.vaadin.flow.router.Route;
 public class GMSession extends SplitLayout {
 
     private final TimeLineHistory timeLineHistory;
+    private final DiceHistory diceHistory;
 
-    public GMSession(RepoService repoService, SessionService sessionService) {
+    public GMSession(SessionService sessionService) {
 
-        GMTimeLineView gmTimeLineView = new GMTimeLineView(this, repoService, sessionService);
+        GMTimeLineView gmTimeLineView = new GMTimeLineView(this, sessionService);
 
         SplitLayout historyLayout = new SplitLayout();
         historyLayout.setOrientation(Orientation.VERTICAL);
-        historyLayout.addToPrimary(new DiceHistory(repoService, sessionService));
+        diceHistory = new DiceHistory(sessionService);
+        historyLayout.addToPrimary(diceHistory);
         timeLineHistory = new TimeLineHistory(gmTimeLineView);
         historyLayout.addToSecondary(timeLineHistory);
         addToPrimary(historyLayout);
@@ -38,5 +34,13 @@ public class GMSession extends SplitLayout {
 
     public void logAction(Entry entry) {
         timeLineHistory.addHistory(entry);
+    }
+
+    public void clearRolls() {
+        diceHistory.removeAll();
+    }
+
+    public void clearActions() {
+        timeLineHistory.removeAll();
     }
 }

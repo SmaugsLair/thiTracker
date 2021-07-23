@@ -1,19 +1,21 @@
 package com.smaugslair.thitracker.ui;
 
 import com.smaugslair.thitracker.data.user.Credentials;
-import com.smaugslair.thitracker.data.user.CredentialsRepository;
 import com.smaugslair.thitracker.data.user.User;
-import com.smaugslair.thitracker.data.user.UserRepository;
 import com.smaugslair.thitracker.security.SecurityUtils;
+import com.smaugslair.thitracker.services.PasswordResetService;
 import com.smaugslair.thitracker.ui.users.PasswordForm;
 import com.smaugslair.thitracker.ui.users.UserForm;
-import com.smaugslair.thitracker.util.RepoService;
+import com.smaugslair.thitracker.services.SessionService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.login.LoginForm;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
@@ -22,13 +24,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Optional;
+
 @Route("login") 
 @PageTitle("Login")
 public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 
 	private static final Logger log = LoggerFactory.getLogger(LoginView.class);
 
-	private RepoService repoService;
+	private SessionService sessionService;
+
+	private PasswordResetService passwordResetService;
 
 	private LoginForm login = new LoginForm(); 
 
@@ -40,7 +46,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 
 		login.setAction("login");  
 
-		add(new H1("THI"), login);
+		add(new H1("The Hero Instant"), login);
 
 		Dialog dialog = new Dialog();
 		dialog.setWidth("500px");
@@ -55,11 +61,11 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 				String validPassword = passwordForm.getValidPassword();
 				if (validPassword != null) {
 					user.setFriendCode(generateFriendCode());
-					user = repoService.getUserRepo().save(user);
+					user = sessionService.getUserRepo().save(user);
 					Credentials credentials = new Credentials();
 					credentials.setUserId(user.getId());
 					credentials.setEncodedPassword(SecurityUtils.encode(validPassword));
-					repoService.getCredRepo().save(credentials);
+					sessionService.getCredRepo().save(credentials);
 
 					dialog.close();
 					Notification.show("Account created, please login", 5000, Notification.Position.TOP_CENTER);
@@ -68,6 +74,29 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 			}
 		});
 		dialog.add(saveNewUser);
+
+		Dialog forgotPasswordDialog = new Dialog();
+		forgotPasswordDialog.setWidth("500px");
+		forgotPasswordDialog.add(new Paragraph("An email will be sent to you with a link to reset your password. The link will expire after 5 minutes"));
+		forgotPasswordDialog.add(new Span("Provide the email address for your account:"));
+		TextField email = new TextField();
+		email.setPlaceholder("email");
+		forgotPasswordDialog.add(email);
+		forgotPasswordDialog.add(new Button("Request reset", event -> {
+			Optional<User> user = sessionService.getUserRepo().findUserByEmail(email.getValue());
+			if (user.isPresent()) {
+				passwordResetService.createPasswordResetForUser(user.get());
+			}
+			else {
+				log.info("no user found with email "+email.getValue());
+			}
+			forgotPasswordDialog.close();
+			Notification.show("Check your inbox", 10000, Notification.Position.MIDDLE);
+		}));
+
+		login.addForgotPasswordListener(event -> {
+			forgotPasswordDialog.open();
+		});
 
 		add(new Button("Create new account", event -> dialog.open()));
 	}
@@ -84,8 +113,13 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 	}
 
 	@Autowired
-	public void setRepoService(RepoService repoService) {
-		this.repoService = repoService;
+	public void setSessionService(SessionService sessionService) {
+		this.sessionService = sessionService;
+	}
+
+	@Autowired
+	public void setPasswordResetService(PasswordResetService passwordResetService) {
+		this.passwordResetService = passwordResetService;
 	}
 
 	private String generateFriendCode() {

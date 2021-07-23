@@ -2,7 +2,6 @@ package com.smaugslair.thitracker.ui.powers.transformers;
 
 import com.smaugslair.thitracker.data.powers.Power;
 import org.apache.commons.beanutils.BeanUtils;
-import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.slf4j.Logger;

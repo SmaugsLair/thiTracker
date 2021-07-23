@@ -1,19 +1,15 @@
 package com.smaugslair.thitracker.ui.powers;
 
 import com.smaugslair.thitracker.data.powers.PowerSet;
+import com.smaugslair.thitracker.services.PowersCache;
 import com.smaugslair.thitracker.ui.MainView;
-import com.smaugslair.thitracker.util.PowersCache;
-import com.smaugslair.thitracker.util.RepoService;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @PageTitle("Power Set Browser")

@@ -3,6 +3,8 @@ package com.smaugslair.thitracker.security;
 import com.smaugslair.thitracker.data.user.User;
 import com.vaadin.flow.server.HandlerHelper.RequestType;
 import com.vaadin.flow.shared.ApplicationConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -13,6 +15,7 @@ import java.util.stream.Stream;
 
 public final class SecurityUtils {
 
+    private static Logger log = LoggerFactory.getLogger(SecurityUtils.class);
     private static BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     private SecurityUtils() {
@@ -20,6 +23,7 @@ public final class SecurityUtils {
     }
 
     public static boolean isFrameworkInternalRequest(HttpServletRequest request) {
+
         final String parameterValue = request.getParameter(ApplicationConstants.REQUEST_TYPE_PARAMETER);
         return parameterValue != null
             && Stream.of(RequestType.values())
@@ -47,4 +51,10 @@ public final class SecurityUtils {
     public static String encode(CharSequence rawPassword) {
         return encoder.encode(rawPassword);
     }
+
+    /*private final static String passwordReset = "/passwordreset";
+    public static boolean isPasswordReset(HttpServletRequest request) {
+        log.info("isPasswordReset getServletPath: "+ request.getServletPath());
+        return passwordReset.equals(request.getServletPath());
+    }*/
 }

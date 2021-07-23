@@ -2,9 +2,9 @@ package com.smaugslair.thitracker.ui.powers;
 
 import com.smaugslair.thitracker.data.powers.Power;
 import com.smaugslair.thitracker.data.powers.PowerFilter;
+import com.smaugslair.thitracker.services.PowersCache;
 import com.smaugslair.thitracker.ui.MainView;
 import com.smaugslair.thitracker.ui.components.FilterField;
-import com.smaugslair.thitracker.util.PowersCache;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.grid.GridSortOrderBuilder;

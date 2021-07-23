@@ -1,6 +1,5 @@
 package com.smaugslair.thitracker.ui.components;
 
-import com.smaugslair.thitracker.data.user.UserFilter;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 

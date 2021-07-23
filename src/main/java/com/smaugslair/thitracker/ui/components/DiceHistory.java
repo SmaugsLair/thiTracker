@@ -1,11 +1,9 @@
 package com.smaugslair.thitracker.ui.components;
 
 import com.smaugslair.thitracker.data.log.Entry;
-import com.smaugslair.thitracker.data.log.EntryRepository;
 import com.smaugslair.thitracker.data.log.EventType;
-import com.smaugslair.thitracker.util.RepoService;
-import com.smaugslair.thitracker.util.SessionService;
-import com.smaugslair.thitracker.websockets.DiceRollBroadcaster;
+import com.smaugslair.thitracker.services.SessionService;
+import com.smaugslair.thitracker.websockets.Broadcaster;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
@@ -21,17 +19,14 @@ public class DiceHistory extends VerticalLayout {
 
     private static final Logger log = LoggerFactory.getLogger(DiceHistory.class);
 
-    private final RepoService repoService;
     private final SessionService sessionService;
     private Registration tlbReg;
 
-    public DiceHistory(RepoService repoService, SessionService sessionService) {
-        //setPadding(false);
+    public DiceHistory(SessionService sessionService) {
         setMargin(false);
         setSpacing(false);
         this.sessionService = sessionService;
-        this.repoService = repoService;
-        List<Entry> entryList = repoService.getEntryRepo().findAllByGameIdAndTypeEqualsOrderByIdDesc(sessionService.getGameId(), EventType.DiceRoll);
+        List<Entry> entryList = sessionService.getEntryRepo().findAllByGameIdAndTypeEqualsOrderByIdDesc(sessionService.getGameId(), EventType.DiceRoll);
         for (Entry entry : entryList) {
             add(new Label(entry.getText()));
         }
@@ -42,10 +37,18 @@ public class DiceHistory extends VerticalLayout {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         UI ui = attachEvent.getUI();
-        tlbReg = DiceRollBroadcaster.register(newMessage -> {
+        tlbReg = Broadcaster.register(newMessage -> {
             ui.access(() -> {
                 if (newMessage.getGameId().equals(sessionService.getGameId())) {
-                    addComponentAsFirst(new Label(newMessage.getText()));
+                    log.info(newMessage.toString());
+                    switch (newMessage.getType()) {
+                        case DiceRoll:
+                            addComponentAsFirst(new Label(newMessage.getText()));
+                            break;
+                        case ClearRolls:
+                            removeAll();
+                            break;
+                    }
                 }
             });
         });

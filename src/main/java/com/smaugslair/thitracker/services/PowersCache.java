@@ -1,4 +1,4 @@
-package com.smaugslair.thitracker.util;
+package com.smaugslair.thitracker.services;
 
 import com.smaugslair.thitracker.data.powers.Power;
 import com.smaugslair.thitracker.data.powers.PowerRepository;

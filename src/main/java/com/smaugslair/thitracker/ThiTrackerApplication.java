@@ -2,22 +2,26 @@ package com.smaugslair.thitracker;
 
 import com.smaugslair.thitracker.data.atd.ActionTimeDefault;
 import com.smaugslair.thitracker.data.atd.AtdRepository;
-import com.smaugslair.thitracker.data.powers.*;
+import com.smaugslair.thitracker.data.powers.PowerRepository;
+import com.smaugslair.thitracker.data.powers.PowerSetRepository;
 import com.smaugslair.thitracker.data.user.Credentials;
 import com.smaugslair.thitracker.data.user.CredentialsRepository;
 import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.data.user.UserRepository;
 import com.smaugslair.thitracker.security.SecurityUtils;
+import com.smaugslair.thitracker.services.ThiProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
 
 @SpringBootApplication(exclude = ErrorMvcAutoConfiguration.class)
+@EnableConfigurationProperties(ThiProperties.class)
 public class ThiTrackerApplication {
 
     private static final Logger log = LoggerFactory.getLogger(ThiTrackerApplication.class);
@@ -32,7 +36,8 @@ public class ThiTrackerApplication {
             UserRepository userRepository,
             CredentialsRepository credentialsRepository,
             PowerSetRepository powerSetRepository,
-            PowerRepository powerRepository) {
+            PowerRepository powerRepository,
+            ThiProperties thiProperties) {
         return (args) -> {
 
             if (repository.findAll().isEmpty()) {
@@ -45,6 +50,7 @@ public class ThiTrackerApplication {
                 repository.save(new ActionTimeDefault("Recovery", 10, false));
                 repository.save(new ActionTimeDefault("Repair", 10, true));
             }
+            log.info(thiProperties.toString());
             if (userRepository.findAll().isEmpty()) {
                 User user = new User();
                 user.setName("naganalf");

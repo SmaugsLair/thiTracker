@@ -1,6 +1,7 @@
 package com.smaugslair.thitracker.data.log;
 
 import javax.persistence.*;
+import java.util.StringJoiner;
 
 @Entity
 public class Entry {
@@ -16,6 +17,9 @@ public class Entry {
 
     @Column(nullable = false)
     private Long gameId;
+
+    @Transient
+    private Long pcId;
 
     public Long getId() {
         return id;
@@ -47,5 +51,24 @@ public class Entry {
 
     public void setGameId(Long gameId) {
         this.gameId = gameId;
+    }
+
+    public Long getPcId() {
+        return pcId;
+    }
+
+    public void setPcId(Long pcId) {
+        this.pcId = pcId;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Entry.class.getSimpleName() + "[", "]")
+                .add("id=" + id)
+                .add("text='" + text + "'")
+                .add("type=" + type)
+                .add("gameId=" + gameId)
+                .add("pcId=" + pcId)
+                .toString();
     }
 }

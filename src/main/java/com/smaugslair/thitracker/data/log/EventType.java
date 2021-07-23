@@ -1,5 +1,5 @@
 package com.smaugslair.thitracker.data.log;
 
 public enum EventType {
-    DiceRoll, GMAction
+    DiceRoll, GMAction, PCUpdate, ClearRolls;
 }

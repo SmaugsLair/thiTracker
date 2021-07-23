@@ -2,7 +2,6 @@ package com.smaugslair.thitracker.ui.games.tl;
 
 import com.smaugslair.thitracker.data.game.TimeLineItem;
 import com.vaadin.flow.component.textfield.IntegerField;
-import com.vaadin.flow.component.textfield.TextField;
 
 
 public class ReactText extends IntegerField {

@@ -1,11 +1,10 @@
 package com.smaugslair.thitracker.ui.powers;
 
 import com.smaugslair.thitracker.data.powers.PowerSet;
-import com.smaugslair.thitracker.util.PowersCache;
+import com.smaugslair.thitracker.services.PowersCache;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class PowerSetDetails extends VerticalLayout {

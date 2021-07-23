@@ -1,10 +1,8 @@
 package com.smaugslair.thitracker.data.pc;
 
 import com.smaugslair.thitracker.data.user.User;
-import org.hibernate.annotations.Formula;
 
 import javax.persistence.*;
-import javax.persistence.criteria.CriteriaBuilder;
 
 @Entity
 public class PlayerCharacter {
@@ -22,6 +20,15 @@ public class PlayerCharacter {
 
     @Column(nullable = true)
     private Long gameId;
+
+    @Column(nullable = false)
+    private Integer progressionTokens = 0;
+
+    @Column(nullable = false)
+    private Integer heroPoints = 0;
+
+    @Column(nullable = false)
+    private Integer dramaPoints = 0;
 
 
     public Long getId() {
@@ -58,5 +65,29 @@ public class PlayerCharacter {
 
     public String getCharacterAndPlayerName() {
         return getName() + " (" + user.getDisplayName() + ")";
+    }
+
+    public Integer getProgressionTokens() {
+        return progressionTokens;
+    }
+
+    public void setProgressionTokens(Integer progressionTokens) {
+        this.progressionTokens = progressionTokens;
+    }
+
+    public Integer getHeroPoints() {
+        return heroPoints;
+    }
+
+    public void setHeroPoints(Integer heroPoints) {
+        this.heroPoints = heroPoints;
+    }
+
+    public Integer getDramaPoints() {
+        return dramaPoints;
+    }
+
+    public void setDramaPoints(Integer dramaPoints) {
+        this.dramaPoints = dramaPoints;
     }
 }

@@ -16,9 +16,8 @@ import com.smaugslair.thitracker.ui.components.ConfirmDialog;
 import com.smaugslair.thitracker.ui.components.ci.ImportButton;
 import com.smaugslair.thitracker.ui.games.tl.*;
 import com.smaugslair.thitracker.util.AtdCache;
-import com.smaugslair.thitracker.util.RepoService;
-import com.smaugslair.thitracker.util.SessionService;
-import com.smaugslair.thitracker.websockets.TimelineBroadcaster;
+import com.smaugslair.thitracker.services.SessionService;
+import com.smaugslair.thitracker.websockets.Broadcaster;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -32,33 +31,32 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.mail.SimpleMailMessage;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @CssImport(value = "./styles/color.css", themeFor = "vaadin-grid")
 public class GMTimeLineView extends VerticalLayout {
 
     private static Logger log = LoggerFactory.getLogger(GMTimeLineView.class);
 
-    private final RepoService repoService;
     private final SessionService sessionService;
     private final GMSession gmSession;
 
+    private TokenDialog tokenDialog = new TokenDialog(this);
 
-    public GMTimeLineView(GMSession gmSession, RepoService repoService, SessionService sessionService) {
+
+    public GMTimeLineView(GMSession gmSession, SessionService sessionService ) {
         this.gmSession = gmSession;
-        this.repoService = repoService;
         this.sessionService = sessionService;
         init();
     }
 
 
-    public void refresh() {
+    public void refreshAndBroadcast() {
         refreshWithLog(null);
     }
 
@@ -70,11 +68,11 @@ public class GMTimeLineView extends VerticalLayout {
         entry.setGameId(getGameId());
         entry.setType(EventType.GMAction);
         if (logText != null) {
-            repoService.getEntryRepo().save(entry);
+            sessionService.getEntryRepo().save(entry);
             gmSession.logAction(entry);
 
         }
-        TimelineBroadcaster.broadcast(entry);
+        Broadcaster.broadcast(entry);
     }
 
     private Long getGameId() {
@@ -139,17 +137,20 @@ public class GMTimeLineView extends VerticalLayout {
         grid.setHeightByRows(true);
         grid.setItems(items);
 
-        grid.addComponentColumn((TimeLineItem item3) -> new NameField(item3, this)).setHeader("Character/NPC/Event");
-        grid.addComponentColumn((TimeLineItem item3) -> new StunField(item3, this)).setHeader("Stun");
-        grid.addComponentColumn((TimeLineItem item4) -> new ActionSelect(item4, this));
-        grid.addComponentColumn((TimeLineItem item3) -> new TimeField(item3, this)).setHeader("Time");
+        //Icon icon = VaadinIcon.WALLET.create();
+
+        grid.addComponentColumn(item -> new NameField(item, this)).setHeader("Character/NPC/Event");
+        grid.addComponentColumn(item -> new TokenButton(item, this));
+        grid.addComponentColumn(item -> new StunField(item, this)).setHeader("Stun");
+        grid.addComponentColumn(item -> new ActionSelect(item, this));
+        grid.addComponentColumn(item -> new TimeField(item, this)).setHeader("Time");
         grid.addComponentColumn(ReactText::new).setHeader("React");
         Icon icon = VaadinIcon.EYE_SLASH.create();
         icon.setSize("16px");
-        grid.addComponentColumn((TimeLineItem item3) -> new HiddenField(item3, this)).setHeader(icon).setTextAlign(ColumnTextAlign.CENTER);
+        grid.addComponentColumn(item -> new HiddenField(item, this)).setHeader(icon).setTextAlign(ColumnTextAlign.CENTER);
         icon = VaadinIcon.CARET_UP.create();
         icon.setSize("16px");
-        grid.addComponentColumn((TimeLineItem item2) -> new DeltaButton(item2, this)).setHeader(icon).setTextAlign(ColumnTextAlign.CENTER);
+        grid.addComponentColumn(item -> new DeltaButton(item, this)).setHeader(icon).setTextAlign(ColumnTextAlign.CENTER);
         //grid.addComponentColumn((TimeLineItem item1) -> new ButtonRow(item1, this));
 
         grid.setClassNameGenerator(item -> "w3-"+item.getColor());
@@ -178,14 +179,14 @@ public class GMTimeLineView extends VerticalLayout {
                     copy.getDeltas().put(delta.getName(), deltaCopy);
                 }
                 getTliRepo().save(copy);
-                refresh();
+                refreshAndBroadcast();
             });
         });
 
         contextMenu.addItem("Remove", event -> {
             event.getItem().ifPresent(item -> {
                 getTliRepo().delete(item);
-                refresh();
+                refreshAndBroadcast();
             });
         });
 
@@ -201,7 +202,7 @@ public class GMTimeLineView extends VerticalLayout {
                     collectedDelta.setName(delta.getName());
                     collectedItem.getDeltas().add(collectedDelta);
                 }
-                repoService.getCiRepo().save(collectedItem);
+                sessionService.getCiRepo().save(collectedItem);
                 Notification.show("Saved "+collectedItem.getName()+" to your collection",
                         2000, Notification.Position.TOP_CENTER);
             });
@@ -211,7 +212,7 @@ public class GMTimeLineView extends VerticalLayout {
 
         User user = SecurityUtils.getLoggedInUser();
 
-        List<Friendship> friendships = repoService.getFriendsRepo().findAllByUserOrFriend(user, user);
+        List<Friendship> friendships = sessionService.getFriendsRepo().findAllByUserOrFriend(user, user);
 
         Set<Integer> userIds = new HashSet<>();
         friendships.forEach(friendship -> {
@@ -221,7 +222,7 @@ public class GMTimeLineView extends VerticalLayout {
 
         List<PlayerCharacter> pcs = new ArrayList<>();
         userIds.forEach(id -> {
-            pcs.addAll(repoService.getPcRepo().findAllByUserIdAndGameIdIsNull(id));
+            pcs.addAll(sessionService.getPcRepo().findAllByUserIdAndGameIdIsNull(id));
         });
 
         NewItemForm newItemForm = new NewItemForm(pcs);
@@ -234,7 +235,7 @@ public class GMTimeLineView extends VerticalLayout {
                 item.setName(pc.getCharacterAndPlayerName());
                 item.setPcId(pc.getId());
                 pc.setGameId(getGameId());
-                repoService.getPcRepo().save(pc);
+                sessionService.getPcRepo().save(pc);
             }
             else {
                 item.setName(newItemForm.getName());
@@ -246,7 +247,7 @@ public class GMTimeLineView extends VerticalLayout {
             item.initializeDeltas();
             getTliRepo().save(item);
             addItemDialog.close();
-            refresh();
+            refreshAndBroadcast();
         });
         addItemDialog.setConfirmButton(confirmButton);
         addItemDialog.setWidth("500px");
@@ -261,24 +262,40 @@ public class GMTimeLineView extends VerticalLayout {
             Iterable<TimeLineItem> timeLineItems = getTliRepo().findByGameIdOrderByTime(getGameId());
             timeLineItems.forEach(item -> item.setStun(0));
             getTliRepo().saveAll(timeLineItems);
-            refresh();
+            refreshAndBroadcast();
         });
         gameActions.add(resetStun);
 
 
-        Button resetTime = new Button("Reset time");
-        resetTime.addClickListener(event -> {
+        Button resetTime = new Button("Reset time", event -> {
             Iterable<TimeLineItem> timeLineItems = getTliRepo().findByGameIdOrderByTime(getGameId());
             timeLineItems.forEach(item -> item.setTime(0));
             getTliRepo().saveAll(timeLineItems);
             game.setLastEventId(null);
             getGameRepo().save(game);
-            refresh();
+            refreshAndBroadcast();
         });
         gameActions.add(resetTime);
 
+        Button clearRollHistory = new Button("Clear roll log", event -> {
+            getEntryRepo().deleteAllByGameIdAndType(getGameId(), EventType.DiceRoll);
+            gmSession.clearRolls();
+            Entry entry = new Entry();
+            entry.setGameId(getGameId());
+            entry.setType(EventType.ClearRolls);
+            Broadcaster.broadcast(entry);
+        });
+        gameActions.add(clearRollHistory);
 
-        List<CollectedItem> collectedItems = repoService.getCiRepo().findAllByGmId(SecurityUtils.getLoggedInUser().getId());
+        Button clearActionHistory = new Button("Clear action log", event -> {
+            getEntryRepo().deleteAllByGameIdAndType(getGameId(), EventType.GMAction);
+            gmSession.clearActions();
+        });
+        gameActions.add(clearActionHistory);
+
+
+
+        List<CollectedItem> collectedItems = sessionService.getCiRepo().findAllByGmId(SecurityUtils.getLoggedInUser().getId());
         if (!collectedItems.isEmpty()) {
 
             Grid<CollectedItem> ciGrid = new Grid<>();
@@ -299,6 +316,42 @@ public class GMTimeLineView extends VerticalLayout {
 
         }
 
+        TextField inviteName = new TextField();
+        inviteName.setPlaceholder("name");
+        TextField inviteEmail = new TextField();
+        inviteEmail.setPlaceholder("email");
+
+        ConfirmDialog inviteDialog = new ConfirmDialog(new VerticalLayout(inviteName, inviteEmail));
+        Button inviteButton = new Button("Invite player", event -> {
+            sendPlayerInvitation(inviteName.getValue(), inviteEmail.getValue());
+            inviteDialog.close();
+        });
+        inviteDialog.setConfirmButton(inviteButton);
+        gameActions.add(new Button("Invite players", event -> {
+            inviteDialog.open();
+        }));
+
+    }
+
+    private void sendPlayerInvitation(String name, String email) {
+
+        User gm = SecurityUtils.getLoggedInUser();
+
+        SimpleMailMessage msg = new SimpleMailMessage();
+        msg.setTo(email);
+
+        msg.setSubject("Invitation to The Hero Instant App");
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Hello ").append(name).append("\n You've been invited to create an account on The Hero Instance app and join a game with ")
+            .append(gm.getDisplayName()).append("!\n").append("To start, point your browser to ")
+                .append(sessionService.getThiProperties().getAppUrl()).append(", create an account, sign in, click on the Friends tab, ")
+                .append("and enter \nUsername: ").append(gm.getName()).append("\nFriend code: ")
+                .append(gm.getFriendCode()).append("\nin the Friend Finder. Then create a character and ")
+                .append(gm.getDisplayName()).append(" will be able to add you to their game.");
+        msg.setText(sb.toString());
+
+        sessionService.getJavaMailSender().send(msg);
     }
 
     public void updateItem(TimeLineItem item) {
@@ -320,11 +373,11 @@ public class GMTimeLineView extends VerticalLayout {
     }
 
     public GameRepository getGameRepo() {
-        return repoService.getGameRepo();
+        return sessionService.getGameRepo();
     }
 
     public TimeLineItemRepository getTliRepo() {
-        return repoService.getTliRepo();
+        return sessionService.getTliRepo();
     }
 
     public Long getGameID() {
@@ -332,6 +385,29 @@ public class GMTimeLineView extends VerticalLayout {
     }
 
     public EntryRepository getEntryRepo() {
-        return repoService.getEntryRepo();
+        return sessionService.getEntryRepo();
+    }
+
+    public void openTokenDialog(TimeLineItem item) {
+        if (item.getPcId() != null) {
+            Optional<PlayerCharacter> opc = sessionService.getPcRepo().findById(item.getPcId());
+            if (opc.isPresent()) {
+                tokenDialog.setPc(opc.get());
+                tokenDialog.open();
+            }
+        }
+
+
+    }
+
+    public void updatePc(PlayerCharacter pc) {
+        sessionService.getPcRepo().save(pc);
+        Entry entry = new Entry();
+        entry.setType(EventType.PCUpdate);
+        entry.setPcId(pc.getId());
+        entry.setGameId(getGameId());
+        Broadcaster.broadcast(entry);
+        removeAll();
+        init();
     }
 }

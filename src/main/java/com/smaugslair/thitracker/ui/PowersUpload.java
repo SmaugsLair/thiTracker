@@ -1,13 +1,12 @@
 package com.smaugslair.thitracker.ui;
 
-import com.smaugslair.thitracker.data.powers.PowerSet;
 import com.smaugslair.thitracker.data.powers.Power;
+import com.smaugslair.thitracker.data.powers.PowerSet;
 import com.smaugslair.thitracker.data.powers.Sheetable;
 import com.smaugslair.thitracker.ui.powers.transformers.PowerSetTransformer;
 import com.smaugslair.thitracker.ui.powers.transformers.PowerTransformer;
 import com.smaugslair.thitracker.ui.powers.transformers.Transformer;
-import com.smaugslair.thitracker.util.PowersCache;
-import com.smaugslair.thitracker.util.RepoService;
+import com.smaugslair.thitracker.services.SessionService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.html.Label;
@@ -24,7 +23,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,7 +35,7 @@ public class PowersUpload extends VerticalLayout {
 
     private static Logger log = LoggerFactory.getLogger(PowersUpload.class);
 
-    private final RepoService repoService;
+    private final SessionService sessionService;
 
     private final List<PowerSet> newPowerSets = new ArrayList<>();
     private final List<PowerSet> unchangedPowerSets = new ArrayList<>();
@@ -47,24 +45,24 @@ public class PowersUpload extends VerticalLayout {
     private final List<Power> unchangedPowers = new ArrayList<>();
     private final List<Power> updatedPowers = new ArrayList<>();
 
-    public PowersUpload(RepoService repoService, PowersCache powersCache) {
-        this.repoService = repoService;
+    public PowersUpload(SessionService sessionService) {
+        this.sessionService = sessionService;
 
         Map<String, PowerSet> cachedPowerSetMap = new HashMap<>();
-        powersCache.getPowerSetList().forEach(powerSet -> cachedPowerSetMap.put(powerSet.getSsid(), powerSet));
+        sessionService.getPowersCache().getPowerSetList().forEach(powerSet -> cachedPowerSetMap.put(powerSet.getSsid(), powerSet));
 
         Map<String, Power> cachedPowerMap = new HashMap<>();
-        repoService.getPowerRepo().findAll().forEach(power -> cachedPowerMap.put(power.getSsid(), power));
+        sessionService.getPowerRepo().findAll().forEach(power -> cachedPowerMap.put(power.getSsid(), power));
 
         MemoryBuffer buffer = new MemoryBuffer();
         Upload upload = new Upload(buffer);
         VerticalLayout output = new VerticalLayout();
         Button saveButton = new Button("Save changes", event -> {
-            repoService.getPowerRepo().saveAll(newPowers);
-            repoService.getPowerRepo().saveAll(updatedPowers);
-            repoService.getPowerSetRepo().saveAll(newPowerSets);
-            repoService.getPowerSetRepo().saveAll(updatedPowerSets);
-            powersCache.load();
+            sessionService.getPowerRepo().saveAll(newPowers);
+            sessionService.getPowerRepo().saveAll(updatedPowers);
+            sessionService.getPowerSetRepo().saveAll(newPowerSets);
+            sessionService.getPowerSetRepo().saveAll(updatedPowerSets);
+            sessionService.getPowersCache().load();
             event.getSource().getUI().get().navigate("powersetbrowser");
         });
         saveButton.setEnabled(false);

@@ -1,8 +1,8 @@
 package com.smaugslair.thitracker.ui.games;
 
 import com.smaugslair.thitracker.data.user.CollectedItem;
-import com.smaugslair.thitracker.data.user.CollectedItemRepository;
 import com.smaugslair.thitracker.security.SecurityUtils;
+import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.ui.MainView;
 import com.smaugslair.thitracker.ui.components.ci.DeleteButton;
 import com.vaadin.flow.component.grid.Grid;
@@ -15,10 +15,10 @@ import java.util.List;
 @Route(value = "collection", layout = MainView.class)
 public class CollectionView extends VerticalLayout {
 
-    private final CollectedItemRepository ciRepo;
+    private final SessionService sessionService;
 
-    public CollectionView(CollectedItemRepository collectedItemRepository) {
-        ciRepo = collectedItemRepository;
+    public CollectionView(SessionService sessionService) {
+        this.sessionService = sessionService;
         init();
     }
 
@@ -30,7 +30,7 @@ public class CollectionView extends VerticalLayout {
     public void init() {
 
         add(new H3("Collection"));
-        List<CollectedItem> items = ciRepo.findAllByGmId(SecurityUtils.getLoggedInUser().getId());
+        List<CollectedItem> items = sessionService.getCiRepo().findAllByGmId(SecurityUtils.getLoggedInUser().getId());
 
         if (items.isEmpty()) {
             add("Empty Collection - Items can be added from an active timeline");
@@ -51,7 +51,7 @@ public class CollectionView extends VerticalLayout {
     }
 
     public void deleteItem(CollectedItem item) {
-        ciRepo.delete(item);
+        sessionService.getCiRepo().delete(item);
         refresh();
     }
 }

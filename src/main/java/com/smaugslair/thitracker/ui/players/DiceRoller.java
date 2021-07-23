@@ -1,13 +1,13 @@
 package com.smaugslair.thitracker.ui.players;
 
 import com.smaugslair.thitracker.data.log.Entry;
-import com.smaugslair.thitracker.data.log.EntryRepository;
 import com.smaugslair.thitracker.data.log.EventType;
 import com.smaugslair.thitracker.data.pc.PlayerCharacter;
-import com.smaugslair.thitracker.util.RepoService;
-import com.smaugslair.thitracker.util.SessionService;
-import com.smaugslair.thitracker.websockets.DiceRollBroadcaster;
-import com.vaadin.flow.component.Text;
+import com.smaugslair.thitracker.services.SessionService;
+import com.smaugslair.thitracker.websockets.Broadcaster;
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.DetachEvent;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.H3;
@@ -18,6 +18,7 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.progressbar.ProgressBarVariant;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.shared.Registration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,8 +29,10 @@ import java.util.List;
 
 public class DiceRoller extends VerticalLayout {
 
+    private enum TokenType {HERO, DRAMA}
+
     private static final Logger log = LoggerFactory.getLogger(DiceRoller.class);
-    private final RepoService repoService;
+
     private final SessionService sessionService;
 
     private IntegerField d10s = new IntegerField();
@@ -38,16 +41,21 @@ public class DiceRoller extends VerticalLayout {
     private Label progressLabel = new Label();
     private ProgressBar progressBar = new ProgressBar();
     private Label expectedValue = new Label("Expected value: "+(3*5.5));
+    private Label expectedHeroValue = new Label("Expected value: "+(4*5.5));
     private TextField diceText = new TextField();
     private TextField droppedText = new TextField();
     private Label droppedLabel = new Label("Dropped");
+
+    private Button preHeroRollButton = new Button("Hero roll 4");
+
+    Button postHeroRollButton = new Button("Roll 1 more, drop lowest",
+            event -> rollAgain(TokenType.HERO));
 
     private List<Integer> dice = new ArrayList<>();
     private int sum = 0;
 
 
-    public DiceRoller(RepoService repoService, SessionService sessionService) {
-        this.repoService = repoService;
+    public DiceRoller(SessionService sessionService) {
         this.sessionService = sessionService;
 
 
@@ -71,15 +79,29 @@ public class DiceRoller extends VerticalLayout {
         maxDice.setValue(10);
         maxDice.setHasControls(true);
         maxDice.setMin(1);
-        rollLayout.addFormItem(maxDice, "Max dice (ask GM)");
-        Button rollButton = new Button("Roll 3 dice");
+        rollLayout.addFormItem(maxDice, "Max dice");
+
+        Button rollButton = new Button("Roll 3");
         rollLayout.addFormItem(expectedValue, rollButton);
+
+        rollLayout.addFormItem(expectedHeroValue, preHeroRollButton);
+        preHeroRollButton.setEnabled(pc.getHeroPoints() > 0);
+
+
         d10s.addValueChangeListener(event -> {
-            rollButton.setText("Roll "+event.getValue()+" dice");
-            expectedValue.setText("Expected value: "+calcExpected());
+            rollButton.setText("Roll "+event.getValue());
+            expectedValue.setText("Expected value: "+calcExpected(d10s.getValue()));
+
+            preHeroRollButton.setText("Hero roll "+(event.getValue()+1));
+            expectedHeroValue.setText("Expected value: "+calcExpected(d10s.getValue()+1));
         });
-        maxDice.addValueChangeListener(event -> expectedValue.setText("Expected value: "+calcExpected()));
-        rollButton.addClickListener(event -> normalRoll());
+        maxDice.addValueChangeListener(event -> {
+            expectedValue.setText("Expected value: "+calcExpected(d10s.getValue()));
+            expectedHeroValue.setText("Expected value: "+calcExpected(d10s.getValue()+1));
+        });
+
+        rollButton.addClickListener(event -> initialRoll(false));
+        preHeroRollButton.addClickListener(event -> initialRoll(true));
 
         add(rollLayout);
 
@@ -92,9 +114,10 @@ public class DiceRoller extends VerticalLayout {
         droppedText.setReadOnly(true);
         resultLayout.addFormItem(droppedText, droppedLabel);
 
-        Button heroRoll = new Button("Roll 1 more, drop lowest", event -> heroRoll());
-        Button dramaRoll = new Button("Roll 2 more, drop lowest", event -> dramaRoll());
-        resultLayout.addFormItem(heroRoll, "Spend Hero Token");
+        Button dramaRoll = new Button("Roll 2 more, drop lowest",
+                event -> rollAgain(TokenType.DRAMA));
+        resultLayout.addFormItem(postHeroRollButton, "Spend Hero Token");
+        postHeroRollButton.setEnabled(pc.getHeroPoints() > 0);
         resultLayout.addFormItem(dramaRoll, "Spend Drama Token");
 
         add(resultLayout);
@@ -102,6 +125,7 @@ public class DiceRoller extends VerticalLayout {
 
     private int captureD10roll() {
         int roll = (int)(Math.random() * 10) + 1;
+        log.info("rolled:"+roll);
         sum += roll;
         dice.add(roll);
         return roll;
@@ -119,8 +143,8 @@ public class DiceRoller extends VerticalLayout {
         return Math.min(sum/(divisor*10), 1.0);
     }
 
-    private String calcExpected() {
-        int dice = d10s.getValue();
+    private String calcExpected(int dice) {
+        //int dice = d10s.getValue();
         int max = maxDice.getValue();
         if (dice > max) {
             return " > " + (max *5.5);
@@ -128,10 +152,11 @@ public class DiceRoller extends VerticalLayout {
         return String.valueOf(dice * 5.5);
     }
 
-    private void normalRoll() {
+    private void initialRoll(boolean hero) {
         dice.clear();
         sum = 0;
-        for (int count = 0; count < d10s.getValue(); ++count) {
+        int total = d10s.getValue() + (hero ? 1 : 0);
+        for (int count = 0; count < total; ++count) {
             captureD10roll();
         }
         Collections.sort(dice);
@@ -139,7 +164,11 @@ public class DiceRoller extends VerticalLayout {
         while (dice.size() > maxDice.getValue()) {
             dropped.add(dropLowest());
         }
-        prepareResults(dropped, null);
+        prepareResults(dropped, hero?"HERO":null);
+
+        if (hero) {
+            spendToken(TokenType.HERO);
+        }
 
         resultLayout.setVisible(true);
 
@@ -174,27 +203,71 @@ public class DiceRoller extends VerticalLayout {
         message.setType(EventType.DiceRoll);
         message.setText(sb.toString());
 
-        repoService.getEntryRepo().save(message);
+        sessionService.getEntryRepo().save(message);
 
-        DiceRollBroadcaster.broadcast(message);
+        Broadcaster.broadcast(message);
 
     }
 
+    private void spendToken(TokenType tokenType) {
 
-    private void heroRoll() {
+        PlayerCharacter pc = sessionService.getPc();
+        if (tokenType.equals(TokenType.HERO)) {
+            pc.setHeroPoints(pc.getHeroPoints()-1);
+        }
+        else {
+            pc.setDramaPoints(pc.getDramaPoints()+1);
+        }
+        sessionService.getPcRepo().save(pc);
+        Entry entry = new Entry();
+        entry.setPcId(pc.getId());
+        entry.setGameId(sessionService.getGameId());
+        entry.setType(EventType.PCUpdate);
+        Broadcaster.broadcast(entry);
+    }
+
+
+    private void rollAgain(TokenType tokenType) {
         captureD10roll();
+        if (tokenType.equals(TokenType.DRAMA)) {
+            captureD10roll();
+        }
         Collections.sort(dice);
         List<Integer> dropped = new ArrayList<>();
         dropped.add(dropLowest());
-        prepareResults(dropped, "HERO");
+        prepareResults(dropped, tokenType.toString());
+        spendToken(tokenType);
     }
 
-    private void dramaRoll() {
-        captureD10roll();
-        captureD10roll();
-        Collections.sort(dice);
-        List<Integer> dropped = new ArrayList<>();
-        dropped.add(dropLowest());
-        prepareResults(dropped, "DRAMA");
+    private void handlePcUpdates() {
+        sessionService.refreshPc();
+        boolean hasHeroPoints = sessionService.getPc().getHeroPoints() > 0;
+        postHeroRollButton.setEnabled(hasHeroPoints);
+        preHeroRollButton.setEnabled(hasHeroPoints);
+
     }
+
+
+    private Registration tlbReg;
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        UI ui = attachEvent.getUI();
+        tlbReg = Broadcaster.register(newMessage -> {
+            ui.access(() -> {
+                if (EventType.PCUpdate.equals(newMessage.getType())) {
+                    if (newMessage.getPcId().equals(sessionService.getPc().getId())) {
+                        handlePcUpdates();
+                    }
+                }
+            });
+        });
+    }
+
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        tlbReg.remove();
+        tlbReg = null;
+    }
+
 }

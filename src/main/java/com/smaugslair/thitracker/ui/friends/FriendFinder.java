@@ -3,7 +3,7 @@ package com.smaugslair.thitracker.ui.friends;
 import com.smaugslair.thitracker.data.user.Friendship;
 import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.security.SecurityUtils;
-import com.smaugslair.thitracker.util.RepoService;
+import com.smaugslair.thitracker.services.SessionService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -15,13 +15,13 @@ import java.util.Optional;
 
 public class FriendFinder extends VerticalLayout {
 
-    private final RepoService repoService;
+    private final SessionService sessionService;
     private final FriendsSession friendsSession;
     private User self = SecurityUtils.getLoggedInUser();
     private User friend = null;
 
-    public FriendFinder(FriendsSession friendsSession, RepoService repoService) {
-        this.repoService = repoService;
+    public FriendFinder(FriendsSession friendsSession, SessionService sessionService) {
+        this.sessionService = sessionService;
         this.friendsSession = friendsSession;
         init();
     }
@@ -46,7 +46,7 @@ public class FriendFinder extends VerticalLayout {
             friendship.setAccepted(false);
             friendship.setUser(self);
             friendship.setFriend(friend);
-            repoService.getFriendsRepo().save(friendship);
+            sessionService.getFriendsRepo().save(friendship);
             //sendEmail(friend);
             friendsSession.refresh();
         });
@@ -54,13 +54,13 @@ public class FriendFinder extends VerticalLayout {
 
         Button button = new Button("Find", event -> {
             request.setVisible(false);
-            Optional<User> user = repoService.getUserRepo().findUserByNameAndFriendCode(nameField.getValue(), friendCode.getValue());
+            Optional<User> user = sessionService.getUserRepo().findUserByNameAndFriendCode(nameField.getValue(), friendCode.getValue());
             if (user.isPresent()) {
                 if (user.get().equals(self)) {
                     message.setText("That's you, fool!");
                     return;
                 }
-                Optional<Friendship> friendship = repoService.getFriendsRepo().findByUserAndFriend(user.get(), self);
+                Optional<Friendship> friendship = sessionService.getFriendsRepo().findByUserAndFriend(user.get(), self);
                 if (friendship.isPresent()) {
                     if (friendship.get().getAccepted()) {
                         message.setText("Already friends with " + user.get().getDisplayName());
@@ -70,7 +70,7 @@ public class FriendFinder extends VerticalLayout {
                     }
                     return;
                 }
-                friendship = repoService.getFriendsRepo().findByUserAndFriend(self, user.get());
+                friendship = sessionService.getFriendsRepo().findByUserAndFriend(self, user.get());
                 if (friendship.isPresent()) {
                     if (friendship.get().getAccepted()) {
                         message.setText("Already friends with " + user.get().getDisplayName());
@@ -104,6 +104,6 @@ public class FriendFinder extends VerticalLayout {
         msg.setSubject("Testing from Spring Boot");
         msg.setText("Hello World \n Spring Boot Email");
 
-        repoService.getJavaMailSender().send(msg);
+        sessionService.getJavaMailSender().send(msg);
     }
 }

@@ -1,15 +1,11 @@
 package com.smaugslair.thitracker.ui.players;
 
 import com.smaugslair.thitracker.data.game.Game;
-import com.smaugslair.thitracker.data.game.GameRepository;
 import com.smaugslair.thitracker.data.game.TimeLineItem;
-import com.smaugslair.thitracker.data.game.TimeLineItemRepository;
-import com.smaugslair.thitracker.data.pc.PlayerCharacterRepository;
-import com.smaugslair.thitracker.data.user.CollectedItemRepository;
+import com.smaugslair.thitracker.data.log.EventType;
 import com.smaugslair.thitracker.data.user.User;
-import com.smaugslair.thitracker.util.RepoService;
-import com.smaugslair.thitracker.util.SessionService;
-import com.smaugslair.thitracker.websockets.TimelineBroadcaster;
+import com.smaugslair.thitracker.services.SessionService;
+import com.smaugslair.thitracker.websockets.Broadcaster;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
@@ -29,11 +25,9 @@ public class PCTimeLineView extends VerticalLayout {
 
     private static Logger log = LoggerFactory.getLogger(PCTimeLineView.class);
 
-    private final RepoService repoService;
-    private SessionService sessionService;
+    private final SessionService sessionService;
 
-    public PCTimeLineView(RepoService repoService, SessionService sessionService) {
-        this.repoService = repoService;
+    public PCTimeLineView(SessionService sessionService) {
         this.sessionService = sessionService;
 
         init();
@@ -49,21 +43,21 @@ public class PCTimeLineView extends VerticalLayout {
             return;
         }
 
-        final Game game = repoService.getGameRepo().findById(gameId).orElse(new Game());
+        final Game game = sessionService.getGameRepo().findById(gameId).orElse(new Game());
         if (game.getId() == null) {
             add(new H1("Game not found"));
             return;
         }
 
-        User gm = repoService.getUserRepo().findById(game.getGameMasterId()).get();
+        User gm = sessionService.getUserRepo().findById(game.getGameMasterId()).get();
 
         add( new H3("Game: "+game.getName()+ " by "+ gm.getDisplayName()));
 
-        List<TimeLineItem> items = repoService.getTliRepo().findByGameIdAndHiddenFalseOrderByTime(game.getId());
+        List<TimeLineItem> items = sessionService.getTliRepo().findByGameIdAndHiddenFalseOrderByTime(game.getId());
 
         TimeLineItem lastEvent = null;
         if (game.getLastEventId() != null) {
-            lastEvent = repoService.getTliRepo().findById(game.getLastEventId()).orElse(null);
+            lastEvent = sessionService.getTliRepo().findById(game.getLastEventId()).orElse(null);
         }
 
         for (TimeLineItem item : items) {
@@ -100,11 +94,13 @@ public class PCTimeLineView extends VerticalLayout {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         UI ui = attachEvent.getUI();
-        tlbReg = TimelineBroadcaster.register(newMessage -> {
+        tlbReg = Broadcaster.register(newMessage -> {
             ui.access(() -> {
-                if (newMessage.getGameId().equals(sessionService.getGameId())) {
-                    removeAll();
-                    init();
+                if (EventType.GMAction.equals(newMessage.getType())) {
+                    if (newMessage.getGameId().equals(sessionService.getGameId())) {
+                        removeAll();
+                        init();
+                    }
                 }
             });
         });

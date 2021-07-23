@@ -6,9 +6,7 @@ import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.security.SecurityUtils;
 import com.smaugslair.thitracker.ui.components.ConfirmDialog;
 import com.smaugslair.thitracker.ui.components.ValidTextField;
-import com.smaugslair.thitracker.util.RepoService;
-import com.smaugslair.thitracker.util.SessionService;
-import com.vaadin.flow.component.Text;
+import com.smaugslair.thitracker.services.SessionService;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
@@ -22,12 +20,12 @@ import java.util.List;
 
 public class PCManager extends VerticalLayout {
 
-    private final RepoService repoService;
+    //private final RepoService repoService;
     private final SessionService sessionService;
 
-    public PCManager(RepoService repoService, SessionService sessionService) {
+    public PCManager(SessionService sessionService) {
         this.sessionService = sessionService;
-        this.repoService = repoService;
+        //this.repoService = repoService;
         init();
     }
 
@@ -42,7 +40,7 @@ public class PCManager extends VerticalLayout {
         User user = SecurityUtils.getLoggedInUser();
         if (user == null) return;
 
-        Iterable<PlayerCharacter> pcs = repoService.getPcRepo().findAllByUserId(user.getId());
+        Iterable<PlayerCharacter> pcs = sessionService.getPcRepo().findAllByUserId(user.getId());
 
         Accordion accordion = new Accordion();
         for (PlayerCharacter pc : pcs) {
@@ -69,7 +67,7 @@ public class PCManager extends VerticalLayout {
                 PlayerCharacter pc = new PlayerCharacter();
                 pc.setName(pcName.getValue());
                 pc.setUser(SecurityUtils.getLoggedInUser());
-                repoService.getPcRepo().save(pc);
+                sessionService.getPcRepo().save(pc);
                 confirmDialog.close();
                 refresh();
             }
@@ -83,13 +81,13 @@ public class PCManager extends VerticalLayout {
 
         ConfirmDialog deleteDialog = new ConfirmDialog("Are you sure you want to delete the character "+pc.getName()+"?");
         Button confirmButton = new Button("Delete", event -> {
-            List<TimeLineItem> items = repoService.getTliRepo().findAllByPcId(pc.getId());
+            List<TimeLineItem> items = sessionService.getTliRepo().findAllByPcId(pc.getId());
             items.forEach(item -> {
                 item.setPcId(null);
                 item.setName(pc.getName());
             });
-            repoService.getTliRepo().saveAll(items);
-            repoService.getPcRepo().delete(pc);
+            sessionService.getTliRepo().saveAll(items);
+            sessionService.getPcRepo().delete(pc);
             deleteDialog.close();
             refresh();
         });
@@ -117,5 +115,6 @@ public class PCManager extends VerticalLayout {
         layout.add(delete);
         return layout;
     }
+
 
 }

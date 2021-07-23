@@ -10,8 +10,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
-public class TimelineBroadcaster {
-    private static Logger log = LoggerFactory.getLogger(TimelineBroadcaster.class);
+public class Broadcaster {
+    private static Logger log = LoggerFactory.getLogger(Broadcaster.class);
     private static Executor executor = Executors.newSingleThreadExecutor();
 
     private static LinkedList<Consumer<Entry>> listeners = new LinkedList<>();
@@ -19,7 +19,7 @@ public class TimelineBroadcaster {
     public static synchronized Registration register(Consumer<Entry> listener) {
         listeners.add(listener);
         return () -> {
-            synchronized (TimelineBroadcaster.class) {
+            synchronized (Broadcaster.class) {
                 listeners.remove(listener);
             }
         };

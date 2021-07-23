@@ -1,29 +1,21 @@
 package com.smaugslair.thitracker.ui.games;
 
 import com.smaugslair.thitracker.data.game.Game;
-import com.smaugslair.thitracker.data.game.GameRepository;
-import com.smaugslair.thitracker.data.game.TimeLineItemRepository;
 import com.smaugslair.thitracker.data.pc.PlayerCharacter;
-import com.smaugslair.thitracker.data.pc.PlayerCharacterRepository;
 import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.security.SecurityUtils;
 import com.smaugslair.thitracker.ui.components.ConfirmDialog;
 import com.smaugslair.thitracker.ui.components.ValidTextField;
-import com.smaugslair.thitracker.util.RepoService;
-import com.smaugslair.thitracker.util.SessionService;
-import com.vaadin.flow.component.Text;
+import com.smaugslair.thitracker.services.SessionService;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.validator.StringLengthValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
 
 public class GamesManager extends VerticalLayout {
@@ -31,11 +23,9 @@ public class GamesManager extends VerticalLayout {
 
     private static final Logger log = LoggerFactory.getLogger(GamesManager.class);
 
-    private final RepoService repoService;
     private final SessionService sessionService;
 
-    public GamesManager(RepoService repoService, SessionService sessionService) {
-        this.repoService = repoService;
+    public GamesManager(SessionService sessionService) {
         this.sessionService = sessionService;
         init();
     }
@@ -54,7 +44,7 @@ public class GamesManager extends VerticalLayout {
         User user = SecurityUtils.getLoggedInUser();
         if (user == null) return;
 
-        Iterable<Game> games = repoService.getGameRepo().findGamesByGameMasterId(user.getId());
+        Iterable<Game> games = sessionService.getGameRepo().findGamesByGameMasterId(user.getId());
 
         for (Game game : games) {
             accordion.add(game.getName(), getGameRow(game));
@@ -80,7 +70,7 @@ public class GamesManager extends VerticalLayout {
                 Game game = new Game();
                 game.setName(gameName.getValue());
                 game.setGameMasterId(SecurityUtils.getLoggedInUser().getId());
-                repoService.getGameRepo().save(game);
+                sessionService.getGameRepo().save(game);
                 dialog.close();
                 refresh();
             }
@@ -94,11 +84,11 @@ public class GamesManager extends VerticalLayout {
 
         ConfirmDialog deleteDialog = new ConfirmDialog("Are you sure you want to delete the game "+game.getName()+"?");
         Button confirmButton = new Button("Delete", event -> {
-            List<PlayerCharacter> pcs = repoService.getPcRepo().findAllByGameId(game.getId());
+            List<PlayerCharacter> pcs = sessionService.getPcRepo().findAllByGameId(game.getId());
             pcs.forEach(pc -> pc.setGameId(null));
-            repoService.getPcRepo().saveAll(pcs);
-            repoService.getTliRepo().deleteAllByGameId(game.getId());
-            repoService.getGameRepo().delete(game);
+            sessionService.getPcRepo().saveAll(pcs);
+            sessionService.getTliRepo().deleteAllByGameId(game.getId());
+            sessionService.getGameRepo().delete(game);
             deleteDialog.close();
             refresh();
         });
@@ -118,4 +108,5 @@ public class GamesManager extends VerticalLayout {
         layout.add(delete);
         return layout;
     }
+
 }

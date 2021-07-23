@@ -1,7 +1,6 @@
 package com.smaugslair.thitracker.ui.users;
 
 import com.smaugslair.thitracker.data.user.User;
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Span;

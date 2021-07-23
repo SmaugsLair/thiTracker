@@ -1,7 +1,5 @@
 package com.smaugslair.thitracker.data.user;
 
-import com.smaugslair.thitracker.data.game.TimeLineItem;
-
 import javax.persistence.*;
 
 @Entity

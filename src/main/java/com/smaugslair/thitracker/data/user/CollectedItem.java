@@ -1,11 +1,7 @@
 package com.smaugslair.thitracker.data.user;
 
-import com.smaugslair.thitracker.data.game.ActionTimeDelta;
-
 import javax.persistence.*;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 @Entity

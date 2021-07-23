@@ -1,7 +1,5 @@
 package com.smaugslair.thitracker.data.game;
 
-import com.smaugslair.thitracker.data.user.User;
-
 import javax.persistence.*;
 
 @Entity

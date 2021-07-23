@@ -3,11 +3,11 @@ package com.smaugslair.thitracker.ui;
 import com.smaugslair.thitracker.security.SecurityUtils;
 import com.smaugslair.thitracker.ui.friends.FriendsSession;
 import com.smaugslair.thitracker.ui.games.CollectionView;
-import com.smaugslair.thitracker.ui.powers.PowerSetBrowserView;
 import com.smaugslair.thitracker.ui.powers.PowerBrowserView;
+import com.smaugslair.thitracker.ui.powers.PowerSetBrowserView;
 import com.smaugslair.thitracker.ui.users.UserDetailsView;
 import com.smaugslair.thitracker.util.AtdCache;
-import com.smaugslair.thitracker.util.RepoService;
+import com.smaugslair.thitracker.services.SessionService;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.html.Anchor;
@@ -23,7 +23,7 @@ import javax.annotation.PostConstruct;
 @Push
 public class MainView extends AppLayout {
 
-    private RepoService repoService;
+    private SessionService sessionService;
 
     public MainView() {
 
@@ -50,13 +50,13 @@ public class MainView extends AppLayout {
     @PostConstruct
     public void init() {
         if (AtdCache.getAtds() == null) {
-            AtdCache.setAtds(repoService.getAtdRepo().findAll());
+            AtdCache.setAtds(sessionService.getAtdRepo().findAll());
         }
     }
 
     @Autowired
-    public void setRepoService(RepoService repoService) {
-        this.repoService = repoService;
+    public void setsessionService(SessionService sessionService) {
+        this.sessionService = sessionService;
     }
 
 }

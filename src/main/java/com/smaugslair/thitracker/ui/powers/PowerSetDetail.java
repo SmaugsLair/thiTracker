@@ -1,19 +1,18 @@
 package com.smaugslair.thitracker.ui.powers;
 
-import com.smaugslair.thitracker.data.powers.PowerSet;
 import com.smaugslair.thitracker.data.powers.Power;
-import com.smaugslair.thitracker.util.PowersCache;
-import com.vaadin.flow.component.Text;
+import com.smaugslair.thitracker.data.powers.PowerSet;
+import com.smaugslair.thitracker.services.PowersCache;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.NativeButtonRenderer;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 public class PowerSetDetail extends VerticalLayout {
 

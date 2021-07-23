@@ -2,7 +2,6 @@ package com.smaugslair.thitracker.ui.friends;
 
 import com.smaugslair.thitracker.data.pc.PlayerCharacter;
 import com.smaugslair.thitracker.data.user.Friendship;
-import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.security.SecurityUtils;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Label;

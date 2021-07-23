@@ -1,15 +1,8 @@
 package com.smaugslair.thitracker.ui.powers;
 
 import com.smaugslair.thitracker.data.powers.Power;
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.html.ListItem;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.html.UnorderedList;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class PowerDetails extends FormLayout {
 

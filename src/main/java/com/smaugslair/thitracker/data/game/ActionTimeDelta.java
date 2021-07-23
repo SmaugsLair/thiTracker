@@ -1,8 +1,5 @@
 package com.smaugslair.thitracker.data.game;
 
-import com.smaugslair.thitracker.data.atd.ActionTimeDefault;
-import com.smaugslair.thitracker.util.AtdCache;
-
 import javax.persistence.*;
 
 @Entity

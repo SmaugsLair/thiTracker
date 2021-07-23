@@ -1,9 +1,10 @@
 package com.smaugslair.thitracker.ui.users;
 
-import com.smaugslair.thitracker.data.user.*;
+import com.smaugslair.thitracker.data.user.Credentials;
+import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.security.SecurityUtils;
 import com.smaugslair.thitracker.ui.MainView;
-import com.smaugslair.thitracker.util.RepoService;
+import com.smaugslair.thitracker.services.SessionService;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -19,10 +20,10 @@ import org.slf4j.LoggerFactory;
 public class UserDetailsView extends VerticalLayout {
 
     private static final Logger log = LoggerFactory.getLogger(UserDetailsView.class);
-    private final RepoService repoService;
+    private final SessionService sessionService;
 
-    public UserDetailsView(RepoService repoService) {
-        this.repoService = repoService;
+    public UserDetailsView(SessionService sessionService) {
+        this.sessionService = sessionService;
 
         init();
     }
@@ -42,7 +43,7 @@ public class UserDetailsView extends VerticalLayout {
         add(form);
 
         Button updateButton = new Button("Update", event -> {
-            repoService.getUserRepo().save(user);
+            sessionService.getUserRepo().save(user);
             refresh();
         });
         add(updateButton);
@@ -54,9 +55,9 @@ public class UserDetailsView extends VerticalLayout {
         Button savePassword = new Button("Save password", event -> {
             String validPassword = passwordForm.getValidPassword();
             if (validPassword != null) {
-                Credentials credentials = repoService.getCredRepo().findByUserId(user.getId());
+                Credentials credentials = sessionService.getCredRepo().findByUserId(user.getId());
                 credentials.setEncodedPassword(SecurityUtils.encode(validPassword));
-                repoService.getCredRepo().save(credentials);
+                sessionService.getCredRepo().save(credentials);
                 dialog.close();
                 UI.getCurrent().getPage().setLocation("logout");
                 Notification.show("Password changed, please re-authenticate", 4000, Notification.Position.TOP_CENTER);

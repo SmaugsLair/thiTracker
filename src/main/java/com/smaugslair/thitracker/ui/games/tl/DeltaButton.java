@@ -50,7 +50,7 @@ public class DeltaButton extends Button {
             }
             gmTimeLineView.getTliRepo().save(item);
             deltaDialog.close();
-            gmTimeLineView.refresh();
+            gmTimeLineView.refreshAndBroadcast();
         });
         deltaDialog.setConfirmButton(confirmButton);
         deltaDialog.setWidth("400px");
