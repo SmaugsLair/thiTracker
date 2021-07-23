@@ -65,10 +65,10 @@ public class DiceRoller extends VerticalLayout {
 
         PlayerCharacter pc = sessionService.getPc();
 
-        if (pc == null) {
+        /*if (pc == null) {
             add(new H3("Select a Hero first"));
             return;
-        }
+        }*/
 
         FormLayout rollLayout = new FormLayout();
         rollLayout.addFormItem(new Span("Hero: "+pc.getName()), "Dice Roller");
