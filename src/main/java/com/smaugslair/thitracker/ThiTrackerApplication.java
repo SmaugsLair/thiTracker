@@ -50,7 +50,7 @@ public class ThiTrackerApplication {
                 repository.save(new ActionTimeDefault("Recovery", 10, false));
                 repository.save(new ActionTimeDefault("Repair", 10, true));
             }
-            log.info(thiProperties.toString());
+            //log.info(thiProperties.toString());
             if (userRepository.findAll().isEmpty()) {
                 User user = new User();
                 user.setName("naganalf");

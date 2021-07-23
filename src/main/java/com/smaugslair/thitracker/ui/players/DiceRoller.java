@@ -89,10 +89,10 @@ public class DiceRoller extends VerticalLayout {
 
 
         d10s.addValueChangeListener(event -> {
-            rollButton.setText("Roll "+event.getValue());
+            rollButton.setText("Roll "+d10s.getValue());
             expectedValue.setText("Expected value: "+calcExpected(d10s.getValue()));
 
-            preHeroRollButton.setText("Hero roll "+(event.getValue()+1));
+            preHeroRollButton.setText("Hero roll "+(d10s.getValue()+1));
             expectedHeroValue.setText("Expected value: "+calcExpected(d10s.getValue()+1));
         });
         maxDice.addValueChangeListener(event -> {
