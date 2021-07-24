@@ -21,6 +21,12 @@ public class Entry {
     @Transient
     private Long pcId;
 
+    public Entry() {
+    }
+    public Entry(EventType eventType) {
+        type = eventType;
+    }
+
     public Long getId() {
         return id;
     }

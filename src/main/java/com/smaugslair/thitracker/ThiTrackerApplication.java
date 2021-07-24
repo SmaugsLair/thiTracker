@@ -139,9 +139,10 @@ public class ThiTrackerApplication {
             ScheduledExecutorService keepAlive = Executors.newScheduledThreadPool(1);
             Runnable r = () -> {
                 Broadcaster.broadcast(ping);
-                log.info("pinging websockets");
+                //log.info("pinging websockets");
             };
             keepAlive.scheduleAtFixedRate(r, 0, 50, TimeUnit.SECONDS);
+
 
         };
     }

@@ -31,12 +31,7 @@ public class PasswordResetView extends VerticalLayout implements BeforeEnterObse
 
 	public PasswordResetView(SessionService sessionService){
 		this.sessionService = sessionService;
-		//setSizeFull();
 		setSizeUndefined();
-		//setAlignItems(Alignment.CENTER);
-		//setJustifyContentMode(JustifyContentMode.CENTER);
-
-
 		add(new H1("The Hero Instant"), new H3("Password reset"));
 
 	}

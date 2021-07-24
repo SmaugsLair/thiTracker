@@ -1,5 +1,6 @@
 package com.smaugslair.thitracker.ui.players;
 
+import com.smaugslair.thitracker.data.game.Game;
 import com.smaugslair.thitracker.data.game.TimeLineItem;
 import com.smaugslair.thitracker.data.pc.PlayerCharacter;
 import com.smaugslair.thitracker.data.user.User;
@@ -95,13 +96,13 @@ public class PCManager extends VerticalLayout {
 
         HorizontalLayout layout = new HorizontalLayout();
         if (pc.getGameId() != null) {
-            Button launch = new Button("Launch");
+            Game game = sessionService.getGameRepo().findById(pc.getGameId()).orElse(new Game("?"));
+            Button launch = new Button("Launch "+ game.getName());
             launch.addClickListener(e -> {
                 launch.getUI().ifPresent(ui -> {
                     sessionService.setGameId(pc.getGameId());
                     sessionService.setPc(pc);
                     ui.navigate("playersession");
-                    //ui.navigate(PCTimeLineView.class, new RouteParameters("gameId", pc.getGameId().toString()))                        }
                 });
             });
             layout.add(launch);

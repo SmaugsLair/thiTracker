@@ -10,6 +10,10 @@ import com.vaadin.flow.shared.Registration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 /**
  A VerticalLayout that registers itself with the Broadcaster
  */
@@ -18,6 +22,15 @@ public abstract class RegisteredVerticalLayout extends VerticalLayout {
     private static final Logger log = LoggerFactory.getLogger(RegisteredVerticalLayout.class);
 
     private Registration tlbReg;
+
+    final Entry ping = new Entry(EventType.Ping);
+
+
+    ScheduledExecutorService keepAlive = Executors.newScheduledThreadPool(1);
+    Runnable r = () -> {
+        log.info(this.getClass().getSimpleName()+" ---- ping -------");
+        Broadcaster.broadcast(ping);
+    };
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
@@ -30,6 +43,7 @@ public abstract class RegisteredVerticalLayout extends VerticalLayout {
                 }
             });
         });
+        keepAlive.scheduleAtFixedRate(r, 0, 50, TimeUnit.SECONDS);
     }
 
     @Override
@@ -37,6 +51,7 @@ public abstract class RegisteredVerticalLayout extends VerticalLayout {
         //log.info("Detaching "+this.getClass().getSimpleName());
         tlbReg.remove();
         tlbReg = null;
+        keepAlive.shutdown();
     }
 
     protected abstract void handleMessage(Entry entry);
