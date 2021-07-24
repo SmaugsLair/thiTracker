@@ -5,6 +5,7 @@ import com.smaugslair.thitracker.data.log.EventType;
 import com.smaugslair.thitracker.data.pc.PlayerCharacter;
 import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.websockets.Broadcaster;
+import com.smaugslair.thitracker.websockets.RegisteredVerticalLayout;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
@@ -27,7 +28,7 @@ import java.util.Collections;
 import java.util.List;
 
 
-public class DiceRoller extends VerticalLayout {
+public class DiceRoller extends RegisteredVerticalLayout {
 
     private enum TokenType {HERO, DRAMA}
 
@@ -125,7 +126,7 @@ public class DiceRoller extends VerticalLayout {
 
     private int captureD10roll() {
         int roll = (int)(Math.random() * 10) + 1;
-        log.info("rolled:"+roll);
+        //log.info("rolled:"+roll);
         sum += roll;
         dice.add(roll);
         return roll;
@@ -246,7 +247,7 @@ public class DiceRoller extends VerticalLayout {
         preHeroRollButton.setEnabled(hasHeroPoints);
 
     }
-
+/*
 
     private Registration tlbReg;
 
@@ -268,6 +269,15 @@ public class DiceRoller extends VerticalLayout {
     protected void onDetach(DetachEvent detachEvent) {
         tlbReg.remove();
         tlbReg = null;
+    }*/
+
+    @Override
+    protected void handleMessage(Entry entry) {
+        if (EventType.PCUpdate.equals(entry.getType())) {
+            if (entry.getPcId().equals(sessionService.getPc().getId())) {
+                handlePcUpdates();
+            }
+        }
     }
 
 }

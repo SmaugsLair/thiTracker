@@ -2,10 +2,12 @@ package com.smaugslair.thitracker.ui.players;
 
 import com.smaugslair.thitracker.data.game.Game;
 import com.smaugslair.thitracker.data.game.TimeLineItem;
+import com.smaugslair.thitracker.data.log.Entry;
 import com.smaugslair.thitracker.data.log.EventType;
 import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.websockets.Broadcaster;
+import com.smaugslair.thitracker.websockets.RegisteredVerticalLayout;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
@@ -21,7 +23,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 @CssImport(value = "./styles/color.css", themeFor = "vaadin-grid")
-public class PCTimeLineView extends VerticalLayout {
+public class PCTimeLineView extends RegisteredVerticalLayout {
 
     private static Logger log = LoggerFactory.getLogger(PCTimeLineView.class);
 
@@ -89,19 +91,14 @@ public class PCTimeLineView extends VerticalLayout {
         add(grid);
     }
 
-
+/*
     private Registration tlbReg;
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         UI ui = attachEvent.getUI();
         tlbReg = Broadcaster.register(newMessage -> {
             ui.access(() -> {
-                if (EventType.GMAction.equals(newMessage.getType())) {
-                    if (newMessage.getGameId().equals(sessionService.getGameId())) {
-                        removeAll();
-                        init();
-                    }
-                }
+
             });
         });
     }
@@ -110,5 +107,15 @@ public class PCTimeLineView extends VerticalLayout {
     protected void onDetach(DetachEvent detachEvent) {
         tlbReg.remove();
         tlbReg = null;
+    }*/
+
+    @Override
+    protected void handleMessage(Entry entry) {
+        if (EventType.GMAction.equals(entry.getType())) {
+            if (entry.getGameId().equals(sessionService.getGameId())) {
+                removeAll();
+                init();
+            }
+        }
     }
 }

@@ -2,6 +2,8 @@ package com.smaugslair.thitracker;
 
 import com.smaugslair.thitracker.data.atd.ActionTimeDefault;
 import com.smaugslair.thitracker.data.atd.AtdRepository;
+import com.smaugslair.thitracker.data.log.Entry;
+import com.smaugslair.thitracker.data.log.EventType;
 import com.smaugslair.thitracker.data.powers.PowerRepository;
 import com.smaugslair.thitracker.data.powers.PowerSetRepository;
 import com.smaugslair.thitracker.data.user.Credentials;
@@ -10,6 +12,7 @@ import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.data.user.UserRepository;
 import com.smaugslair.thitracker.security.SecurityUtils;
 import com.smaugslair.thitracker.services.ThiProperties;
+import com.smaugslair.thitracker.websockets.Broadcaster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -18,6 +21,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 
 @SpringBootApplication(exclude = ErrorMvcAutoConfiguration.class)
@@ -127,6 +134,15 @@ public class ThiTrackerApplication {
                 powerSetRepository.save(flash);
                 powerSetRepository.save(combo);
             }*/
+            final Entry ping = new Entry();
+            ping.setType(EventType.Ping);
+            ScheduledExecutorService keepAlive = Executors.newScheduledThreadPool(1);
+            Runnable r = () -> {
+                Broadcaster.broadcast(ping);
+                log.info("pinging websockets");
+            };
+            keepAlive.scheduleAtFixedRate(r, 0, 50, TimeUnit.SECONDS);
+
         };
     }
 
