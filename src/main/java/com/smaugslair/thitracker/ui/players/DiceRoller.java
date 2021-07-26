@@ -3,6 +3,7 @@ package com.smaugslair.thitracker.ui.players;
 import com.smaugslair.thitracker.data.log.Entry;
 import com.smaugslair.thitracker.data.log.EventType;
 import com.smaugslair.thitracker.data.pc.PlayerCharacter;
+import com.smaugslair.thitracker.services.CacheService;
 import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.websockets.Broadcaster;
 import com.smaugslair.thitracker.websockets.RegisteredVerticalLayout;
@@ -35,6 +36,7 @@ public class DiceRoller extends RegisteredVerticalLayout {
     private static final Logger log = LoggerFactory.getLogger(DiceRoller.class);
 
     private final SessionService sessionService;
+    private final CacheService cacheService;
 
     private IntegerField d10s = new IntegerField();
     private IntegerField maxDice = new IntegerField();
@@ -56,8 +58,9 @@ public class DiceRoller extends RegisteredVerticalLayout {
     private int sum = 0;
 
 
-    public DiceRoller(SessionService sessionService) {
+    public DiceRoller(SessionService sessionService, CacheService cacheService) {
         this.sessionService = sessionService;
+        this.cacheService = cacheService;
 
 
         //setPadding(false);
@@ -204,7 +207,7 @@ public class DiceRoller extends RegisteredVerticalLayout {
         message.setType(EventType.DiceRoll);
         message.setText(sb.toString());
 
-        sessionService.getEntryRepo().save(message);
+        cacheService.getEntryCache().save(message);
 
         Broadcaster.broadcast(message);
 
@@ -219,7 +222,7 @@ public class DiceRoller extends RegisteredVerticalLayout {
         else {
             pc.setDramaPoints(pc.getDramaPoints()+1);
         }
-        sessionService.getPcRepo().save(pc);
+        cacheService.getPcCache().save(pc);
         Entry entry = new Entry();
         entry.setPcId(pc.getId());
         entry.setGameId(sessionService.getGameId());
@@ -247,29 +250,6 @@ public class DiceRoller extends RegisteredVerticalLayout {
         preHeroRollButton.setEnabled(hasHeroPoints);
 
     }
-/*
-
-    private Registration tlbReg;
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        UI ui = attachEvent.getUI();
-        tlbReg = Broadcaster.register(newMessage -> {
-            ui.access(() -> {
-                if (EventType.PCUpdate.equals(newMessage.getType())) {
-                    if (newMessage.getPcId().equals(sessionService.getPc().getId())) {
-                        handlePcUpdates();
-                    }
-                }
-            });
-        });
-    }
-
-    @Override
-    protected void onDetach(DetachEvent detachEvent) {
-        tlbReg.remove();
-        tlbReg = null;
-    }*/
 
     @Override
     protected void handleMessage(Entry entry) {

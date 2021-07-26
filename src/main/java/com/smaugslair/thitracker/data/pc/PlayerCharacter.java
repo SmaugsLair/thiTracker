@@ -1,11 +1,12 @@
 package com.smaugslair.thitracker.data.pc;
 
+import com.smaugslair.thitracker.data.ThiEntity;
 import com.smaugslair.thitracker.data.user.User;
 
 import javax.persistence.*;
 
 @Entity
-public class PlayerCharacter {
+public class PlayerCharacter implements ThiEntity {
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
@@ -14,9 +15,8 @@ public class PlayerCharacter {
     @Column(nullable = false)
     private String name;
 
-    @OneToOne
-    @JoinColumn(name="user_id")
-    private User user;
+    @Column(nullable = false)
+    private Integer userId;
 
     @Column(nullable = true)
     private Long gameId;
@@ -55,16 +55,12 @@ public class PlayerCharacter {
         this.gameId = gameId;
     }
 
-    public User getUser() {
-        return user;
+    public Integer getUserId() {
+        return userId;
     }
 
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public String getCharacterAndPlayerName() {
-        return getName() + " (" + user.getDisplayName() + ")";
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 
     public Integer getProgressionTokens() {
@@ -89,5 +85,26 @@ public class PlayerCharacter {
 
     public void setDramaPoints(Integer dramaPoints) {
         this.dramaPoints = dramaPoints;
+    }
+
+    @Override
+    public PlayerCharacter createEmptyObject() {
+        PlayerCharacter pc = new PlayerCharacter();
+        pc.setDramaPoints(null);
+        pc.setHeroPoints(null);
+        pc.setProgressionTokens(null);
+        return pc;
+    }
+
+    @Transient
+    String pcPlayerName = null;
+
+    public String getCharacterAndPlayerName(User user) {
+        if (pcPlayerName == null) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(name).append(" (").append(user.getDisplayName()).append(")");
+            pcPlayerName = sb.toString();
+        }
+        return pcPlayerName;
     }
 }

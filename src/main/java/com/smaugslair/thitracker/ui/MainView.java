@@ -6,7 +6,6 @@ import com.smaugslair.thitracker.ui.games.CollectionView;
 import com.smaugslair.thitracker.ui.powers.PowerBrowserView;
 import com.smaugslair.thitracker.ui.powers.PowerSetBrowserView;
 import com.smaugslair.thitracker.ui.users.UserDetailsView;
-import com.smaugslair.thitracker.util.AtdCache;
 import com.smaugslair.thitracker.services.SessionService;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
@@ -23,7 +22,6 @@ import javax.annotation.PostConstruct;
 @Push
 public class MainView extends AppLayout {
 
-    private SessionService sessionService;
 
     public MainView() {
 
@@ -45,18 +43,6 @@ public class MainView extends AppLayout {
         tabs.add(new Tab( new Anchor("logout", "Logout "+ SecurityUtils.getLoggedInUser().getName())));
         tabs.setOrientation(Tabs.Orientation.VERTICAL);
         addToDrawer(tabs);
-    }
-
-    @PostConstruct
-    public void init() {
-        if (AtdCache.getAtds() == null) {
-            AtdCache.setAtds(sessionService.getAtdRepo().findAll());
-        }
-    }
-
-    @Autowired
-    public void setsessionService(SessionService sessionService) {
-        this.sessionService = sessionService;
     }
 
 }

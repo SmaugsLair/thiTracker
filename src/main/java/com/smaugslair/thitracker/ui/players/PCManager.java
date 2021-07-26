@@ -5,9 +5,11 @@ import com.smaugslair.thitracker.data.game.TimeLineItem;
 import com.smaugslair.thitracker.data.pc.PlayerCharacter;
 import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.security.SecurityUtils;
+import com.smaugslair.thitracker.services.CacheService;
 import com.smaugslair.thitracker.ui.components.ConfirmDialog;
 import com.smaugslair.thitracker.ui.components.ValidTextField;
 import com.smaugslair.thitracker.services.SessionService;
+import com.smaugslair.thitracker.util.NameValue;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
@@ -16,16 +18,22 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.validator.StringLengthValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 public class PCManager extends VerticalLayout {
 
+    private final Logger log = LoggerFactory.getLogger(PCManager.class);
+
     //private final RepoService repoService;
     private final SessionService sessionService;
+    private final CacheService cacheService;
 
-    public PCManager(SessionService sessionService) {
+    public PCManager(SessionService sessionService, CacheService cacheService) {
         this.sessionService = sessionService;
+        this.cacheService = cacheService;
         //this.repoService = repoService;
         init();
     }
@@ -41,7 +49,9 @@ public class PCManager extends VerticalLayout {
         User user = SecurityUtils.getLoggedInUser();
         if (user == null) return;
 
-        Iterable<PlayerCharacter> pcs = sessionService.getPcRepo().findAllByUserId(user.getId());
+        NameValue nameValue = new NameValue("userId", user.getId());
+
+        Iterable<PlayerCharacter> pcs = cacheService.getPcCache().findManyByProperty(nameValue);
 
         Accordion accordion = new Accordion();
         for (PlayerCharacter pc : pcs) {
@@ -67,8 +77,8 @@ public class PCManager extends VerticalLayout {
             if (pcName.isValid()) {
                 PlayerCharacter pc = new PlayerCharacter();
                 pc.setName(pcName.getValue());
-                pc.setUser(SecurityUtils.getLoggedInUser());
-                sessionService.getPcRepo().save(pc);
+                pc.setUserId(SecurityUtils.getLoggedInUser().getId());
+                cacheService.getPcCache().save(pc);
                 confirmDialog.close();
                 refresh();
             }
@@ -82,13 +92,15 @@ public class PCManager extends VerticalLayout {
 
         ConfirmDialog deleteDialog = new ConfirmDialog("Are you sure you want to delete the character "+pc.getName()+"?");
         Button confirmButton = new Button("Delete", event -> {
-            List<TimeLineItem> items = sessionService.getTliRepo().findAllByPcId(pc.getId());
+            NameValue example = new NameValue("pcId", pc.getId());
+
+            List<TimeLineItem> items = cacheService.getTliCache().findManyByProperty(example);
             items.forEach(item -> {
                 item.setPcId(null);
                 item.setName(pc.getName());
             });
-            sessionService.getTliRepo().saveAll(items);
-            sessionService.getPcRepo().delete(pc);
+            cacheService.getTliCache().saveAll(items);
+            cacheService.getPcCache().delete(pc);
             deleteDialog.close();
             refresh();
         });
@@ -96,7 +108,7 @@ public class PCManager extends VerticalLayout {
 
         HorizontalLayout layout = new HorizontalLayout();
         if (pc.getGameId() != null) {
-            Game game = sessionService.getGameRepo().findById(pc.getGameId()).orElse(new Game("?"));
+            Game game = cacheService.getGameCache().findOneById(pc.getGameId()).orElse(new Game("?"));
             Button launch = new Button("Launch "+ game.getName());
             launch.addClickListener(e -> {
                 launch.getUI().ifPresent(ui -> {

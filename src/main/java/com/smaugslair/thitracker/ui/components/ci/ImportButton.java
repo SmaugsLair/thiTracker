@@ -30,7 +30,7 @@ public class ImportButton extends Button {
                 atd.setTimeLineItem(tli);
                 tli.getDeltas().put(delta.getName(), atd);
             }
-            gmTimeLineView.getTliRepo().save(tli);
+            gmTimeLineView.getTliCache().save(tli);
             gmTimeLineView.refreshAndBroadcast();
         });
     }

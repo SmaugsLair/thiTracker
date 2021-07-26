@@ -3,6 +3,7 @@ package com.smaugslair.thitracker.ui.users;
 import com.smaugslair.thitracker.data.user.Credentials;
 import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.security.SecurityUtils;
+import com.smaugslair.thitracker.services.CacheService;
 import com.smaugslair.thitracker.ui.MainView;
 import com.smaugslair.thitracker.services.SessionService;
 import com.vaadin.flow.component.UI;
@@ -21,9 +22,11 @@ public class UserDetailsView extends VerticalLayout {
 
     private static final Logger log = LoggerFactory.getLogger(UserDetailsView.class);
     private final SessionService sessionService;
+    private final CacheService cacheService;
 
-    public UserDetailsView(SessionService sessionService) {
+    public UserDetailsView(SessionService sessionService, CacheService cacheService) {
         this.sessionService = sessionService;
+        this.cacheService = cacheService;
 
         init();
     }
@@ -43,7 +46,7 @@ public class UserDetailsView extends VerticalLayout {
         add(form);
 
         Button updateButton = new Button("Update", event -> {
-            sessionService.getUserRepo().save(user);
+            cacheService.getUserCache().save(user);
             refresh();
         });
         add(updateButton);

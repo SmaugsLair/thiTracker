@@ -1,10 +1,13 @@
 package com.smaugslair.thitracker.data.user;
 
+import com.smaugslair.thitracker.data.ThiEntity;
+import org.apache.poi.ss.formula.functions.T;
+
 import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-public class User {
+public class User implements ThiEntity {
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
@@ -28,6 +31,7 @@ public class User {
     public User() {
     }
 
+    @Override
     public Integer getId() {
         return id;
     }
@@ -101,5 +105,12 @@ public class User {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    @Override
+    public User createEmptyObject() {
+        User u = new User();
+        u.setAdmin(null);
+        return u;
     }
 }

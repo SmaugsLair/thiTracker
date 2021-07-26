@@ -1,6 +1,7 @@
 package com.smaugslair.thitracker.ui.games.tl;
 
 import com.smaugslair.thitracker.data.pc.PlayerCharacter;
+import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.ui.games.GMTimeLineView;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -57,7 +58,8 @@ public class TokenDialog extends Dialog {
 
     public void setPc(PlayerCharacter pc) {
         this.pc = pc;
-        nameHeader.setText(pc.getCharacterAndPlayerName());
+        User user = gmTimeLineView.getUserCache().findOneById(pc.getUserId()).get();
+        nameHeader.setText(pc.getCharacterAndPlayerName(user));
         progression.setValue(pc.getProgressionTokens());
         hero.setValue(pc.getHeroPoints());
         drama.setValue(pc.getDramaPoints());

@@ -1,7 +1,9 @@
 package com.smaugslair.thitracker.services;
 
 import com.smaugslair.thitracker.data.atd.AtdRepository;
+import com.smaugslair.thitracker.data.game.Game;
 import com.smaugslair.thitracker.data.game.GameRepository;
+import com.smaugslair.thitracker.data.game.TimeLineItem;
 import com.smaugslair.thitracker.data.game.TimeLineItemRepository;
 import com.smaugslair.thitracker.data.log.EntryRepository;
 import com.smaugslair.thitracker.data.pc.PlayerCharacter;
@@ -9,6 +11,7 @@ import com.smaugslair.thitracker.data.pc.PlayerCharacterRepository;
 import com.smaugslair.thitracker.data.powers.PowerRepository;
 import com.smaugslair.thitracker.data.powers.PowerSetRepository;
 import com.smaugslair.thitracker.data.user.*;
+import com.smaugslair.thitracker.util.JPACache;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -18,8 +21,13 @@ import org.springframework.stereotype.Component;
 @VaadinSessionScope
 public class SessionService {
 
+    private final CacheService cacheService;
     private Long gameId;
     private PlayerCharacter pc;
+
+    public SessionService(CacheService cacheService) {
+        this.cacheService = cacheService;
+    }
 
     public Long getGameId() {
         return gameId;
@@ -37,33 +45,20 @@ public class SessionService {
 
     public void refreshPc() {
         if (pc != null) {
-            pc = pcRepo.findById(pc.getId()).orElse(pc);
+            pc= cacheService.getPcCache().findOneById(pc.getId()).orElse(pc);
         }
     }
 
-    private AtdRepository atdRepo;
     private CredentialsRepository credRepo;
-    private UserRepository userRepo;
-    private GameRepository gameRepo;
-    private TimeLineItemRepository tliRepo;
-    private EntryRepository entryRepo;
-    private PlayerCharacterRepository pcRepo;
-    private CollectedItemRepository ciRepo;
-    private FriendshipRepository friendsRepo;
     private PowerRepository powerRepo;
     private PowerSetRepository powerSetRepo;
-    private JavaMailSender javaMailSender;
     private PasswordResetRepository passwordResetRepo;
+    private JavaMailSender javaMailSender;
     private ThiProperties thiProperties;
     private PowersCache powersCache;
+    private CollectedItemRepository ciRepo;
+    private FriendshipRepository friendsRepo;
 
-    public AtdRepository getAtdRepo() {
-        return atdRepo;
-    }
-    @Autowired
-    public void setAtdRepo(AtdRepository atdRepository) {
-        this.atdRepo = atdRepository;
-    }
 
     public CredentialsRepository getCredRepo() {
         return credRepo;
@@ -73,45 +68,7 @@ public class SessionService {
         this.credRepo = credRepo;
     }
 
-    public UserRepository getUserRepo() {
-        return userRepo;
-    }
-    @Autowired
-    public void setUserRepo(UserRepository userRepo) {
-        this.userRepo = userRepo;
-    }
 
-    public GameRepository getGameRepo() {
-        return gameRepo;
-    }
-    @Autowired
-    public void setGameRepo(GameRepository gameRepo) {
-        this.gameRepo = gameRepo;
-    }
-
-    public TimeLineItemRepository getTliRepo() {
-        return tliRepo;
-    }
-    @Autowired
-    public void setTliRepo(TimeLineItemRepository tliRepo) {
-        this.tliRepo = tliRepo;
-    }
-
-    public EntryRepository getEntryRepo() {
-        return entryRepo;
-    }
-    @Autowired
-    public void setEntryRepo(EntryRepository entryRepo) {
-        this.entryRepo = entryRepo;
-    }
-
-    public PlayerCharacterRepository getPcRepo() {
-        return pcRepo;
-    }
-    @Autowired
-    public void setPcRepo(PlayerCharacterRepository pcRepo) {
-        this.pcRepo = pcRepo;
-    }
 
     public CollectedItemRepository getCiRepo() {
         return ciRepo;
@@ -176,5 +133,9 @@ public class SessionService {
     @Autowired
     public void setPowersCache(PowersCache powersCache) {
         this.powersCache = powersCache;
+    }
+
+    public CacheService getCacheService() {
+        return cacheService;
     }
 }

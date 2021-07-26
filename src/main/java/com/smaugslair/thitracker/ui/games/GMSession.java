@@ -1,6 +1,7 @@
 package com.smaugslair.thitracker.ui.games;
 
 import com.smaugslair.thitracker.data.log.Entry;
+import com.smaugslair.thitracker.services.CacheService;
 import com.smaugslair.thitracker.ui.MainView;
 import com.smaugslair.thitracker.ui.components.DiceHistory;
 import com.smaugslair.thitracker.services.SessionService;
@@ -15,13 +16,13 @@ public class GMSession extends SplitLayout {
     private final TimeLineHistory timeLineHistory;
     private final DiceHistory diceHistory;
 
-    public GMSession(SessionService sessionService) {
+    public GMSession(SessionService sessionService, CacheService cacheService) {
 
-        GMTimeLineView gmTimeLineView = new GMTimeLineView(this, sessionService);
+        GMTimeLineView gmTimeLineView = new GMTimeLineView(this, sessionService, cacheService);
 
         SplitLayout historyLayout = new SplitLayout();
         historyLayout.setOrientation(Orientation.VERTICAL);
-        diceHistory = new DiceHistory(sessionService);
+        diceHistory = new DiceHistory(sessionService, cacheService);
         historyLayout.addToPrimary(diceHistory);
         timeLineHistory = new TimeLineHistory(gmTimeLineView);
         historyLayout.addToSecondary(timeLineHistory);

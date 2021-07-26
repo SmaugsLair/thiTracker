@@ -5,7 +5,6 @@ import com.smaugslair.thitracker.data.game.ActionTimeDelta;
 import com.smaugslair.thitracker.data.game.TimeLineItem;
 import com.smaugslair.thitracker.ui.components.ConfirmDialog;
 import com.smaugslair.thitracker.ui.games.GMTimeLineView;
-import com.smaugslair.thitracker.util.AtdCache;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
@@ -27,7 +26,7 @@ public class DeltaButton extends Button {
 
         FormLayout formLayout = new FormLayout();
         Integer count = 0;
-        for (ActionTimeDefault atd : AtdCache.getAtds()) {
+        for (ActionTimeDefault atd : gmTimeLineView.getAtds()) {
             ActionTimeDelta delta = item.getDeltas().get(atd.getName());
             if (delta.getDelta() != 0) {
                 ++count;
@@ -44,11 +43,11 @@ public class DeltaButton extends Button {
 
         Button confirmButton = new Button("Save", event -> {
 
-            for (ActionTimeDefault atd : AtdCache.getAtds()) {
+            for (ActionTimeDefault atd : gmTimeLineView.getAtds()) {
                 ActionTimeDelta delta = item.getDeltas().get(atd.getName());
                 delta.setDelta(fieldMap.get(delta.getName()).getValue());
             }
-            gmTimeLineView.getTliRepo().save(item);
+            gmTimeLineView.getTliCache().save(item);
             deltaDialog.close();
             gmTimeLineView.refreshAndBroadcast();
         });

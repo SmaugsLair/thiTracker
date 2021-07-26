@@ -28,7 +28,7 @@ public abstract class RegisteredVerticalLayout extends VerticalLayout {
 
     ScheduledExecutorService keepAlive = Executors.newScheduledThreadPool(1);
     Runnable r = () -> {
-        log.info(this.getClass().getSimpleName()+" ---- ping -------");
+        //log.info(this.getClass().getSimpleName()+" ---- ping -------");
         Broadcaster.broadcast(ping);
     };
 

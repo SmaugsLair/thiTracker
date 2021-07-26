@@ -1,17 +1,14 @@
 package com.smaugslair.thitracker.data.game;
 
+import com.smaugslair.thitracker.data.ThiEntity;
 import com.smaugslair.thitracker.data.atd.ActionTime;
 import com.smaugslair.thitracker.data.atd.ActionTimeDefault;
-import com.smaugslair.thitracker.util.AtdCache;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Entity
-public class TimeLineItem {
+public class TimeLineItem implements ThiEntity, Comparable<TimeLineItem> {
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
@@ -149,13 +146,44 @@ public class TimeLineItem {
     }
 
 
-    public void initializeDeltas() {
-        for (ActionTimeDefault atd : AtdCache.getAtds()) {
+    public void initializeDeltas(List<ActionTimeDefault> defaults) {
+        for (ActionTimeDefault atd : defaults) {
             ActionTimeDelta delta = new ActionTimeDelta();
             delta.setDelta(0);
             delta.setName(atd.getName());
             delta.setTimeLineItem(this);
             getDeltas().put(atd.getName(), delta);
         }
+    }
+
+    @Override
+    public int compareTo(TimeLineItem o) {
+        return -o.getTime().compareTo(getTime());
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", TimeLineItem.class.getSimpleName() + "[", "]")
+                .add("id=" + id)
+                .add("gameId=" + gameId)
+                .add("name='" + name + "'")
+                .add("time=" + time)
+                .add("stun=" + stun)
+                .add("color='" + color + "'")
+                .add("pcId=" + pcId)
+                .add("hidden=" + hidden)
+                .add("actionTime=" + actionTime)
+                .add("reactTime=" + reactTime)
+                .toString();
+    }
+
+    @Override
+    public TimeLineItem createEmptyObject() {
+        TimeLineItem sample = new TimeLineItem();
+        sample.setStun(null);
+        sample.setHidden(null);
+        sample.setDeltas(null);
+        sample.actionTimes = null;
+        return sample;
     }
 }

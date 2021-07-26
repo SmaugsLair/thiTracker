@@ -2,7 +2,9 @@ package com.smaugslair.thitracker.ui.components;
 
 import com.smaugslair.thitracker.data.log.Entry;
 import com.smaugslair.thitracker.data.log.EventType;
+import com.smaugslair.thitracker.services.CacheService;
 import com.smaugslair.thitracker.services.SessionService;
+import com.smaugslair.thitracker.util.NameValue;
 import com.smaugslair.thitracker.websockets.Broadcaster;
 import com.smaugslair.thitracker.websockets.RegisteredVerticalLayout;
 import com.vaadin.flow.component.AttachEvent;
@@ -15,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class DiceHistory extends RegisteredVerticalLayout {
 
@@ -22,33 +25,19 @@ public class DiceHistory extends RegisteredVerticalLayout {
 
     private final SessionService sessionService;
 
-    public DiceHistory(SessionService sessionService) {
+    public DiceHistory(SessionService sessionService, CacheService cacheService) {
         setMargin(false);
         setSpacing(false);
         this.sessionService = sessionService;
-        List<Entry> entryList = sessionService.getEntryRepo().findAllByGameIdAndTypeEqualsOrderByIdDesc(sessionService.getGameId(), EventType.DiceRoll);
+        NameValue nameValue = new NameValue("gameId", sessionService.getGameId());
+        List<Entry> entryList = cacheService.getEntryCache().findManyByProperty(nameValue)
+                .stream().sorted().collect(Collectors.toList());
         for (Entry entry : entryList) {
-            add(new Label(entry.getText()));
+            if (entry.getType().equals(EventType.DiceRoll)) {
+                add(new Label(entry.getText()));
+            }
         }
     }
-
-/*
-
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        UI ui = attachEvent.getUI();
-        tlbReg = Broadcaster.register(newMessage -> {
-            ui.access(() -> {
-
-            });
-        });
-    }
-
-    @Override
-    protected void onDetach(DetachEvent detachEvent) {
-        tlbReg.remove();
-        tlbReg = null;
-    }*/
 
     @Override
     protected void handleMessage(Entry entry) {

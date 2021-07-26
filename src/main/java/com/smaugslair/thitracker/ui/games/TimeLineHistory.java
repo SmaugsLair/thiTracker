@@ -2,12 +2,14 @@ package com.smaugslair.thitracker.ui.games;
 
 import com.smaugslair.thitracker.data.log.Entry;
 import com.smaugslair.thitracker.data.log.EventType;
+import com.smaugslair.thitracker.util.NameValue;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class TimeLineHistory extends VerticalLayout {
 
@@ -18,10 +20,13 @@ public class TimeLineHistory extends VerticalLayout {
         setSpacing(false);
         setMargin(false);
 
-        List<Entry> entryList = gmTimeLineView.getEntryRepo().findAllByGameIdAndTypeEqualsOrderByIdDesc(
-                gmTimeLineView.getGameID(), EventType.GMAction);
+        NameValue nameValue = new NameValue("gameId", gmTimeLineView.getGameID());
+        List<Entry> entryList = gmTimeLineView.getEntryCache().findManyByProperty(nameValue)
+                .stream().sorted().collect(Collectors.toList());
         for (Entry entry : entryList) {
-            add(new Label(entry.getText()));
+            if (EventType.GMAction.equals(entry.getType())) {
+                add(new Label(entry.getText()));
+            }
         }
     }
 

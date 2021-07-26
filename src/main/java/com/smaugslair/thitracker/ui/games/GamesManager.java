@@ -4,9 +4,11 @@ import com.smaugslair.thitracker.data.game.Game;
 import com.smaugslair.thitracker.data.pc.PlayerCharacter;
 import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.security.SecurityUtils;
+import com.smaugslair.thitracker.services.CacheService;
 import com.smaugslair.thitracker.ui.components.ConfirmDialog;
 import com.smaugslair.thitracker.ui.components.ValidTextField;
 import com.smaugslair.thitracker.services.SessionService;
+import com.smaugslair.thitracker.util.NameValue;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
@@ -24,9 +26,11 @@ public class GamesManager extends VerticalLayout {
     private static final Logger log = LoggerFactory.getLogger(GamesManager.class);
 
     private final SessionService sessionService;
+    private final CacheService cacheService;
 
-    public GamesManager(SessionService sessionService) {
+    public GamesManager(SessionService sessionService, CacheService cacheService) {
         this.sessionService = sessionService;
+        this.cacheService = cacheService;
         init();
     }
 
@@ -44,7 +48,9 @@ public class GamesManager extends VerticalLayout {
         User user = SecurityUtils.getLoggedInUser();
         if (user == null) return;
 
-        Iterable<Game> games = sessionService.getGameRepo().findGamesByGameMasterId(user.getId());
+        NameValue example = new NameValue("gameMasterId", user.getId());
+
+        Iterable<Game> games = cacheService.getGameCache().findManyByProperty(example);
 
         for (Game game : games) {
             accordion.add(game.getName(), getGameRow(game));
@@ -70,7 +76,7 @@ public class GamesManager extends VerticalLayout {
                 Game game = new Game();
                 game.setName(gameName.getValue());
                 game.setGameMasterId(SecurityUtils.getLoggedInUser().getId());
-                sessionService.getGameRepo().save(game);
+                cacheService.getGameCache().save(game);
                 dialog.close();
                 refresh();
             }
@@ -84,11 +90,13 @@ public class GamesManager extends VerticalLayout {
 
         ConfirmDialog deleteDialog = new ConfirmDialog("Are you sure you want to delete the game "+game.getName()+"?");
         Button confirmButton = new Button("Delete", event -> {
-            List<PlayerCharacter> pcs = sessionService.getPcRepo().findAllByGameId(game.getId());
+            NameValue nameValue = new NameValue("gameId", game.getId());
+            List<PlayerCharacter> pcs = cacheService.getPcCache().findManyByProperty(nameValue);
             pcs.forEach(pc -> pc.setGameId(null));
-            sessionService.getPcRepo().saveAll(pcs);
-            sessionService.getTliRepo().deleteAllByGameId(game.getId());
-            sessionService.getGameRepo().delete(game);
+            cacheService.getPcCache().saveAll(pcs);
+            NameValue example = new NameValue("gameId", game.getId());
+            cacheService.getTliCache().deleteAllByProperty(example);
+            cacheService.getGameCache().delete(game);
             deleteDialog.close();
             refresh();
         });

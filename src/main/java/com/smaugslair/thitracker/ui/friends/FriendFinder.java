@@ -3,7 +3,9 @@ package com.smaugslair.thitracker.ui.friends;
 import com.smaugslair.thitracker.data.user.Friendship;
 import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.security.SecurityUtils;
+import com.smaugslair.thitracker.services.CacheService;
 import com.smaugslair.thitracker.services.SessionService;
+import com.smaugslair.thitracker.util.NameValue;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -16,13 +18,15 @@ import java.util.Optional;
 public class FriendFinder extends VerticalLayout {
 
     private final SessionService sessionService;
+    private final CacheService cacheService;
     private final FriendsSession friendsSession;
     private User self = SecurityUtils.getLoggedInUser();
     private User friend = null;
 
-    public FriendFinder(FriendsSession friendsSession, SessionService sessionService) {
+    public FriendFinder(FriendsSession friendsSession, SessionService sessionService, CacheService cacheService) {
         this.sessionService = sessionService;
         this.friendsSession = friendsSession;
+        this.cacheService = cacheService;
         init();
     }
 
@@ -54,11 +58,15 @@ public class FriendFinder extends VerticalLayout {
 
         Button button = new Button("Find", event -> {
             request.setVisible(false);
-            Optional<User> user = sessionService.getUserRepo().findUserByNameAndFriendCode(nameField.getValue(), friendCode.getValue());
+            NameValue nameValue = new NameValue("name", nameField.getValue());
+            Optional<User> user = cacheService.getUserCache().findOneByProperty(nameValue);
             if (user.isPresent()) {
                 if (user.get().equals(self)) {
                     message.setText("That's you, fool!");
                     return;
+                }
+                if (!user.get().getFriendCode().equals(friendCode.getValue())) {
+                    message.setText("Not found");
                 }
                 Optional<Friendship> friendship = sessionService.getFriendsRepo().findByUserAndFriend(user.get(), self);
                 if (friendship.isPresent()) {

@@ -3,10 +3,12 @@ package com.smaugslair.thitracker.ui;
 import com.smaugslair.thitracker.data.user.Credentials;
 import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.security.SecurityUtils;
+import com.smaugslair.thitracker.services.CacheService;
 import com.smaugslair.thitracker.services.PasswordResetService;
 import com.smaugslair.thitracker.ui.users.PasswordForm;
 import com.smaugslair.thitracker.ui.users.UserForm;
 import com.smaugslair.thitracker.services.SessionService;
+import com.smaugslair.thitracker.util.NameValue;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.H1;
@@ -33,6 +35,8 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 	private static final Logger log = LoggerFactory.getLogger(LoginView.class);
 
 	private SessionService sessionService;
+
+	private CacheService cacheService;
 
 	private PasswordResetService passwordResetService;
 
@@ -61,7 +65,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 				String validPassword = passwordForm.getValidPassword();
 				if (validPassword != null) {
 					user.setFriendCode(generateFriendCode());
-					user = sessionService.getUserRepo().save(user);
+					user = cacheService.getUserCache().save(user);
 					Credentials credentials = new Credentials();
 					credentials.setUserId(user.getId());
 					credentials.setEncodedPassword(SecurityUtils.encode(validPassword));
@@ -83,7 +87,9 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 		email.setPlaceholder("email");
 		forgotPasswordDialog.add(email);
 		forgotPasswordDialog.add(new Button("Request reset", event -> {
-			Optional<User> user = sessionService.getUserRepo().findUserByEmail(email.getValue());
+
+			NameValue nameValue = new NameValue("email", email.getValue());
+			Optional<User> user = cacheService.getUserCache().findOneByProperty(nameValue);
 			if (user.isPresent()) {
 				passwordResetService.createPasswordResetForUser(user.get());
 			}
@@ -120,6 +126,11 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 	@Autowired
 	public void setPasswordResetService(PasswordResetService passwordResetService) {
 		this.passwordResetService = passwordResetService;
+	}
+
+	@Autowired
+	public void setCacheService(CacheService cacheService) {
+		this.cacheService = cacheService;
 	}
 
 	private String generateFriendCode() {

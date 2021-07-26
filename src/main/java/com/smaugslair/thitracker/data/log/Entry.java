@@ -1,10 +1,12 @@
 package com.smaugslair.thitracker.data.log;
 
+import com.smaugslair.thitracker.data.ThiEntity;
+
 import javax.persistence.*;
 import java.util.StringJoiner;
 
 @Entity
-public class Entry {
+public class Entry implements ThiEntity, Comparable<Entry> {
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Long id;
@@ -76,5 +78,15 @@ public class Entry {
                 .add("gameId=" + gameId)
                 .add("pcId=" + pcId)
                 .toString();
+    }
+
+    @Override
+    public Entry createEmptyObject() {
+        return new Entry();
+    }
+
+    @Override
+    public int compareTo(Entry o) {
+        return -id.compareTo(o.id);
     }
 }

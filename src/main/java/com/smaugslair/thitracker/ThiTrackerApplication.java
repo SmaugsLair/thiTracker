@@ -20,6 +20,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 
 import java.util.concurrent.Executors;
@@ -29,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 
 @SpringBootApplication(exclude = ErrorMvcAutoConfiguration.class)
 @EnableConfigurationProperties(ThiProperties.class)
+@EnableCaching
 public class ThiTrackerApplication {
 
     private static final Logger log = LoggerFactory.getLogger(ThiTrackerApplication.class);

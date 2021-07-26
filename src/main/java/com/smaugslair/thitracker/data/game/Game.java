@@ -1,9 +1,11 @@
 package com.smaugslair.thitracker.data.game;
 
+import com.smaugslair.thitracker.data.ThiEntity;
+
 import javax.persistence.*;
 
 @Entity
-public class Game {
+public class Game implements ThiEntity {
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
@@ -63,5 +65,10 @@ public class Game {
                 ", name='" + name + '\'' +
                 ", gameMasterId=" + gameMasterId +
                 '}';
+    }
+
+    @Override
+    public Game createEmptyObject() {
+        return new Game();
     }
 }
