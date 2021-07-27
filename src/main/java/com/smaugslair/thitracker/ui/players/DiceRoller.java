@@ -12,9 +12,11 @@ import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.progressbar.ProgressBarVariant;
@@ -31,6 +33,8 @@ import java.util.List;
 
 public class DiceRoller extends RegisteredVerticalLayout {
 
+    private final String exp_val = "Exp val: ";
+
     private enum TokenType {HERO, DRAMA}
 
     private static final Logger log = LoggerFactory.getLogger(DiceRoller.class);
@@ -43,8 +47,8 @@ public class DiceRoller extends RegisteredVerticalLayout {
     private FormLayout resultLayout = new FormLayout();
     private Label progressLabel = new Label();
     private ProgressBar progressBar = new ProgressBar();
-    private Label expectedValue = new Label("Expected value: "+(3*5.5));
-    private Label expectedHeroValue = new Label("Expected value: "+(4*5.5));
+    private Label expectedValue = new Label(exp_val+(3*5.5));
+    private Label expectedHeroValue = new Label(exp_val+(4*5.5));
     private TextField diceText = new TextField();
     private TextField droppedText = new TextField();
     private Label droppedLabel = new Label("Dropped");
@@ -69,39 +73,67 @@ public class DiceRoller extends RegisteredVerticalLayout {
 
         PlayerCharacter pc = sessionService.getPc();
 
-        /*if (pc == null) {
-            add(new H3("Select a Hero first"));
-            return;
-        }*/
 
         FormLayout rollLayout = new FormLayout();
-        rollLayout.addFormItem(new Span("Hero: "+pc.getName()), "Dice Roller");
+        TextField heroField = new TextField();
+        heroField.setLabel("Hero");
+        heroField.setValue(pc.getName());
+        heroField.setReadOnly(true);
+        heroField.setWidth("150px");
+
+
+        //rollLayout.addFormItem(new Span("Hero: "+pc.getName()), "Dice Roller");
+        d10s.setLabel("d10s to roll");
+        d10s.setWidth("100px");
         d10s.setValue(3);
         d10s.setHasControls(true);
         d10s.setMin(1);
-        rollLayout.addFormItem(d10s, "d10s to roll");
-        maxDice.setValue(10);
-        maxDice.setHasControls(true);
-        maxDice.setMin(1);
-        rollLayout.addFormItem(maxDice, "Max dice");
+
+        maxDice.setLabel("Max dice");
+        maxDice.setWidth("60px");
+        maxDice.setValue(getMaxDiceForGame());
+        maxDice.setReadOnly(true);
+
+        HorizontalLayout topLine = new HorizontalLayout(heroField, d10s, maxDice);
+        topLine.setMargin(false);
+        topLine.setPadding(false);
+
+        rollLayout.add(topLine);
 
         Button rollButton = new Button("Roll 3");
-        rollLayout.addFormItem(expectedValue, rollButton);
-
-        rollLayout.addFormItem(expectedHeroValue, preHeroRollButton);
         preHeroRollButton.setEnabled(pc.getHeroPoints() > 0);
+
+
+        VerticalLayout normal = new VerticalLayout();
+        normal.setWidthFull();
+        normal.setAlignItems(Alignment.CENTER);
+        normal.setPadding(false);
+        normal.setMargin(false);
+        normal.setSpacing(false);
+        VerticalLayout hero = new VerticalLayout();
+        hero.setWidthFull();
+        hero.setAlignItems(Alignment.CENTER);
+        hero.setPadding(false);
+        hero.setMargin(false);
+        hero.setSpacing(false);
+
+        normal.add(rollButton, expectedValue);
+        hero.add(preHeroRollButton, expectedHeroValue);
+
+        rollLayout.addFormItem(hero, normal);
+
 
 
         d10s.addValueChangeListener(event -> {
             rollButton.setText("Roll "+d10s.getValue());
-            expectedValue.setText("Expected value: "+calcExpected(d10s.getValue()));
+            expectedValue.setText(exp_val+calcExpected(d10s.getValue()));
 
             preHeroRollButton.setText("Hero roll "+(d10s.getValue()+1));
-            expectedHeroValue.setText("Expected value: "+calcExpected(d10s.getValue()+1));
+            expectedHeroValue.setText(exp_val+calcExpected(d10s.getValue()+1));
         });
         maxDice.addValueChangeListener(event -> {
-            expectedValue.setText("Expected value: "+calcExpected(d10s.getValue()));
-            expectedHeroValue.setText("Expected value: "+calcExpected(d10s.getValue()+1));
+            expectedValue.setText(exp_val+calcExpected(d10s.getValue()));
+            expectedHeroValue.setText(exp_val+calcExpected(d10s.getValue()+1));
         });
 
         rollButton.addClickListener(event -> initialRoll(false));
@@ -239,6 +271,9 @@ public class DiceRoller extends RegisteredVerticalLayout {
         Collections.sort(dice);
         List<Integer> dropped = new ArrayList<>();
         dropped.add(dropLowest());
+        while (dice.size() > maxDice.getValue()) {
+            dropped.add(dropLowest());
+        }
         prepareResults(dropped, tokenType.toString());
         spendToken(tokenType);
     }
@@ -258,6 +293,16 @@ public class DiceRoller extends RegisteredVerticalLayout {
                 handlePcUpdates();
             }
         }
+        else if (EventType.MaxDiceUpdate.equals(entry.getType())) {
+            if (entry.getGameId().equals(sessionService.getGameId())) {
+                maxDice.setValue(getMaxDiceForGame());
+            }
+        }
+    }
+
+    private Integer getMaxDiceForGame() {
+        return cacheService.getGameCache().findOneById(sessionService.getGameId())
+                .get().getMaxDice();
     }
 
 }

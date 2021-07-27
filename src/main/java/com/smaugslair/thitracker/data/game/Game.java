@@ -20,6 +20,10 @@ public class Game implements ThiEntity {
     @Column
     private Long lastEventId;
 
+
+    @Column(nullable = false)
+    private Integer maxDice = 10;
+
     public Game() {}
 
     public Game(String name) {
@@ -58,6 +62,14 @@ public class Game implements ThiEntity {
         this.lastEventId = lastEventId;
     }
 
+    public Integer getMaxDice() {
+        return maxDice;
+    }
+
+    public void setMaxDice(Integer maxDice) {
+        this.maxDice = maxDice;
+    }
+
     @Override
     public String toString() {
         return "Game{" +
@@ -69,6 +81,8 @@ public class Game implements ThiEntity {
 
     @Override
     public Game createEmptyObject() {
-        return new Game();
+        Game g = new Game();
+        g.setMaxDice(null);
+        return g;
     }
 }

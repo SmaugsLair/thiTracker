@@ -1,4 +1,4 @@
-package com.smaugslair.thitracker.ui.components.ci;
+package com.smaugslair.thitracker.ui.games.tl;
 
 import com.smaugslair.thitracker.data.game.ActionTimeDelta;
 import com.smaugslair.thitracker.data.game.TimeLineItem;

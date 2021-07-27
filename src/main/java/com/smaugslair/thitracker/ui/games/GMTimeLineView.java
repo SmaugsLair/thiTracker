@@ -4,7 +4,6 @@ import com.smaugslair.thitracker.data.atd.ActionTime;
 import com.smaugslair.thitracker.data.atd.ActionTimeDefault;
 import com.smaugslair.thitracker.data.game.*;
 import com.smaugslair.thitracker.data.log.Entry;
-import com.smaugslair.thitracker.data.log.EntryRepository;
 import com.smaugslair.thitracker.data.log.EventType;
 import com.smaugslair.thitracker.data.pc.PlayerCharacter;
 import com.smaugslair.thitracker.data.user.CollectedDelta;
@@ -14,12 +13,13 @@ import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.security.SecurityUtils;
 import com.smaugslair.thitracker.services.CacheService;
 import com.smaugslair.thitracker.ui.components.ConfirmDialog;
-import com.smaugslair.thitracker.ui.components.ci.ImportButton;
+import com.smaugslair.thitracker.ui.games.tl.ImportButton;
 import com.smaugslair.thitracker.ui.games.tl.*;
 import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.util.JPACache;
 import com.smaugslair.thitracker.util.NameValue;
 import com.smaugslair.thitracker.websockets.Broadcaster;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -33,6 +33,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +51,11 @@ public class GMTimeLineView extends VerticalLayout {
     private final CacheService cacheService;
     private final GMSession gmSession;
 
+    private NameValue gameIdProp = null;
+    private Game game = null;
+    private Accordion gameAccordion;
+    private boolean accordionOpen = false;
+
     private TokenDialog tokenDialog = new TokenDialog(this);
 
 
@@ -66,6 +72,7 @@ public class GMTimeLineView extends VerticalLayout {
     }
 
     public void refreshWithLog(String logText) {
+        accordionOpen = gameAccordion.getOpenedIndex().isPresent();
         removeAll();
         init();
         Entry entry = new Entry();
@@ -111,21 +118,37 @@ public class GMTimeLineView extends VerticalLayout {
 
     public void init() {
 
-        Game game = confirmData();
+        game = confirmData();
         if (game == null) {
             return;
         }
-        Accordion gameAccordion = new Accordion();
-        HorizontalLayout gameActions = new HorizontalLayout();
-        gameAccordion.add("Game: "+game.getName(), gameActions);
-        gameAccordion.close();
+        gameIdProp = new NameValue("gameId", getGameId());
 
+        gameAccordion = new Accordion();
+        if (!accordionOpen) {
+            gameAccordion.close();
+        }
+        HorizontalLayout gameActions = new HorizontalLayout();
+        HorizontalLayout buttonBarTop = new HorizontalLayout();
+        HorizontalLayout buttonBarBottom = new HorizontalLayout();
+        VerticalLayout buttonZone = new VerticalLayout(buttonBarTop, buttonBarBottom);
+        gameActions.setMargin(false);
+        gameActions.setPadding(false);
+        gameActions.add(createMaxDiceField());
+        gameActions.add(buttonZone);
+        buttonBarTop.add(createAddEventButton());
+        buttonBarTop.add(createImportButton());
+        buttonBarTop.add(createInviteButton());
+        buttonBarBottom.add(createResetStunButton());
+        buttonBarBottom.add(createResetTimeButton());
+        buttonBarBottom.add(createClearRollsButton());
+        buttonBarBottom.add(createClearActionsButton());
+        gameAccordion.add("Game: "+game.getName(), gameActions);
         add(gameAccordion);
 
-        NameValue example = new NameValue("gameId", getGameId());
 
 
-        List<TimeLineItem> items = getTliCache().findManyByProperty(example).stream()
+        List<TimeLineItem> items = getTliCache().findManyByProperty(gameIdProp).stream()
                 .sorted().collect(Collectors.toList());
 
         TimeLineItem lastEvent = null;
@@ -150,8 +173,6 @@ public class GMTimeLineView extends VerticalLayout {
         grid.setHeightByRows(true);
         grid.setItems(items);
 
-        //Icon icon = VaadinIcon.WALLET.create();
-
         grid.addComponentColumn(item -> new NameField(item, this)).setHeader("Character/NPC/Event");
         grid.addComponentColumn(item -> new TokenButton(item, this));
         grid.addComponentColumn(item -> new StunField(item, this)).setHeader("Stun");
@@ -164,7 +185,6 @@ public class GMTimeLineView extends VerticalLayout {
         icon = VaadinIcon.CARET_UP.create();
         icon.setSize("16px");
         grid.addComponentColumn(item -> new DeltaButton(item, this)).setHeader(icon).setTextAlign(ColumnTextAlign.CENTER);
-        //grid.addComponentColumn((TimeLineItem item1) -> new ButtonRow(item1, this));
 
         grid.setClassNameGenerator(item -> "w3-"+item.getColor());
         grid.getColumns().forEach(itemColumn -> itemColumn.setAutoWidth(true));
@@ -220,6 +240,8 @@ public class GMTimeLineView extends VerticalLayout {
                     collectedItem.getDeltas().add(collectedDelta);
                 }
                 sessionService.getCiRepo().save(collectedItem);
+                Component oldButton = buttonBarTop.getComponentAt(1);
+                buttonBarTop.replace(oldButton, createImportButton());
                 Notification.show("Saved "+collectedItem.getName()+" to your collection",
                         2000, Notification.Position.TOP_CENTER);
             });
@@ -227,133 +249,7 @@ public class GMTimeLineView extends VerticalLayout {
 
         add(grid);
 
-        User user = SecurityUtils.getLoggedInUser();
 
-        List<Friendship> friendships = sessionService.getFriendsRepo().findAllByUserOrFriend(user, user);
-
-        Set<Integer> userIds = new HashSet<>();
-        friendships.forEach(friendship -> {
-            userIds.add(friendship.getUser().getId());
-            userIds.add(friendship.getFriend().getId());
-        });
-
-        log.info("building pcs");
-        List<PlayerCharacter> pcs = new ArrayList<>();
-        userIds.forEach(id -> {
-            NameValue nameValue = new NameValue("userId", id);
-            pcs.addAll(cacheService.getPcCache().findManyByProperty(nameValue).stream()
-                    .filter(pc -> pc.getGameId() == null ).collect(Collectors.toList()));
-        });
-
-        NewItemForm newItemForm = new NewItemForm(pcs, cacheService);
-        ConfirmDialog addItemDialog = new ConfirmDialog(newItemForm);
-
-        Button confirmButton = new Button("Add event to "+game.getName(), event -> {
-            TimeLineItem item = new TimeLineItem();
-            if (newItemForm.isPC()) {
-                PlayerCharacter pc = newItemForm.getPC();
-                item.setName(pc.getCharacterAndPlayerName(cacheService.getUserCache().findOneById(pc.getUserId()).get()));
-                item.setPcId(pc.getId());
-                pc.setGameId(getGameId());
-                cacheService.getPcCache().save(pc);
-            }
-            else {
-                item.setName(newItemForm.getName());
-            }
-            item.setStun(newItemForm.getStun());
-            item.setTime(newItemForm.getTime());
-            item.setHidden(newItemForm.getHidden());
-            item.setGameId(game.getId());
-            item.initializeDeltas(cacheService.getAtdRepo().findAll());
-            getTliCache().save(item);
-            addItemDialog.close();
-            refreshAndBroadcast();
-        });
-        addItemDialog.setConfirmButton(confirmButton);
-        addItemDialog.setWidth("500px");
-
-
-        Button addButton = new Button("Add event");
-        addButton.addClickListener(event -> addItemDialog.open());
-        gameActions.add(addButton);
-
-        Button resetStun = new Button("Reset stun");
-        resetStun.addClickListener(event -> {
-            Iterable<TimeLineItem> timeLineItems = getTliCache().findManyByProperty(example);
-            timeLineItems.forEach(item -> {
-                item.setStun(0);
-                getTliCache().save(item);
-            });
-            refreshAndBroadcast();
-        });
-        gameActions.add(resetStun);
-
-
-        Button resetTime = new Button("Reset time", event -> {
-            Iterable<TimeLineItem> timeLineItems = getTliCache().findManyByProperty(example);
-            timeLineItems.forEach(item -> {
-                item.setTime(0);
-                getTliCache().save(item);
-            });
-            game.setLastEventId(null);
-            getGameCache().save(game);
-            refreshAndBroadcast();
-        });
-        gameActions.add(resetTime);
-
-        Button clearRollHistory = new Button("Clear roll log", event -> {
-            clearLogs(EventType.DiceRoll);
-            gmSession.clearRolls();
-            Entry entry = new Entry();
-            entry.setGameId(getGameId());
-            entry.setType(EventType.ClearRolls);
-            Broadcaster.broadcast(entry);
-        });
-        gameActions.add(clearRollHistory);
-
-        Button clearActionHistory = new Button("Clear action log", event -> {
-            clearLogs(EventType.GMAction);
-            gmSession.clearActions();
-        });
-        gameActions.add(clearActionHistory);
-
-
-
-        List<CollectedItem> collectedItems = sessionService.getCiRepo().findAllByGmId(SecurityUtils.getLoggedInUser().getId());
-        if (!collectedItems.isEmpty()) {
-
-            Grid<CollectedItem> ciGrid = new Grid<>();
-            ciGrid.setItems(collectedItems);
-            ciGrid.setHeightByRows(true);
-            ciGrid.setClassNameGenerator(item -> "w3-"+item.getColor());
-            ciGrid.getColumns().forEach(itemColumn -> itemColumn.setAutoWidth(true));
-            ciGrid.addColumn(CollectedItem::getName);
-            ciGrid.addComponentColumn((CollectedItem item1) -> new ImportButton(item1, this));
-
-            ConfirmDialog importDialog = new ConfirmDialog(ciGrid);
-            importDialog.setWidth("500px");
-
-            Button importButton = new Button("Import from collection", event -> {
-                importDialog.open();
-            });
-            gameActions.add(importButton);
-
-        }
-
-        TextField inviteName = new TextField();
-        inviteName.setPlaceholder("name");
-        TextField inviteEmail = new TextField();
-        inviteEmail.setPlaceholder("email");
-
-        ConfirmDialog inviteDialog = new ConfirmDialog(new VerticalLayout(inviteName, inviteEmail));
-        Button inviteButton = new Button("Invite player", event -> {
-            sendPlayerInvitation(inviteName.getValue(), inviteEmail.getValue());
-            inviteDialog.close();
-        });
-        inviteDialog.setConfirmButton(inviteButton);
-        gameActions.add(new Button("Invite players", event -> {
-            inviteDialog.open();
-        }));
 
     }
 
@@ -448,5 +344,161 @@ public class GMTimeLineView extends VerticalLayout {
                 getEntryCache().delete(entry);
             }
         }
+    }
+    private Button createClearRollsButton() {
+        Button button = new Button("Clear rolls", event -> {
+            clearLogs(EventType.DiceRoll);
+            gmSession.clearRolls();
+            Entry entry = new Entry();
+            entry.setGameId(getGameId());
+            entry.setType(EventType.ClearRolls);
+            Broadcaster.broadcast(entry);
+        });
+        return button;
+    }
+
+    private Button createClearActionsButton() {
+        Button button = new Button("Clear actions", event -> {
+            clearLogs(EventType.GMAction);
+            gmSession.clearActions();
+        });
+        return button;
+    }
+
+    private Button createResetTimeButton() {
+        Button resetTime = new Button("Reset time", event -> {
+            Iterable<TimeLineItem> timeLineItems = getTliCache().findManyByProperty(gameIdProp);
+            timeLineItems.forEach(item -> {
+                item.setTime(0);
+                getTliCache().save(item);
+            });
+            game.setLastEventId(null);
+            getGameCache().save(game);
+            refreshAndBroadcast();
+        });
+        return resetTime;
+    }
+
+    private Button createResetStunButton() {
+
+        Button resetStun = new Button("Reset stun");
+        resetStun.addClickListener(event -> {
+            Iterable<TimeLineItem> timeLineItems = getTliCache().findManyByProperty(gameIdProp);
+            timeLineItems.forEach(item -> {
+                item.setStun(0);
+                getTliCache().save(item);
+            });
+            refreshAndBroadcast();
+        });
+        return resetStun;
+    }
+
+    private Button createAddEventButton() {
+
+        User user = SecurityUtils.getLoggedInUser();
+
+        List<Friendship> friendships = sessionService.getFriendsRepo().findAllByUserOrFriend(user, user);
+
+        Set<Integer> userIds = new HashSet<>();
+        friendships.forEach(friendship -> {
+            userIds.add(friendship.getUser().getId());
+            userIds.add(friendship.getFriend().getId());
+        });
+
+        log.info("building pcs");
+        List<PlayerCharacter> pcs = new ArrayList<>();
+        userIds.forEach(id -> {
+            NameValue nameValue = new NameValue("userId", id);
+            pcs.addAll(cacheService.getPcCache().findManyByProperty(nameValue).stream()
+                    .filter(pc -> pc.getGameId() == null ).collect(Collectors.toList()));
+        });
+
+        NewItemForm newItemForm = new NewItemForm(pcs, cacheService);
+        ConfirmDialog addItemDialog = new ConfirmDialog(newItemForm);
+
+        Button confirmButton = new Button("Add event to "+game.getName(), event -> {
+            TimeLineItem item = new TimeLineItem();
+            if (newItemForm.isPC()) {
+                PlayerCharacter pc = newItemForm.getPC();
+                item.setName(pc.getCharacterAndPlayerName(cacheService.getUserCache().findOneById(pc.getUserId()).get()));
+                item.setPcId(pc.getId());
+                pc.setGameId(getGameId());
+                cacheService.getPcCache().save(pc);
+            }
+            else {
+                item.setName(newItemForm.getName());
+            }
+            item.setStun(newItemForm.getStun());
+            item.setTime(newItemForm.getTime());
+            item.setHidden(newItemForm.getHidden());
+            item.setGameId(game.getId());
+            item.initializeDeltas(cacheService.getAtdRepo().findAll());
+            getTliCache().save(item);
+            addItemDialog.close();
+            refreshAndBroadcast();
+        });
+        addItemDialog.setConfirmButton(confirmButton);
+        addItemDialog.setWidth("500px");
+
+        Button addButton = new Button("Add event");
+        addButton.addClickListener(event -> addItemDialog.open());
+        return addButton;
+    }
+
+    private Button createImportButton() {
+        Button importButton = new Button("Import");
+        List<CollectedItem> collectedItems = sessionService.getCiRepo().findAllByGmId(SecurityUtils.getLoggedInUser().getId());
+        if (!collectedItems.isEmpty()) {
+            Grid<CollectedItem> ciGrid = new Grid<>();
+            ciGrid.setItems(collectedItems);
+            ciGrid.setHeightByRows(true);
+            ciGrid.setClassNameGenerator(item -> "w3-"+item.getColor());
+            ciGrid.getColumns().forEach(itemColumn -> itemColumn.setAutoWidth(true));
+            ciGrid.addColumn(CollectedItem::getName);
+            ciGrid.addComponentColumn((CollectedItem item1) -> new ImportButton(item1, this));
+
+            ConfirmDialog importDialog = new ConfirmDialog(ciGrid);
+            importDialog.setWidth("500px");
+
+            importButton.addClickListener( event -> importDialog.open());
+        }
+        else {
+            importButton.setEnabled(false);
+        }
+        return importButton;
+    }
+
+    private Button createInviteButton() {
+
+        TextField inviteName = new TextField();
+        inviteName.setPlaceholder("name");
+        TextField inviteEmail = new TextField();
+        inviteEmail.setPlaceholder("email");
+
+        ConfirmDialog inviteDialog = new ConfirmDialog(new VerticalLayout(inviteName, inviteEmail));
+        Button inviteButton = new Button("Invite player", event -> {
+            sendPlayerInvitation(inviteName.getValue(), inviteEmail.getValue());
+            inviteDialog.close();
+        });
+        inviteDialog.setConfirmButton(inviteButton);
+        return new Button("Invite", event -> inviteDialog.open());
+    }
+
+    private IntegerField createMaxDiceField() {
+
+        IntegerField maxDice = new IntegerField();
+        maxDice.setLabel("Max dice");
+        maxDice.setValue(game.getMaxDice());
+        maxDice.setHasControls(true);
+        maxDice.setMin(1);
+        maxDice.addValueChangeListener(event -> {
+            game.setMaxDice(event.getValue());
+            cacheService.getGameCache().save(game);
+            Entry entry = new Entry(EventType.MaxDiceUpdate);
+            entry.setGameId(getGameId());
+            Broadcaster.broadcast(entry);
+
+        });
+        return maxDice;
     }
 }

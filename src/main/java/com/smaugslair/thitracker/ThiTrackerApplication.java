@@ -2,6 +2,8 @@ package com.smaugslair.thitracker;
 
 import com.smaugslair.thitracker.data.atd.ActionTimeDefault;
 import com.smaugslair.thitracker.data.atd.AtdRepository;
+import com.smaugslair.thitracker.data.game.Game;
+import com.smaugslair.thitracker.data.game.GameRepository;
 import com.smaugslair.thitracker.data.log.Entry;
 import com.smaugslair.thitracker.data.log.EventType;
 import com.smaugslair.thitracker.data.powers.PowerRepository;
@@ -23,6 +25,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -44,9 +47,8 @@ public class ThiTrackerApplication {
             AtdRepository repository,
             UserRepository userRepository,
             CredentialsRepository credentialsRepository,
-            PowerSetRepository powerSetRepository,
-            PowerRepository powerRepository,
-            ThiProperties thiProperties) {
+            GameRepository gameRepository
+            ) {
         return (args) -> {
 
             if (repository.findAll().isEmpty()) {
@@ -86,56 +88,15 @@ public class ThiTrackerApplication {
                 credentials.setUserId(user.getId());
                 credentials.setEncodedPassword(SecurityUtils.encode("password"));
                 credentialsRepository.save(credentials);
-            }/*
-            if (powerRepository.findAll().isEmpty()) {
+            }
+            List<Game> games = gameRepository.findAll();
+            games.forEach(game -> {
+                if (game.getMaxDice() == null) {
+                    game.setMaxDice(10);
+                    gameRepository.save(game);
+                }
+            });
 
-                Power strength = new Power();
-                strength.setName("Strength");
-                strength.setSsid("str");
-                strength.setMakTaken("maxStr");
-                strength.setAbilityMods("Str:1");
-                strength.addToPowerSets("Animal", 3);
-                strength.addToPowerSets("Combo", 4);
-
-                Power speed = new Power();
-                speed.setName("Speed");
-                speed.setSsid("spe");
-                speed.setMakTaken("maxSpe");
-                speed.setAbilityMods("Spe:1");
-                speed.addToPowerSets("Flash", 2);
-                speed.addToPowerSets("Combo", 2);
-
-                PowerSet animal = new PowerSet();
-                animal.setName("Animal");
-                animal.setSsid("animal");
-                animal.setAbilityText("ability");
-                animal.setOpenText("open");
-                animal.setPowersText("powers");
-                animal.setAbilityMods("Str:1");
-
-                PowerSet flash = new PowerSet();
-                flash.setName("Flash");
-                flash.setSsid("flash");
-                flash.setAbilityText("ability");
-                flash.setOpenText("open");
-                flash.setPowersText("powers");
-                flash.setAbilityMods("Spe:1");
-
-                PowerSet combo = new PowerSet();
-                combo.setName("Combo");
-                combo.setSsid("combo");
-                combo.setAbilityText("ability");
-                combo.setOpenText("open");
-                combo.setPowersText("powers");
-                combo.setAbilityMods("Spe:1|Str:1");
-
-                powerRepository.save(speed);
-                powerRepository.save(strength);
-
-                powerSetRepository.save(animal);
-                powerSetRepository.save(flash);
-                powerSetRepository.save(combo);
-            }*/
             final Entry ping = new Entry();
             ping.setType(EventType.Ping);
             ScheduledExecutorService keepAlive = Executors.newScheduledThreadPool(1);
