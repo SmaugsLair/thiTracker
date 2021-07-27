@@ -40,7 +40,10 @@ public class PowerSetDetail extends VerticalLayout {
             Grid<Power> grid = new Grid<>();
             grid.setItems(powers);
 
-            grid.addColumn(new NativeButtonRenderer<>("+", item -> grid.setDetailsVisible(item, !grid.isDetailsVisible(item)))).setWidth("50px");
+
+            grid.addColumn(new NativeButtonRenderer<>(
+                    item -> grid.isDetailsVisible(item) ? "-" : "+",
+                    item -> grid.setDetailsVisible(item, !grid.isDetailsVisible(item))));
             grid.addColumn(Power::getName).setHeader("Name");
             grid.addColumn(Power::getShortDescr).setHeader("Short Description");
             grid.addColumn(Power::getPrereq).setHeader("Prerequisites");

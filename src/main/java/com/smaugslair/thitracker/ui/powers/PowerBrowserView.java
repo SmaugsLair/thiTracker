@@ -32,7 +32,9 @@ public class PowerBrowserView extends Grid<Power> {
         dataProvider.setFilter(power -> filterObject.test(power));
 
         //setDetailsVisibleOnClick(true);
-        addColumn(new NativeButtonRenderer<>("+", item -> setDetailsVisible(item, !isDetailsVisible(item))));
+        addColumn(new NativeButtonRenderer<>(
+                item -> isDetailsVisible(item) ? "-" : "+",
+                item -> setDetailsVisible(item, !isDetailsVisible(item))));
        /* addColumn(new ComponentRenderer<>(power -> {
             return new Button("+", event -> {
                 boolean visible = !isDetailsVisible(power);
