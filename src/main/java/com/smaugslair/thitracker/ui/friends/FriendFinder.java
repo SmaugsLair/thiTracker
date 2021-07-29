@@ -5,7 +5,6 @@ import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.security.SecurityUtils;
 import com.smaugslair.thitracker.services.CacheService;
 import com.smaugslair.thitracker.services.SessionService;
-import com.smaugslair.thitracker.util.NameValue;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -58,37 +57,36 @@ public class FriendFinder extends VerticalLayout {
 
         Button button = new Button("Find", event -> {
             request.setVisible(false);
-            NameValue nameValue = new NameValue("name", nameField.getValue());
-            Optional<User> user = cacheService.getUserCache().findOneByProperty(nameValue);
-            if (user.isPresent()) {
-                if (user.get().equals(self)) {
+            User user = sessionService.getUserRepository().findUserByName(nameField.getValue());
+            if (user != null) {
+                if (user.equals(self)) {
                     message.setText("That's you, fool!");
                     return;
                 }
-                if (!user.get().getFriendCode().equals(friendCode.getValue())) {
+                if (!user.getFriendCode().equals(friendCode.getValue())) {
                     message.setText("Not found");
                 }
-                Optional<Friendship> friendship = sessionService.getFriendsRepo().findByUserAndFriend(user.get(), self);
+                Optional<Friendship> friendship = sessionService.getFriendsRepo().findByUserAndFriend(user, self);
                 if (friendship.isPresent()) {
                     if (friendship.get().getAccepted()) {
-                        message.setText("Already friends with " + user.get().getDisplayName());
+                        message.setText("Already friends with " + user.getDisplayName());
                     }
                     else {
-                        message.setText(user.get().getDisplayName()+ " has sent a request to you, check your friends lists to accept");
+                        message.setText(user.getDisplayName()+ " has sent a request to you, check your friends lists to accept");
                     }
                     return;
                 }
-                friendship = sessionService.getFriendsRepo().findByUserAndFriend(self, user.get());
+                friendship = sessionService.getFriendsRepo().findByUserAndFriend(self, user);
                 if (friendship.isPresent()) {
                     if (friendship.get().getAccepted()) {
-                        message.setText("Already friends with " + user.get().getDisplayName());
+                        message.setText("Already friends with " + user.getDisplayName());
                     }
                     else {
-                        message.setText("Still waiting for " + user.get().getDisplayName()+" to accept");
+                        message.setText("Still waiting for " + user.getDisplayName()+" to accept");
                     }
                     return;
                 }
-                friend = user.get();
+                friend = user;
                 message.setText("Found! " +friend.getDisplayName());
                 request.setText("Send friend request to " + friend.getDisplayName());
                 request.setVisible(true);

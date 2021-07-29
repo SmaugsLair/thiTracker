@@ -3,26 +3,22 @@ package com.smaugslair.thitracker.ui.players;
 import com.smaugslair.thitracker.data.log.Entry;
 import com.smaugslair.thitracker.data.log.EventType;
 import com.smaugslair.thitracker.data.pc.PlayerCharacter;
+import com.smaugslair.thitracker.data.pc.Trait;
+import com.smaugslair.thitracker.data.pc.TraitType;
 import com.smaugslair.thitracker.services.CacheService;
 import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.websockets.Broadcaster;
 import com.smaugslair.thitracker.websockets.RegisteredVerticalLayout;
-import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.DetachEvent;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.progressbar.ProgressBarVariant;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.shared.Registration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,8 +51,11 @@ public class DiceRoller extends RegisteredVerticalLayout {
 
     private Button preHeroRollButton = new Button("Hero roll 4");
 
+    private Dialog traitRollDialog = new Dialog();
+
     Button postHeroRollButton = new Button("Roll 1 more, drop lowest",
-            event -> rollAgain(TokenType.HERO));
+            event -> showTraitRollDialog(TraitType.Hero, false)); //rollAgain(TokenType.HERO));
+
 
     private List<Integer> dice = new ArrayList<>();
     private int sum = 0;
@@ -101,7 +100,7 @@ public class DiceRoller extends RegisteredVerticalLayout {
         rollLayout.add(topLine);
 
         Button rollButton = new Button("Roll 3");
-        preHeroRollButton.setEnabled(pc.getHeroPoints() > 0);
+        preHeroRollButton.setEnabled(pc.isHeroPointsAvailable());
 
 
         VerticalLayout normal = new VerticalLayout();
@@ -136,8 +135,8 @@ public class DiceRoller extends RegisteredVerticalLayout {
             expectedHeroValue.setText(exp_val+calcExpected(d10s.getValue()+1));
         });
 
-        rollButton.addClickListener(event -> initialRoll(false));
-        preHeroRollButton.addClickListener(event -> initialRoll(true));
+        rollButton.addClickListener(event -> initialRoll(null));
+        preHeroRollButton.addClickListener(event -> showTraitRollDialog(TraitType.Hero, true));
 
         add(rollLayout);
 
@@ -151,9 +150,9 @@ public class DiceRoller extends RegisteredVerticalLayout {
         resultLayout.addFormItem(droppedText, droppedLabel);
 
         Button dramaRoll = new Button("Roll 2 more, drop lowest",
-                event -> rollAgain(TokenType.DRAMA));
+                event -> showTraitRollDialog(TraitType.Drama, false));
         resultLayout.addFormItem(postHeroRollButton, "Spend Hero Token");
-        postHeroRollButton.setEnabled(pc.getHeroPoints() > 0);
+        postHeroRollButton.setEnabled(pc.isHeroPointsAvailable());
         resultLayout.addFormItem(dramaRoll, "Spend Drama Token");
 
         add(resultLayout);
@@ -161,7 +160,6 @@ public class DiceRoller extends RegisteredVerticalLayout {
 
     private int captureD10roll() {
         int roll = (int)(Math.random() * 10) + 1;
-        //log.info("rolled:"+roll);
         sum += roll;
         dice.add(roll);
         return roll;
@@ -188,10 +186,13 @@ public class DiceRoller extends RegisteredVerticalLayout {
         return String.valueOf(dice * 5.5);
     }
 
-    private void initialRoll(boolean hero) {
+    private void initialRoll(Trait heroTrait) {
         dice.clear();
         sum = 0;
-        int total = d10s.getValue() + (hero ? 1 : 0);
+        int total = d10s.getValue();
+        if (heroTrait != null) {
+            ++total;
+        }
         for (int count = 0; count < total; ++count) {
             captureD10roll();
         }
@@ -200,17 +201,17 @@ public class DiceRoller extends RegisteredVerticalLayout {
         while (dice.size() > maxDice.getValue()) {
             dropped.add(dropLowest());
         }
-        prepareResults(dropped, hero?"HERO":null);
+        prepareResults(dropped, heroTrait);
 
-        if (hero) {
-            spendToken(TokenType.HERO);
+        if (heroTrait != null) {
+            spendToken(heroTrait);
         }
 
         resultLayout.setVisible(true);
 
     }
 
-    private void prepareResults(List<Integer> dropped, String rollType) {
+    private void prepareResults(List<Integer> dropped, Trait trait) {
 
         double percent = calcPercent(sum, d10s.getValue(), maxDice.getValue());
         progressBar.setValue(percent);
@@ -226,11 +227,12 @@ public class DiceRoller extends RegisteredVerticalLayout {
         droppedText.setVisible(!dropped.isEmpty());
         droppedText.setValue(dropped.toString());
 
+        PlayerCharacter pc = sessionService.getPc();
         StringBuffer sb = new StringBuffer();
-        sb.append(sessionService.getPc().getName()).append(" rolled ").append(sum);
+        sb.append(pc.getName()).append(" rolled ").append(sum);
         sb.append("  ").append(dice);
-        if (rollType != null) {
-            sb.append(" ").append(rollType);
+        if (trait != null) {
+            sb.append(" ").append(trait.getType()).append(":").append(trait.getName());
         }
 
 
@@ -245,27 +247,28 @@ public class DiceRoller extends RegisteredVerticalLayout {
 
     }
 
-    private void spendToken(TokenType tokenType) {
+    private void spendToken(Trait trait) {
 
         PlayerCharacter pc = sessionService.getPc();
-        if (tokenType.equals(TokenType.HERO)) {
-            pc.setHeroPoints(pc.getHeroPoints()-1);
+        if (TraitType.Hero.equals(trait.getType())) {
+            trait.setPoints(trait.getPoints()-1);
         }
         else {
-            pc.setDramaPoints(pc.getDramaPoints()+1);
+            trait.setPoints(trait.getPoints()+1);
         }
-        cacheService.getPcCache().save(pc);
+        pc = cacheService.getPcCache().save(pc);
+        sessionService.setPc(pc);
         Entry entry = new Entry();
         entry.setPcId(pc.getId());
         entry.setGameId(sessionService.getGameId());
-        entry.setType(EventType.PCUpdate);
+        entry.setType(EventType.PlayerPCUpdate);
         Broadcaster.broadcast(entry);
     }
 
 
-    private void rollAgain(TokenType tokenType) {
+    private void rollAgain(Trait trait) {
         captureD10roll();
-        if (tokenType.equals(TokenType.DRAMA)) {
+        if (TraitType.Drama.equals(trait.getType())) {
             captureD10roll();
         }
         Collections.sort(dice);
@@ -274,13 +277,13 @@ public class DiceRoller extends RegisteredVerticalLayout {
         while (dice.size() > maxDice.getValue()) {
             dropped.add(dropLowest());
         }
-        prepareResults(dropped, tokenType.toString());
-        spendToken(tokenType);
+        prepareResults(dropped, trait);
+        spendToken(trait);
     }
 
     private void handlePcUpdates() {
         sessionService.refreshPc();
-        boolean hasHeroPoints = sessionService.getPc().getHeroPoints() > 0;
+        boolean hasHeroPoints = sessionService.getPc().isHeroPointsAvailable();
         postHeroRollButton.setEnabled(hasHeroPoints);
         preHeroRollButton.setEnabled(hasHeroPoints);
 
@@ -288,16 +291,21 @@ public class DiceRoller extends RegisteredVerticalLayout {
 
     @Override
     protected void handleMessage(Entry entry) {
-        if (EventType.PCUpdate.equals(entry.getType())) {
-            if (entry.getPcId().equals(sessionService.getPc().getId())) {
-                handlePcUpdates();
-            }
+
+        switch (entry.getType()) {
+            case GMPCUpdate:
+            case PlayerPCUpdate:
+                if (entry.getPcId().equals(sessionService.getPc().getId())) {
+                    handlePcUpdates();
+                }
+                break;
+            case MaxDiceUpdate:
+                if (entry.getGameId().equals(sessionService.getGameId())) {
+                    maxDice.setValue(getMaxDiceForGame());
+                }
+                break;
         }
-        else if (EventType.MaxDiceUpdate.equals(entry.getType())) {
-            if (entry.getGameId().equals(sessionService.getGameId())) {
-                maxDice.setValue(getMaxDiceForGame());
-            }
-        }
+
     }
 
     private Integer getMaxDiceForGame() {
@@ -305,4 +313,25 @@ public class DiceRoller extends RegisteredVerticalLayout {
                 .get().getMaxDice();
     }
 
+    private void showTraitRollDialog(TraitType type, boolean initial) {
+        traitRollDialog.removeAll();
+        VerticalLayout buttonColumn = new VerticalLayout();
+        traitRollDialog.add(buttonColumn);
+        PlayerCharacter pc = sessionService.getPc();
+        pc.getTraits().stream().filter(trait -> trait.getType().equals(type)).forEach(trait -> {
+            //Drama always, Hero if points available
+            if (TraitType.Drama.equals(trait.getType()) || trait.getPoints() > 0) {
+                buttonColumn.add(new Button("Spend " + trait.getName() + " point", event -> {
+                    if (initial) {
+                        initialRoll(trait);
+                    }
+                    else {
+                        rollAgain(trait);
+                    }
+                    traitRollDialog.close();
+                }));
+            }
+        });
+        traitRollDialog.open();
+    }
 }

@@ -1,17 +1,12 @@
 package com.smaugslair.thitracker.services;
 
-import com.smaugslair.thitracker.data.atd.AtdRepository;
-import com.smaugslair.thitracker.data.game.Game;
-import com.smaugslair.thitracker.data.game.GameRepository;
-import com.smaugslair.thitracker.data.game.TimeLineItem;
-import com.smaugslair.thitracker.data.game.TimeLineItemRepository;
-import com.smaugslair.thitracker.data.log.EntryRepository;
 import com.smaugslair.thitracker.data.pc.PlayerCharacter;
-import com.smaugslair.thitracker.data.pc.PlayerCharacterRepository;
 import com.smaugslair.thitracker.data.powers.PowerRepository;
 import com.smaugslair.thitracker.data.powers.PowerSetRepository;
-import com.smaugslair.thitracker.data.user.*;
-import com.smaugslair.thitracker.util.JPACache;
+import com.smaugslair.thitracker.data.user.CredentialsRepository;
+import com.smaugslair.thitracker.data.user.FriendshipRepository;
+import com.smaugslair.thitracker.data.user.PasswordResetRepository;
+import com.smaugslair.thitracker.data.user.UserRepository;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -56,8 +51,8 @@ public class SessionService {
     private JavaMailSender javaMailSender;
     private ThiProperties thiProperties;
     private PowersCache powersCache;
-    private CollectedItemRepository ciRepo;
     private FriendshipRepository friendsRepo;
+    private UserRepository userRepository;
 
 
     public CredentialsRepository getCredRepo() {
@@ -66,16 +61,6 @@ public class SessionService {
     @Autowired
     public void setCredRepo(CredentialsRepository credRepo) {
         this.credRepo = credRepo;
-    }
-
-
-
-    public CollectedItemRepository getCiRepo() {
-        return ciRepo;
-    }
-    @Autowired
-    public void setCiRepo(CollectedItemRepository ciRepo) {
-        this.ciRepo = ciRepo;
     }
 
     public FriendshipRepository getFriendsRepo() {
@@ -116,6 +101,14 @@ public class SessionService {
     @Autowired
     public void setPasswordResetRepo(PasswordResetRepository passwordResetRepo) {
         this.passwordResetRepo = passwordResetRepo;
+    }
+
+    public UserRepository getUserRepository() {
+        return userRepository;
+    }
+    @Autowired
+    public void setUserRepository(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     public ThiProperties getThiProperties() {

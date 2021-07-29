@@ -23,6 +23,6 @@ public class TokenButton extends Icon {
             setVisible(false);
             return;
         }
-        addClickListener(event -> gmTimeLineView.openTokenDialog(item));
+        addClickListener(event -> gmTimeLineView.showHeroDetails(item));
     }
 }

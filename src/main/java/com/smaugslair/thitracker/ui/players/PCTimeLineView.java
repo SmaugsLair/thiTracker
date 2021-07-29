@@ -50,7 +50,7 @@ public class PCTimeLineView extends RegisteredVerticalLayout {
             return;
         }
 
-        User gm = cacheService.getUserCache().findOneById(game.getGameMasterId()).get();
+        User gm = sessionService.getUserRepository().findById(game.getGameMasterId()).get();
 
         add( new H3("Game: "+game.getName()+ " by "+ gm.getDisplayName()));
 

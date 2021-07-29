@@ -2,7 +2,9 @@ package com.smaugslair.thitracker.ui.games;
 
 import com.smaugslair.thitracker.data.atd.ActionTime;
 import com.smaugslair.thitracker.data.atd.ActionTimeDefault;
-import com.smaugslair.thitracker.data.game.*;
+import com.smaugslair.thitracker.data.game.ActionTimeDelta;
+import com.smaugslair.thitracker.data.game.Game;
+import com.smaugslair.thitracker.data.game.TimeLineItem;
 import com.smaugslair.thitracker.data.log.Entry;
 import com.smaugslair.thitracker.data.log.EventType;
 import com.smaugslair.thitracker.data.pc.PlayerCharacter;
@@ -12,10 +14,9 @@ import com.smaugslair.thitracker.data.user.Friendship;
 import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.security.SecurityUtils;
 import com.smaugslair.thitracker.services.CacheService;
-import com.smaugslair.thitracker.ui.components.ConfirmDialog;
-import com.smaugslair.thitracker.ui.games.tl.ImportButton;
-import com.smaugslair.thitracker.ui.games.tl.*;
 import com.smaugslair.thitracker.services.SessionService;
+import com.smaugslair.thitracker.ui.components.ConfirmDialog;
+import com.smaugslair.thitracker.ui.games.tl.*;
 import com.smaugslair.thitracker.util.JPACache;
 import com.smaugslair.thitracker.util.NameValue;
 import com.smaugslair.thitracker.websockets.Broadcaster;
@@ -56,7 +57,6 @@ public class GMTimeLineView extends VerticalLayout {
     private Accordion gameAccordion;
     private boolean accordionOpen = false;
 
-    private TokenDialog tokenDialog = new TokenDialog(this);
 
 
     public GMTimeLineView(GMSession gmSession, SessionService sessionService, CacheService cacheService) {
@@ -117,7 +117,6 @@ public class GMTimeLineView extends VerticalLayout {
     }
 
     public void init() {
-
         game = confirmData();
         if (game == null) {
             return;
@@ -156,12 +155,17 @@ public class GMTimeLineView extends VerticalLayout {
             lastEvent = getTliCache().findOneById(game.getLastEventId()).orElse(null);
         }
 
+        List<ActionTimeDefault> atds = getAtds();
+
         for (TimeLineItem item : items) {
             if (lastEvent != null) {
                 item.setReactTime(lastEvent.getTime() - item.getTime());
             }
+            //Clearing here because of caching
+            item.getActionTimes().clear();
+            //item.setActionTime(null);
             item.getActionTimes().add(ActionSelect.unselectedActionTime);
-            for (ActionTimeDefault atd: cacheService.getAtdRepo().findAll()) {
+            for (ActionTimeDefault atd: atds) {
                 item.getActionTimes().add(
                         new ActionTime(atd.getName(),
                                 atd.getTime() + (atd.isStunable() ? item.getStun() : 0)
@@ -174,7 +178,6 @@ public class GMTimeLineView extends VerticalLayout {
         grid.setItems(items);
 
         grid.addComponentColumn(item -> new NameField(item, this)).setHeader("Character/NPC/Event");
-        grid.addComponentColumn(item -> new TokenButton(item, this));
         grid.addComponentColumn(item -> new StunField(item, this)).setHeader("Stun");
         grid.addComponentColumn(item -> new ActionSelect(item, this));
         grid.addComponentColumn(item -> new TimeField(item, this)).setHeader("Time");
@@ -188,6 +191,8 @@ public class GMTimeLineView extends VerticalLayout {
 
         grid.setClassNameGenerator(item -> "w3-"+item.getColor());
         grid.getColumns().forEach(itemColumn -> itemColumn.setAutoWidth(true));
+
+        grid.addItemClickListener(event -> showHeroDetails(event.getItem()));
 
 
         ColorDialog colorDialog = new ColorDialog(this);
@@ -239,7 +244,7 @@ public class GMTimeLineView extends VerticalLayout {
                     collectedDelta.setName(delta.getName());
                     collectedItem.getDeltas().add(collectedDelta);
                 }
-                sessionService.getCiRepo().save(collectedItem);
+                cacheService.getCiRepo().save(collectedItem);
                 Component oldButton = buttonBarTop.getComponentAt(1);
                 buttonBarTop.replace(oldButton, createImportButton());
                 Notification.show("Saved "+collectedItem.getName()+" to your collection",
@@ -305,22 +310,24 @@ public class GMTimeLineView extends VerticalLayout {
         return cacheService.getEntryCache();
     }
 
-    public void openTokenDialog(TimeLineItem item) {
+    public void showHeroDetails(TimeLineItem item) {
         if (item.getPcId() != null) {
             Optional<PlayerCharacter> opc = cacheService.getPcCache().findOneById(item.getPcId());
             if (opc.isPresent()) {
-                tokenDialog.setPc(opc.get());
-                tokenDialog.open();
+                PlayerCharacter pc = opc.get();
+                User user = sessionService.getUserRepository().findById(pc.getUserId()).get();
+                gmSession.setHero(pc, user);
+                return;
             }
         }
-
-
+        gmSession.setHero(null, null);
     }
 
     public void updatePc(PlayerCharacter pc) {
+        log.info("updatePc");
         cacheService.getPcCache().save(pc);
         Entry entry = new Entry();
-        entry.setType(EventType.PCUpdate);
+        entry.setType(EventType.GMPCUpdate);
         entry.setPcId(pc.getId());
         entry.setGameId(getGameId());
         Broadcaster.broadcast(entry);
@@ -330,10 +337,6 @@ public class GMTimeLineView extends VerticalLayout {
 
     public List<ActionTimeDefault> getAtds() {
         return cacheService.getAtdRepo().findAll();
-    }
-
-    public JPACache<User, Integer> getUserCache() {
-        return cacheService.getUserCache();
     }
 
     private void clearLogs(EventType type) {
@@ -394,18 +397,17 @@ public class GMTimeLineView extends VerticalLayout {
     }
 
     private Button createAddEventButton() {
-
         User user = SecurityUtils.getLoggedInUser();
 
         List<Friendship> friendships = sessionService.getFriendsRepo().findAllByUserOrFriend(user, user);
 
         Set<Integer> userIds = new HashSet<>();
+        userIds.add(user.getId());
         friendships.forEach(friendship -> {
             userIds.add(friendship.getUser().getId());
             userIds.add(friendship.getFriend().getId());
         });
 
-        log.info("building pcs");
         List<PlayerCharacter> pcs = new ArrayList<>();
         userIds.forEach(id -> {
             NameValue nameValue = new NameValue("userId", id);
@@ -413,14 +415,14 @@ public class GMTimeLineView extends VerticalLayout {
                     .filter(pc -> pc.getGameId() == null ).collect(Collectors.toList()));
         });
 
-        NewItemForm newItemForm = new NewItemForm(pcs, cacheService);
+        NewItemForm newItemForm = new NewItemForm(pcs, sessionService);
         ConfirmDialog addItemDialog = new ConfirmDialog(newItemForm);
 
         Button confirmButton = new Button("Add event to "+game.getName(), event -> {
             TimeLineItem item = new TimeLineItem();
             if (newItemForm.isPC()) {
                 PlayerCharacter pc = newItemForm.getPC();
-                item.setName(pc.getCharacterAndPlayerName(cacheService.getUserCache().findOneById(pc.getUserId()).get()));
+                item.setName(pc.getCharacterAndPlayerName(sessionService.getUserRepository().findById(pc.getUserId()).get()));
                 item.setPcId(pc.getId());
                 pc.setGameId(getGameId());
                 cacheService.getPcCache().save(pc);
@@ -432,7 +434,7 @@ public class GMTimeLineView extends VerticalLayout {
             item.setTime(newItemForm.getTime());
             item.setHidden(newItemForm.getHidden());
             item.setGameId(game.getId());
-            item.initializeDeltas(cacheService.getAtdRepo().findAll());
+            item.initializeDeltas(getAtds());
             getTliCache().save(item);
             addItemDialog.close();
             refreshAndBroadcast();
@@ -447,7 +449,7 @@ public class GMTimeLineView extends VerticalLayout {
 
     private Button createImportButton() {
         Button importButton = new Button("Import");
-        List<CollectedItem> collectedItems = sessionService.getCiRepo().findAllByGmId(SecurityUtils.getLoggedInUser().getId());
+        List<CollectedItem> collectedItems = cacheService.getCiRepo().findAllByGmId(SecurityUtils.getLoggedInUser().getId());
         if (!collectedItems.isEmpty()) {
             Grid<CollectedItem> ciGrid = new Grid<>();
             ciGrid.setItems(collectedItems);

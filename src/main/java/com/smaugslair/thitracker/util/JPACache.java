@@ -2,8 +2,6 @@ package com.smaugslair.thitracker.util;
 
 import com.smaugslair.thitracker.data.ThiEntity;
 import org.apache.commons.beanutils.PropertyUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Example;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -25,6 +23,9 @@ public class JPACache<T extends ThiEntity, ID extends Number> {
     }
 
     public Optional<T> findOneById(ID id) {
+        if (id == null) {
+            return Optional.empty();
+        }
         //log.info("findOneById: id="+id+", class:"+starter.getClass().getSimpleName());
         if (map.containsKey(id)) {
             //log.info("found one cached");

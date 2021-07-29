@@ -9,24 +9,25 @@ import com.smaugslair.thitracker.data.log.Entry;
 import com.smaugslair.thitracker.data.log.EntryRepository;
 import com.smaugslair.thitracker.data.pc.PlayerCharacter;
 import com.smaugslair.thitracker.data.pc.PlayerCharacterRepository;
-import com.smaugslair.thitracker.data.powers.PowerRepository;
-import com.smaugslair.thitracker.data.powers.PowerSetRepository;
-import com.smaugslair.thitracker.data.user.*;
+import com.smaugslair.thitracker.data.user.CollectedItemRepository;
 import com.smaugslair.thitracker.util.JPACache;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
+
+/**
+ * CacheService is meant to hold repos that have frequent read/writes.
+ */
 
 @Component
 public class CacheService {
 
     private JPACache<TimeLineItem, Long> tliCache;
-    private JPACache<User, Integer> userCache;
     private JPACache<Game, Long> gameCache;
     private JPACache<PlayerCharacter, Long> pcCache;
     private JPACache<Entry, Long> entryCache;
 
     private AtdRepository atdRepo;
+    private CollectedItemRepository ciRepo;
 
 
     public AtdRepository getAtdRepo() {
@@ -46,14 +47,6 @@ public class CacheService {
         tliCache = new JPACache<>(new TimeLineItem(), tliRepo);
     }
 
-    @Autowired
-    public void setUserRepo(UserRepository userRepo) {
-        userCache = new JPACache<>(new User(), userRepo);
-    }
-    public JPACache<User, Integer> getUserCache() {
-        return userCache;
-    }
-
     public JPACache<Game, Long> getGameCache() {
         return gameCache;
     }
@@ -62,6 +55,13 @@ public class CacheService {
         gameCache = new JPACache<>(new Game(), gameRepo);
     }
 
+    @Autowired
+    public void setCiRepo(CollectedItemRepository ciRepo) {
+        this.ciRepo = ciRepo;
+    }
+    public CollectedItemRepository getCiRepo() {
+        return ciRepo;
+    }
 
     public JPACache<Entry, Long> getEntryCache() {
         return entryCache;

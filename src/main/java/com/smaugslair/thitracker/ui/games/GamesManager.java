@@ -14,6 +14,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.data.validator.StringLengthValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,10 +66,16 @@ public class GamesManager extends VerticalLayout {
 
 
         ValidTextField gameName = new ValidTextField();
+        gameName.setLabel("Game name");
+        IntegerField maxDice = new IntegerField();
+        maxDice.setHasControls(true);
+        maxDice.setValue(10);
+        maxDice.setMin(1);
+        maxDice.setLabel("Max dice");
         gameName.addValidator(new StringLengthValidator("2 char min", 2, 40));
         gameName.setPlaceholder("Game name");
 
-        ConfirmDialog dialog = new ConfirmDialog(gameName);
+        ConfirmDialog dialog = new ConfirmDialog(new VerticalLayout(gameName, maxDice));
 
 
         Button confirmButton = new Button("Save", event -> {
@@ -76,6 +83,7 @@ public class GamesManager extends VerticalLayout {
                 Game game = new Game();
                 game.setName(gameName.getValue());
                 game.setGameMasterId(SecurityUtils.getLoggedInUser().getId());
+                game.setMaxDice(maxDice.getValue());
                 cacheService.getGameCache().save(game);
                 dialog.close();
                 refresh();

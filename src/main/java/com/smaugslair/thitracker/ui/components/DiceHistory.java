@@ -5,14 +5,8 @@ import com.smaugslair.thitracker.data.log.EventType;
 import com.smaugslair.thitracker.services.CacheService;
 import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.util.NameValue;
-import com.smaugslair.thitracker.websockets.Broadcaster;
 import com.smaugslair.thitracker.websockets.RegisteredVerticalLayout;
-import com.vaadin.flow.component.AttachEvent;
-import com.vaadin.flow.component.DetachEvent;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.shared.Registration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,4 +48,5 @@ public class DiceHistory extends RegisteredVerticalLayout {
         }
 
     }
+
 }

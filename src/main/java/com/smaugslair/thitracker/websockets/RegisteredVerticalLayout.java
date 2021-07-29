@@ -1,7 +1,6 @@
 package com.smaugslair.thitracker.websockets;
 
 import com.smaugslair.thitracker.data.log.Entry;
-import com.smaugslair.thitracker.data.log.EventType;
 import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
@@ -9,10 +8,6 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.shared.Registration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 /**
  A VerticalLayout that registers itself with the Broadcaster
@@ -23,14 +18,14 @@ public abstract class RegisteredVerticalLayout extends VerticalLayout {
 
     private Registration tlbReg;
 
-    final Entry ping = new Entry(EventType.Ping);
+    //final Entry ping = new Entry(EventType.Ping);
 
-
+/*
     ScheduledExecutorService keepAlive = Executors.newScheduledThreadPool(1);
     Runnable r = () -> {
         //log.info(this.getClass().getSimpleName()+" ---- ping -------");
         Broadcaster.broadcast(ping);
-    };
+    };*/
 
     @Override
     protected void onAttach(AttachEvent attachEvent) {
@@ -38,12 +33,10 @@ public abstract class RegisteredVerticalLayout extends VerticalLayout {
         UI ui = attachEvent.getUI();
         tlbReg = Broadcaster.register(entry -> {
             ui.access(() -> {
-                if (!EventType.Ping.equals(entry.getType())) {
-                    handleMessage(entry);
-                }
+                handleMessage(entry);
             });
         });
-        keepAlive.scheduleAtFixedRate(r, 0, 50, TimeUnit.SECONDS);
+        //keepAlive.scheduleAtFixedRate(r, 0, 50, TimeUnit.SECONDS);
     }
 
     @Override
@@ -51,7 +44,7 @@ public abstract class RegisteredVerticalLayout extends VerticalLayout {
         //log.info("Detaching "+this.getClass().getSimpleName());
         tlbReg.remove();
         tlbReg = null;
-        keepAlive.shutdown();
+        //keepAlive.shutdown();
     }
 
     protected abstract void handleMessage(Entry entry);

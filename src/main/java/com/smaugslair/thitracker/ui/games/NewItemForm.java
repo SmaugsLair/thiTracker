@@ -1,7 +1,7 @@
 package com.smaugslair.thitracker.ui.games;
 
 import com.smaugslair.thitracker.data.pc.PlayerCharacter;
-import com.smaugslair.thitracker.services.CacheService;
+import com.smaugslair.thitracker.services.SessionService;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
@@ -21,7 +21,7 @@ public class NewItemForm extends FormLayout {
     private final IntegerField timeField;
     private final Checkbox hidden;
 
-    public NewItemForm(List<PlayerCharacter> pcs, CacheService cacheService) {
+    public NewItemForm(List<PlayerCharacter> pcs, SessionService sessionService) {
 
         radioGroup = new RadioButtonGroup<>();
         radioGroup.setItems("PC", "Other");
@@ -32,7 +32,7 @@ public class NewItemForm extends FormLayout {
         pcField = new Select<>();
         pcField.setItemLabelGenerator(item -> {
             return item.getCharacterAndPlayerName(
-                    cacheService.getUserCache().findOneById(item.getUserId()).get());
+                    sessionService.getUserRepository().findById(item.getUserId()).get());
         });
 
         otherField = new TextField();

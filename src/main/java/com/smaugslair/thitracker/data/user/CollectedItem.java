@@ -1,11 +1,13 @@
 package com.smaugslair.thitracker.data.user;
 
+import com.smaugslair.thitracker.data.ThiEntity;
+
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-public class CollectedItem {
+public class CollectedItem implements ThiEntity {
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
@@ -62,5 +64,12 @@ public class CollectedItem {
 
     public void setDeltas(Set<CollectedDelta> deltas) {
         this.deltas = deltas;
+    }
+
+    @Override
+    public CollectedItem createEmptyObject() {
+        CollectedItem item = new CollectedItem();
+        item.deltas = null;
+        return item;
     }
 }

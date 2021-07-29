@@ -2,19 +2,12 @@ package com.smaugslair.thitracker;
 
 import com.smaugslair.thitracker.data.atd.ActionTimeDefault;
 import com.smaugslair.thitracker.data.atd.AtdRepository;
-import com.smaugslair.thitracker.data.game.Game;
-import com.smaugslair.thitracker.data.game.GameRepository;
-import com.smaugslair.thitracker.data.log.Entry;
-import com.smaugslair.thitracker.data.log.EventType;
-import com.smaugslair.thitracker.data.powers.PowerRepository;
-import com.smaugslair.thitracker.data.powers.PowerSetRepository;
 import com.smaugslair.thitracker.data.user.Credentials;
 import com.smaugslair.thitracker.data.user.CredentialsRepository;
 import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.data.user.UserRepository;
 import com.smaugslair.thitracker.security.SecurityUtils;
 import com.smaugslair.thitracker.services.ThiProperties;
-import com.smaugslair.thitracker.websockets.Broadcaster;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -24,11 +17,6 @@ import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConf
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
-
-import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 
 @SpringBootApplication(exclude = ErrorMvcAutoConfiguration.class)
@@ -46,8 +34,7 @@ public class ThiTrackerApplication {
     public CommandLineRunner loadData(
             AtdRepository repository,
             UserRepository userRepository,
-            CredentialsRepository credentialsRepository,
-            GameRepository gameRepository
+            CredentialsRepository credentialsRepository
             ) {
         return (args) -> {
 
@@ -88,15 +75,15 @@ public class ThiTrackerApplication {
                 credentials.setUserId(user.getId());
                 credentials.setEncodedPassword(SecurityUtils.encode("password"));
                 credentialsRepository.save(credentials);
-            }
+            }/*
             List<Game> games = gameRepository.findAll();
             games.forEach(game -> {
                 if (game.getMaxDice() == null) {
                     game.setMaxDice(10);
                     gameRepository.save(game);
                 }
-            });
-
+            });*/
+/*
             final Entry ping = new Entry();
             ping.setType(EventType.Ping);
             ScheduledExecutorService keepAlive = Executors.newScheduledThreadPool(1);
@@ -104,7 +91,7 @@ public class ThiTrackerApplication {
                 Broadcaster.broadcast(ping);
                 //log.info("pinging websockets");
             };
-            keepAlive.scheduleAtFixedRate(r, 0, 50, TimeUnit.SECONDS);
+            keepAlive.scheduleAtFixedRate(r, 0, 50, TimeUnit.SECONDS);*/
 
 
         };

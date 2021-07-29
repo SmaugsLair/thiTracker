@@ -4,6 +4,8 @@ import com.smaugslair.thitracker.data.ThiEntity;
 import com.smaugslair.thitracker.data.user.User;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class PlayerCharacter implements ThiEntity {
@@ -24,11 +26,10 @@ public class PlayerCharacter implements ThiEntity {
     @Column(nullable = false)
     private Integer progressionTokens = 0;
 
-    @Column(nullable = false)
-    private Integer heroPoints = 0;
-
-    @Column(nullable = false)
-    private Integer dramaPoints = 0;
+    @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL)
+    @JoinColumn(name = "trait_id" )
+    @OrderBy("sortOrder ASC")
+    List<Trait> traits = new ArrayList<>();
 
 
     public Long getId() {
@@ -71,27 +72,18 @@ public class PlayerCharacter implements ThiEntity {
         this.progressionTokens = progressionTokens;
     }
 
-    public Integer getHeroPoints() {
-        return heroPoints;
+    public List<Trait> getTraits() {
+        return traits;
     }
 
-    public void setHeroPoints(Integer heroPoints) {
-        this.heroPoints = heroPoints;
-    }
-
-    public Integer getDramaPoints() {
-        return dramaPoints;
-    }
-
-    public void setDramaPoints(Integer dramaPoints) {
-        this.dramaPoints = dramaPoints;
+    public void setTraits(List<Trait> traits) {
+        this.traits = traits;
     }
 
     @Override
     public PlayerCharacter createEmptyObject() {
         PlayerCharacter pc = new PlayerCharacter();
-        pc.setDramaPoints(null);
-        pc.setHeroPoints(null);
+        pc.setTraits(null);
         pc.setProgressionTokens(null);
         return pc;
     }
@@ -106,5 +98,16 @@ public class PlayerCharacter implements ThiEntity {
             pcPlayerName = sb.toString();
         }
         return pcPlayerName;
+    }
+
+    public boolean isHeroPointsAvailable() {
+        for (Trait trait : traits) {
+            if (TraitType.Hero.equals(trait.getType())) {
+                if (trait.getPoints() > 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

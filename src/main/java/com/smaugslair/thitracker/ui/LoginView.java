@@ -5,10 +5,9 @@ import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.security.SecurityUtils;
 import com.smaugslair.thitracker.services.CacheService;
 import com.smaugslair.thitracker.services.PasswordResetService;
+import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.ui.users.PasswordForm;
 import com.smaugslair.thitracker.ui.users.UserForm;
-import com.smaugslair.thitracker.services.SessionService;
-import com.smaugslair.thitracker.util.NameValue;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.H1;
@@ -65,7 +64,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 				String validPassword = passwordForm.getValidPassword();
 				if (validPassword != null) {
 					user.setFriendCode(generateFriendCode());
-					user = cacheService.getUserCache().save(user);
+					user = sessionService.getUserRepository().save(user);
 					Credentials credentials = new Credentials();
 					credentials.setUserId(user.getId());
 					credentials.setEncodedPassword(SecurityUtils.encode(validPassword));
@@ -88,8 +87,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 		forgotPasswordDialog.add(email);
 		forgotPasswordDialog.add(new Button("Request reset", event -> {
 
-			NameValue nameValue = new NameValue("email", email.getValue());
-			Optional<User> user = cacheService.getUserCache().findOneByProperty(nameValue);
+			Optional<User> user = sessionService.getUserRepository().findUserByEmail(email.getValue());
 			if (user.isPresent()) {
 				passwordResetService.createPasswordResetForUser(user.get());
 			}

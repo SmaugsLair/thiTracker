@@ -62,7 +62,9 @@ public class UserForm extends FormLayout {
         name.setMinLength(6);
         name.setMaxLength(30);
         displayName.setRequiredIndicatorVisible(true);
-        displayName.addValueChangeListener(event -> user.setDisplayName(event.getValue()));
+        displayName.addValueChangeListener(event -> {
+            user.setDisplayName(event.getValue());
+        });
         addFormItem(displayName, "Display Name");
         binder.forField(displayName)
                 .asRequired("Required")
@@ -74,7 +76,9 @@ public class UserForm extends FormLayout {
         }
 
         if (admin) {
-            adminBox.addValueChangeListener(event -> user.setAdmin(event.getValue()));
+            adminBox.addValueChangeListener(event -> {
+                user.setAdmin(event.getValue());
+            });
             addFormItem(adminBox, "Admin");
             binder.forField(adminBox).bind("admin");
         }
