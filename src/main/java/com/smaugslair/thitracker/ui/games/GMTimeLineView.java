@@ -264,6 +264,7 @@ public class GMTimeLineView extends VerticalLayout {
 
         SimpleMailMessage msg = new SimpleMailMessage();
         msg.setTo(email);
+        msg.setCc(SecurityUtils.getLoggedInUser().getEmail());
 
         msg.setSubject("Invitation to The Hero Instant App");
 
