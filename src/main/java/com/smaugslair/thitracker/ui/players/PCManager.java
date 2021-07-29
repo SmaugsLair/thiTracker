@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class PCManager extends VerticalLayout {
 
@@ -96,6 +97,7 @@ public class PCManager extends VerticalLayout {
                         pc.getTraits().add(trait);
                     }
                 }
+                pc.setTraits(pc.getTraits().stream().sorted().collect(Collectors.toList()));
                 cacheService.getPcCache().save(pc);
                 confirmDialog.close();
                 refresh();
