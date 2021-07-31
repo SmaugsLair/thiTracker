@@ -3,10 +3,10 @@ package com.smaugslair.thitracker.ui;
 import com.smaugslair.thitracker.data.powers.Power;
 import com.smaugslair.thitracker.data.powers.PowerSet;
 import com.smaugslair.thitracker.data.powers.Sheetable;
+import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.ui.powers.transformers.PowerSetTransformer;
 import com.smaugslair.thitracker.ui.powers.transformers.PowerTransformer;
 import com.smaugslair.thitracker.ui.powers.transformers.Transformer;
-import com.smaugslair.thitracker.services.SessionService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.html.Label;
@@ -127,7 +127,6 @@ public class PowersUpload extends VerticalLayout {
                     }
                     else {
                         updatedClutchLayout.add(new Label(loadedPowerSet.getName()));
-                        loadedPowerSet.setId(oldPowerSet.getId());
                         updatedPowerSets.add(loadedPowerSet);
                     }
 
@@ -152,7 +151,6 @@ public class PowersUpload extends VerticalLayout {
                     }
                     else {
                         updatedPowerLayout.add(new Label(loadedPower.getName()));
-                        loadedPower.setId(oldPower.getId());
                         updatedPowers.add(loadedPower);
                     }
 

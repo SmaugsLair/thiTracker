@@ -1,7 +1,6 @@
 package com.smaugslair.thitracker.ui.players;
 
 import com.smaugslair.thitracker.data.pc.PlayerCharacter;
-import com.smaugslair.thitracker.data.pc.Trait;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -15,29 +14,20 @@ public class TraitForm extends FormLayout {
 
     private final static Logger log = LoggerFactory.getLogger(TraitForm.class);
 
-    private final PlayerCharacter pc;
+    private PlayerCharacter pc;
 
     List<TextField> fields = new ArrayList<>(6);
     private final Button saveButton = new Button("Save");
 
-    public TraitForm(PlayerCharacter pc) {
-        this.pc = pc;
-        init();
-    }
-
-    private void init() {
-        //List<Trait> traits = pc.getTraits().stream().sorted().collect(Collectors.toList());
+    public TraitForm() {
         saveButton.setEnabled(false);
         for (int i = 0; i < 6; ++i) {
-            Trait trait = pc.getTraits().get(i);
             TextField textField = new TextField();
-            textField.setValue(trait.getName());
             textField.setMinLength(2);
-            textField.setMaxLength(20);
+            textField.setMaxLength(64);
             textField.setRequired(true);
             textField.setRequiredIndicatorVisible(true);
             textField.addValueChangeListener(event -> isValid());
-            addFormItem(textField, trait.getType().name());
             fields.add(textField);
         }
     }
@@ -51,6 +41,17 @@ public class TraitForm extends FormLayout {
         }
         saveButton.setEnabled(true);
         return true;
+    }
+
+    public void setPc(PlayerCharacter pc) {
+        this.pc = pc;
+        removeAll();
+
+        pc.getTraits().forEach(trait -> {
+            TextField field = fields.get(trait.getSortOrder()-1);
+            field.setValue(trait.getName());
+            addFormItem(field, trait.getType().name());
+        });
     }
 
     public PlayerCharacter getPC() {

@@ -33,14 +33,31 @@ public class PCManager extends VerticalLayout {
 
     private final Logger log = LoggerFactory.getLogger(PCManager.class);
 
-    //private final RepoService repoService;
     private final SessionService sessionService;
     private final CacheService cacheService;
+    private final TraitForm traitForm;
+    private final ConfirmDialog editTraitsDialog;
 
     public PCManager(SessionService sessionService, CacheService cacheService) {
         this.sessionService = sessionService;
         this.cacheService = cacheService;
-        //this.repoService = repoService;
+
+        traitForm = new TraitForm();
+        editTraitsDialog = new ConfirmDialog(traitForm);
+        editTraitsDialog.setConfirmButton(traitForm.getSaveButton());
+        traitForm.getSaveButton().addClickListener(event -> {
+            if (traitForm.isValid()) {
+                PlayerCharacter playerCharacter = traitForm.getPC();
+                sessionService.getCacheService().getPcCache().save(playerCharacter);
+                editTraitsDialog.close();
+                Entry entry = new Entry(EventType.PlayerPCUpdate);
+                entry.setPcId(playerCharacter.getId());
+                Broadcaster.broadcast(entry);
+            }
+
+        });
+        editTraitsDialog.setWidth("500px");
+
         init();
     }
 
@@ -113,7 +130,6 @@ public class PCManager extends VerticalLayout {
         ConfirmDialog deleteDialog = new ConfirmDialog("Are you sure you want to delete the character "+pc.getName()+"?");
         Button confirmButton = new Button("Delete", event -> {
             NameValue example = new NameValue("pcId", pc.getId());
-
             List<TimeLineItem> items = cacheService.getTliCache().findManyByProperty(example);
             items.forEach(item -> {
                 item.setPcId(null);
@@ -125,23 +141,6 @@ public class PCManager extends VerticalLayout {
             refresh();
         });
         deleteDialog.setConfirmButton(confirmButton);
-
-        TraitForm traitForm = new TraitForm(pc);
-        ConfirmDialog editTraitsDialog = new ConfirmDialog(traitForm);
-        editTraitsDialog.setConfirmButton(traitForm.getSaveButton());
-        traitForm.getSaveButton().addClickListener(event -> {
-            if (traitForm.isValid()) {
-                PlayerCharacter playerCharacter = traitForm.getPC();
-                sessionService.getCacheService().getPcCache().save(playerCharacter);
-                editTraitsDialog.close();
-                Entry entry = new Entry(EventType.PlayerPCUpdate);
-                entry.setPcId(playerCharacter.getId());
-                Broadcaster.broadcast(entry);
-
-            }
-
-        });
-        editTraitsDialog.setWidth("500px");
 
         //ConfirmDialog editDialog = new ConfirmDialog()
 
@@ -162,7 +161,10 @@ public class PCManager extends VerticalLayout {
             icon.setSize("16px");
             layout.add(icon);
         }
-        Button edit = new Button("Edit traits", event -> editTraitsDialog.open());
+        Button edit = new Button("Edit traits", event -> {
+            traitForm.setPc(pc);
+            editTraitsDialog.open();
+        });
         layout.add(edit);
         Button delete = new Button("Delete", event -> deleteDialog.open());
         layout.add(delete);

@@ -8,11 +8,8 @@ import java.util.StringJoiner;
 @Entity
 public class PowerSet implements Sheetable {
 
-    @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
-    private Integer id;
 
-    @Column(nullable = false)
+    @Id
     private String ssid;
 
     @Column(nullable = false)
@@ -32,14 +29,6 @@ public class PowerSet implements Sheetable {
     private String powersText;
 
     private String abilityMods = "";
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
 
     public String getSsid() {
         return ssid;
@@ -100,7 +89,6 @@ public class PowerSet implements Sheetable {
     @Override
     public String toString() {
         return new StringJoiner(", ", PowerSet.class.getSimpleName() + "[", "]")
-                .add("id=" + id)
                 .add("ssid='" + ssid + "'")
                 .add("name='" + name + "'")
                 .add("updated=" + updated)

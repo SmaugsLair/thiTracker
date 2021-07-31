@@ -1,16 +1,15 @@
 package com.smaugslair.thitracker.data.powers;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Transient;
 import java.util.*;
 
 @Entity
 public class Power implements Sheetable {
 
     @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
-    private Integer id;
-
-    @Column(nullable = false)
     private String ssid;
 
     @Column(nullable = false)
@@ -44,13 +43,6 @@ public class Power implements Sheetable {
     @Transient
     private Map<String, Integer> powerSetMap = new HashMap<>();
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
 
     public String getSsid() {
         return ssid;
