@@ -7,9 +7,7 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.InvocationTargetException;
-
-public class PowerSetTransformer implements Transformer<PowerSet>{
+public class PowerSetTransformer extends Transformer<PowerSet>{
 
     private final Logger log = LoggerFactory.getLogger(PowerSetTransformer.class);
 
@@ -29,42 +27,40 @@ public class PowerSetTransformer implements Transformer<PowerSet>{
         return 3;
     }
 
-    public PowerSet transformRow(XSSFRow row) throws InvocationTargetException, IllegalAccessException {
+    public PowerSet transformRow(XSSFRow row) throws TransformerException {
         PowerSet powerSet = new PowerSet();
-        int i;
-        for (i = 0; i < labels.length; ++i) {
-            String label = labels[i];
-            XSSFCell cell = row.getCell(i);
-            if (cell == null) {
-                throw new IllegalAccessException("Sheet:"+getSheetName()+", cell is null at index "+i+ " for PowerSet "+ powerSet.getName());
-            }
-            if (label.startsWith("ps_")) {
-                try {
-                    String value;
-                    if (cell.toString().startsWith("*")) {
-                        value = cell.toString();
-                    }
-                    else {
-                        value = String.valueOf(Double.valueOf(cell.toString()).intValue());
-                    }
-                    String pre = powerSet.getAbilityMods();
-                    if (pre == null) {
-                        pre = "";
-                    }
-                    powerSet.setAbilityMods(pre + " " + label.substring(3) + ":" + value);
+        int column;
+        for (column = 0; column < labels.length; ++column) {
+            String label = labels[column];
+            XSSFCell cell = row.getCell(column);
+            if (column == 0) {
+                if (cell.toString().isEmpty() || cell.toString().startsWith("More")) {
+                    break;
                 }
-                catch (Throwable t) {}
             }
-            else if (label.equals("updated")) {
-                try {
+            try {
+                if (label.startsWith("ps_")) {
+                    String value = cell.toString();
+                    if (value != null && !value.isEmpty()) {
+                        if (!value.startsWith("*")) {
+                            value = String.valueOf(Double.valueOf(cell.toString()).intValue());
+                        }
+                        String pre = powerSet.getAbilityMods();
+                        if (pre == null) {
+                            pre = "";
+                        }
+                        powerSet.setAbilityMods(pre + " " + label.substring(3) + ":" + value);
+                    }
+                }
+                else if (label.equals("updated")) {
                     powerSet.setUpdated(cell.getDateCellValue());
-                } catch (Throwable e) {
-                    log.info(e.getMessage()+", cell contents:"+cell.toString());
-                    //e.printStackTrace();
+                }
+                else {
+                    BeanUtils.setProperty(powerSet, label, cell.toString());
                 }
             }
-            else {
-                BeanUtils.setProperty(powerSet, label, cell.toString());
+            catch (Throwable t) {
+                throw new TransformerException(createErrorMessage(row, column, label, cell, t), t);
             }
         }
         if (powerSet.getAbilityMods() != null) {

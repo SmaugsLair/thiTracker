@@ -68,6 +68,7 @@ public class PowersCache {
 
     public synchronized void load() {
         powerList.clear();
+        powerSetList.clear();
         powerSetMap.clear();
         powersMap.clear();
         powerSetRepo.findAll(Sort.by(Sort.Direction.ASC, "name")).forEach(powerSet -> {

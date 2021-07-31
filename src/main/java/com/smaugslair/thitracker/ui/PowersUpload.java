@@ -4,14 +4,18 @@ import com.smaugslair.thitracker.data.powers.Power;
 import com.smaugslair.thitracker.data.powers.PowerSet;
 import com.smaugslair.thitracker.data.powers.Sheetable;
 import com.smaugslair.thitracker.services.SessionService;
+import com.smaugslair.thitracker.ui.powers.PowerSetBrowserView;
 import com.smaugslair.thitracker.ui.powers.transformers.PowerSetTransformer;
 import com.smaugslair.thitracker.ui.powers.transformers.PowerTransformer;
 import com.smaugslair.thitracker.ui.powers.transformers.Transformer;
+import com.smaugslair.thitracker.ui.powers.transformers.TransformerException;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.router.PageTitle;
@@ -23,7 +27,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -45,6 +48,8 @@ public class PowersUpload extends VerticalLayout {
     private final List<Power> unchangedPowers = new ArrayList<>();
     private final List<Power> updatedPowers = new ArrayList<>();
 
+    private final ProgressBar progressBar = new ProgressBar();
+
     public PowersUpload(SessionService sessionService) {
         this.sessionService = sessionService;
 
@@ -63,7 +68,7 @@ public class PowersUpload extends VerticalLayout {
             sessionService.getPowerSetRepo().saveAll(newPowerSets);
             sessionService.getPowerSetRepo().saveAll(updatedPowerSets);
             sessionService.getPowersCache().load();
-            event.getSource().getUI().get().navigate("powersetbrowser");
+            event.getSource().getUI().get().navigate(PowerSetBrowserView.class);
         });
         saveButton.setEnabled(false);
         HorizontalLayout results = new HorizontalLayout();
@@ -91,6 +96,8 @@ public class PowersUpload extends VerticalLayout {
         upload.addSucceededListener(event -> {
             output.removeAll();
             output.add(new Label("Filename uploaded: "+event.getFileName()));
+            progressBar.setIndeterminate(true);
+            output.add(progressBar);
             OPCPackage pkg = null;
             try {
                 pkg = OPCPackage.open(buffer.getInputStream());
@@ -111,11 +118,11 @@ public class PowersUpload extends VerticalLayout {
 
 
 
-                final int[] max = {0};
+                //final int[] max = {0};
 
 
                 powerSetsInSheet.forEach((name, loadedPowerSet) -> {
-                    max[0] = Math.max(max[0], loadedPowerSet.getAbilityText().length());
+                    //max[0] = Math.max(max[0], loadedPowerSet.getAbilityText().length());
                     PowerSet oldPowerSet = cachedPowerSetMap.get(loadedPowerSet.getSsid());
                     if (oldPowerSet == null) {
                         newPowerSets.add(loadedPowerSet);
@@ -132,14 +139,14 @@ public class PowersUpload extends VerticalLayout {
 
                 });
 
-                log.info("Max ability text:"+max[0]);
+                //log.info("Max ability text:"+max[0]);
 
                 newClutchDetails.setSummaryText("New PowerSets: " + newPowerSets.size());
                 unchangedClutchDetails.setSummaryText("Unchanged PowerSets: " + unchangedPowerSets.size());
                 updatedClutchDetails.setSummaryText("Modified PowerSets: " + updatedPowerSets.size());
 
                 powersInSheet.forEach((name, loadedPower) -> {
-                    max[0] = Math.max(max[0], loadedPower.getSubPowers().length());
+                    //max[0] = Math.max(max[0], loadedPower.getSubPowers().length());
                     Power oldPower = cachedPowerMap.get(loadedPower.getSsid());
                     if (oldPower == null) {
                         newPowers.add(loadedPower);
@@ -159,16 +166,21 @@ public class PowersUpload extends VerticalLayout {
 
                 newPowerDetails.setSummaryText("New Powers: " +newPowers.size());
                 unchangedPowerDetails.setSummaryText("Unchanged Powers: " +unchangedPowers.size());
-                updatedPowerDetails.setSummaryText("Modified PowerSets: " +updatedPowers.size());
+                updatedPowerDetails.setSummaryText("Modified Powers: " +updatedPowers.size());
 
+                progressBar.setValue(1);
                 saveButton.setEnabled(!newPowers.isEmpty() || !newPowerSets.isEmpty()
                         || !updatedPowers.isEmpty() || !updatedPowerSets.isEmpty());
 
 
             } catch (Throwable t) {
                 t.printStackTrace();
-                output.add(new Label(t.getMessage()));
+                output.add(new Span(t.getMessage()));
+                for (StackTraceElement line: t.getStackTrace()) {
+                    output.add(new Span(line.toString()));
+                }
             }
+            progressBar.setIndeterminate(false);
         });
 
         upload.addFileRejectedListener(event -> {
@@ -201,7 +213,7 @@ public class PowersUpload extends VerticalLayout {
     }
 
 
-    private Map<String, ? extends Sheetable> loadSheet(XSSFWorkbook workbook, Transformer transformer) throws InvocationTargetException, IllegalAccessException {
+    private Map<String, ? extends Sheetable> loadSheet(XSSFWorkbook workbook, Transformer transformer) throws TransformerException {
         Map<String, Sheetable> map = new HashMap<>();
         XSSFSheet sheet = workbook.getSheet(transformer.getSheetName());
         log.info("sheet size: "+sheet.getPhysicalNumberOfRows());

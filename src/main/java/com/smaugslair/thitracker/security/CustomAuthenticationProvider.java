@@ -21,10 +21,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 
     private static final Logger log = LoggerFactory.getLogger(CustomAuthenticationProvider.class);
 
-    @Autowired
     UserRepository userRepository;
-
-    @Autowired
     CredentialsRepository credentialsRepository;
 
     @Override
@@ -46,5 +43,15 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     @Override
     public boolean supports(Class<?>aClass) {
         return aClass.equals(UsernamePasswordAuthenticationToken.class);
+    }
+
+    @Autowired
+    public void setUserRepository(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    @Autowired
+    public void setCredentialsRepository(CredentialsRepository credentialsRepository) {
+        this.credentialsRepository = credentialsRepository;
     }
 }

@@ -6,7 +6,6 @@ import com.smaugslair.thitracker.ui.games.CollectionView;
 import com.smaugslair.thitracker.ui.powers.PowerBrowserView;
 import com.smaugslair.thitracker.ui.powers.PowerSetBrowserView;
 import com.smaugslair.thitracker.ui.users.UserDetailsView;
-import com.smaugslair.thitracker.services.SessionService;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.html.Anchor;
@@ -15,13 +14,9 @@ import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.router.RouterLink;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import javax.annotation.PostConstruct;
 
 @Push
 public class MainView extends AppLayout {
-
 
     public MainView() {
 

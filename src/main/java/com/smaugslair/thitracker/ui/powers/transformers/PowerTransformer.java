@@ -7,9 +7,7 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.InvocationTargetException;
-
-public class PowerTransformer implements Transformer<Power>{
+public class PowerTransformer extends Transformer<Power>{
 
     private static Logger log = LoggerFactory.getLogger(PowerTransformer.class);
 
@@ -23,41 +21,41 @@ public class PowerTransformer implements Transformer<Power>{
 
 
     @Override
-    public Power transformRow(XSSFRow row) throws InvocationTargetException, IllegalAccessException {
+    public Power transformRow(XSSFRow row) throws TransformerException {
         Power power = new Power();
         int i;
         for (i = 0; i < labels.length; ++i) {
             String label = labels[i];
             XSSFCell cell = row.getCell(i);
             if (cell == null) {
-                throw new IllegalAccessException("Sheet:"+getSheetName()+", cell is null at index "+i+ " for power "+power.getName());
+                break;
             }
-            if (label.startsWith("am_")) {
-                try {
-                    String value;
-                    if (cell.toString().startsWith("*")) {
-                        value = cell.toString();
+            try {
+                if (label.startsWith("am_")) {
+                    String value = cell.toString();
+                    if (value != null && !value.isEmpty()) {
+                        if (!value.startsWith("*")) {
+                            value = String.valueOf(Double.valueOf(cell.toString()).intValue());
+                        }
+                        String pre = power.getAbilityMods();
+                        if (pre == null) {
+                            pre = "";
+                        }
+                        power.setAbilityMods(pre + " " + label.substring(3) + ":" + value);
                     }
-                    else {
-                        value = String.valueOf(Double.valueOf(cell.toString()).intValue());
-                    }
-                    String pre = power.getAbilityMods();
-                    if (pre == null) {
-                        pre = "";
-                    }
-                    power.setAbilityMods(pre + " " + label.substring(3) + ":" + value);
-
                 }
-                catch (Throwable t) {}
+                else if (label.equals("metaPower")) {
+                    power.setMetaPower(cell.toString().equals("1.0"));
+                }
+                else {
+                    BeanUtils.setProperty(power, label, cell.toString());
+                }
+                if (power.getAbilityMods() != null) {
+                    power.setAbilityMods(power.getAbilityMods().trim());
+                }
             }
-            else if (label.equals("metaPower")) {
-                power.setMetaPower(cell.toString().equals("1.0"));
-            }
-            else {
-                BeanUtils.setProperty(power, label, cell.toString());
-            }
-            if (power.getAbilityMods() != null) {
-                power.setAbilityMods(power.getAbilityMods().trim());
+            catch (Throwable t) {
+                throw new TransformerException(createErrorMessage(row, i, label, cell, t), t);
             }
         }
         XSSFRow labelRow = row.getSheet().getRow(getLabelRowIndex());
@@ -65,16 +63,23 @@ public class PowerTransformer implements Transformer<Power>{
         //log.info("loading power sets for power "+power.getName());
         boolean found = false;
         while (!found) {
-            //log.info("index="+i);
+            if (labelRow.getCell(i) == null) {
+                found = true;
+                break;
+            }
             String label = labelRow.getCell(i).toString();
             //log.info("label:"+label);
             if (label.startsWith("set_")) {
                 XSSFCell cell = row.getCell(i);
-                try {
-                    int value = Double.valueOf(cell.toString()).intValue();
-                    power.addToPowerSets(label.substring(4), value);
+                if (cell != null && !cell.toString().isEmpty()) {
+                    try {
+                        int value = Double.valueOf(cell.toString()).intValue();
+                        power.addToPowerSets(label.substring(4), value);
+                    }
+                    catch (Throwable t) {
+                        throw new TransformerException(createErrorMessage(row,i,label,cell, t), t);
+                    }
                 }
-                catch (Throwable t) {}
             }
             else if (label.equals("endColumn")) {
                 found = true;
