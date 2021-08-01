@@ -35,11 +35,10 @@ public class CharacterSheet extends RegisteredVerticalLayout {
         grid.setHeightByRows(true);
         grid.setItems(pc.getTraits().stream().sorted());
 
-        grid.addColumn(Trait::getType);
-        grid.addColumn(Trait::getName);
-        grid.addColumn(Trait::getPoints);
+        grid.addColumn(Trait::getType).setFlexGrow(0);
+        grid.addColumn(Trait::getName).setFlexGrow(1);
+        grid.addColumn(Trait::getPoints).setFlexGrow(0);
 
-        grid.getColumns().forEach(itemColumn -> itemColumn.setAutoWidth(true));
         add(grid);
 
     }

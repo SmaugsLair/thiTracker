@@ -4,17 +4,21 @@ import com.smaugslair.thitracker.data.log.Entry;
 import com.smaugslair.thitracker.data.log.EventType;
 import com.smaugslair.thitracker.data.pc.PlayerCharacter;
 import com.smaugslair.thitracker.data.pc.Trait;
+import com.smaugslair.thitracker.data.pc.TraitType;
 import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.services.SessionService;
-import com.smaugslair.thitracker.ui.games.tl.TraitPoints;
+import com.smaugslair.thitracker.ui.games.tl.ProgressionPoint;
+import com.smaugslair.thitracker.ui.games.tl.TraitPoint;
 import com.smaugslair.thitracker.websockets.RegisteredVerticalLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.textfield.IntegerField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class CharacterDetails extends RegisteredVerticalLayout {
 
@@ -46,27 +50,35 @@ public class CharacterDetails extends RegisteredVerticalLayout {
             return;
         }
 
-        IntegerField progression = new IntegerField();
-        progression.setValue(pc.getProgressionTokens());
-        progression.setMin(0);
-        progression.setHasControls(true);
-        progression.addValueChangeListener(event -> {
-            pc.setProgressionTokens(event.getValue());
-            updatePC();
+        add(new Label(pc.getCharacterAndPlayerName(user)));
+
+        List<TraitRow> traitRows = new ArrayList<>(9);
+        traitRows.add(new TraitRow(new ProgressionPoint(pc, this)));
+
+        List<Trait> traits = pc.getTraits().stream().sorted().collect(Collectors.toList());
+
+        traitRows.add(new TraitRow("Hero Traits"));
+        traits.forEach(trait -> {
+            if (trait.getType().equals(TraitType.Hero)) {
+                traitRows.add(new TraitRow(new TraitPoint(trait, this)));
+            }
         });
 
-        add(new Label(pc.getCharacterAndPlayerName(user)));
-        add(new HorizontalLayout(new Label("Progression tokens"), progression));
+        traitRows.add(new TraitRow("Drama Traits"));
+        traits.forEach(trait -> {
+            if (trait.getType().equals(TraitType.Drama)) {
+                traitRows.add(new TraitRow(new TraitPoint(trait, this)));
+            }
+        });
 
-        Grid<Trait> grid = new Grid<>();
+        Grid<TraitRow> grid = new Grid<>();
         grid.setHeightByRows(true);
-        grid.setItems(pc.getTraits().stream().sorted());
+        grid.setItems(traitRows);
 
-        grid.addColumn(Trait::getType);
-        grid.addColumn(Trait::getName);
-        grid.addComponentColumn(trait -> new TraitPoints(trait, this));
+        grid.addColumn(TraitRow::getName).setFlexGrow(2);
+        grid.addComponentColumn(TraitRow::getComponent).setFlexGrow(1);
 
-        grid.getColumns().forEach(itemColumn -> itemColumn.setAutoWidth(true));
+        //grid.getColumns().forEach(itemColumn -> itemColumn.setAutoWidth(true));
         add(grid);
     }
 
