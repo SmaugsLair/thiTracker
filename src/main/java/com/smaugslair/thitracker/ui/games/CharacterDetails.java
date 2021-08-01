@@ -78,7 +78,8 @@ public class CharacterDetails extends RegisteredVerticalLayout {
         grid.addColumn(TraitRow::getName).setFlexGrow(2);
         grid.addComponentColumn(TraitRow::getComponent).setFlexGrow(1);
 
-        //grid.getColumns().forEach(itemColumn -> itemColumn.setAutoWidth(true));
+        grid.setClassNameGenerator(item -> item.isSubHead() ? "w3-light-grey" : "");
+
         add(grid);
     }
 
