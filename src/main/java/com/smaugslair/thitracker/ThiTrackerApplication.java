@@ -97,4 +97,19 @@ public class ThiTrackerApplication {
         };
     }
 
+
+/*
+Need to turn this on if this is a WAR deployment
+    @Bean
+    public CacheManager cacheManager() {
+        SimpleCacheManager cacheManager = new SimpleCacheManager();
+        List<Cache> caches = new ArrayList<Cache>();
+        caches.add(new ConcurrentMapCache("atds"));
+        caches.add(new ConcurrentMapCache("playerCharacters"));
+        caches.add(new ConcurrentMapCache("collectedItems"));
+        caches.add(new ConcurrentMapCache("friends"));
+        caches.add(new ConcurrentMapCache("users"));
+        cacheManager.setCaches(caches);
+        return cacheManager;
+    }*/
 }
