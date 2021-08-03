@@ -94,7 +94,7 @@ public class GMTimeLineView extends VerticalLayout {
     private Game confirmData() {
 
         if (getGameId() == null) {
-            add(new H1("Select a game before accessing a timeline"));
+            add(new H1("No Game loaded"));
             return null;
         }
 

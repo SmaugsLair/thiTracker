@@ -71,6 +71,10 @@ public class DiceRoller extends RegisteredVerticalLayout {
         setSpacing(false);
 
         PlayerCharacter pc = sessionService.getPc();
+        if (pc == null) {
+            add(new Label("No Hero loaded"));
+            return;
+        }
 
 
         FormLayout rollLayout = new FormLayout();

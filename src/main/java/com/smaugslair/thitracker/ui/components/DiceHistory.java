@@ -24,6 +24,10 @@ public class DiceHistory extends RegisteredVerticalLayout {
         setSpacing(false);
         this.sessionService = sessionService;
         NameValue nameValue = new NameValue("gameId", sessionService.getGameId());
+        if (nameValue.getValue() == null) {
+            add(new Label("No Game loaded"));
+            return;
+        }
         List<Entry> entryList = cacheService.getEntryCache().findManyByProperty(nameValue)
                 .stream().sorted().collect(Collectors.toList());
         for (Entry entry : entryList) {

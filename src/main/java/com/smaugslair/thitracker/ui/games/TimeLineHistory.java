@@ -22,7 +22,7 @@ public class TimeLineHistory extends VerticalLayout {
 
         NameValue nameValue = new NameValue("gameId", gmTimeLineView.getGameID());
         if (nameValue.getValue() == null) {
-            add(new Label("No Game selected"));
+            add(new Label("No Game loaded"));
             return;
         }
         List<Entry> entryList = gmTimeLineView.getEntryCache().findManyByProperty(nameValue)

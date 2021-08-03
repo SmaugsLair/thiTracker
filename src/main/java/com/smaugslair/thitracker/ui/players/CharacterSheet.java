@@ -27,6 +27,10 @@ public class CharacterSheet extends RegisteredVerticalLayout {
     private void init() {
         removeAll();
         PlayerCharacter pc = sessionService.getPc();
+        if (pc == null) {
+            add("No Hero loaded");
+            return;
+        }
         add(new Label(pc.getCharacterAndPlayerName(user)));
         add(new HorizontalLayout(new Label("Progression tokens"),
                 new Span(pc.getProgressionTokens().toString())));

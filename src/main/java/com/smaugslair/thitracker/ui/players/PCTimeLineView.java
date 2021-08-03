@@ -40,7 +40,7 @@ public class PCTimeLineView extends RegisteredVerticalLayout {
         Long gameId = sessionService.getGameId();
 
         if (gameId == null) {
-            add(new H1("No game specified"));
+            add(new H1("No Game loaded"));
             return;
         }
 
