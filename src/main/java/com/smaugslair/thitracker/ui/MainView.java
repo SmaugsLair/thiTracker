@@ -14,8 +14,9 @@ import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.shared.ui.Transport;
 
-@Push
+@Push(transport = Transport.LONG_POLLING)
 public class MainView extends AppLayout {
 
     public MainView() {
