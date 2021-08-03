@@ -121,7 +121,8 @@
             </plugin>
         </plugins>
     </build>
-
+ <!--Do not run a production build on a dev machine, it will delete your node_modules
+     library. This is done to create a smaller Heroku slug<!-->
     <profiles>
         <profile>
             <id>production</id>
@@ -155,7 +156,7 @@
                                 </goals>
                                 <configuration>
                                     <target>
-                                        <delete dir="node_modules" verbose="true"/>
+                                        <delete dir="node_modules"/>
                                     </target>
                                 </configuration>
                             </execution>
