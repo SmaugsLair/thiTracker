@@ -16,7 +16,7 @@ public class TraitForm extends FormLayout {
 
     private PlayerCharacter pc;
 
-    List<TextField> fields = new ArrayList<>(6);
+    final List<TextField> fields = new ArrayList<>(6);
     private final Button saveButton = new Button("Save");
 
     public TraitForm() {

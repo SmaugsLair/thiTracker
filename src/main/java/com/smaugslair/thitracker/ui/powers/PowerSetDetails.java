@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class PowerSetDetails extends VerticalLayout {
 
-    private Map<String, PowerSetDetail> clutchDetailMap = new HashMap<>();
+    private final Map<String, PowerSetDetail> clutchDetailMap = new HashMap<>();
 
     public PowerSetDetails(PowersCache powersCache) {
         powersCache.getPowerSetList().forEach(powerSet -> add(new PowerSetDetail(powerSet, powersCache)));

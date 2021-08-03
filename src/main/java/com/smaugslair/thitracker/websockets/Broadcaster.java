@@ -11,10 +11,10 @@ import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 public class Broadcaster {
-    private static Logger log = LoggerFactory.getLogger(Broadcaster.class);
-    private static Executor executor = Executors.newSingleThreadExecutor();
+    private static final Logger log = LoggerFactory.getLogger(Broadcaster.class);
+    private static final Executor executor = Executors.newSingleThreadExecutor();
 
-    private static LinkedList<Consumer<Entry>> listeners = new LinkedList<>();
+    private static final LinkedList<Consumer<Entry>> listeners = new LinkedList<>();
 
     public static synchronized Registration register(Consumer<Entry> listener) {
         listeners.add(listener);

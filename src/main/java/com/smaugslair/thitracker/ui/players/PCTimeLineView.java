@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @CssImport(value = "./styles/color.css", themeFor = "vaadin-grid")
 public class PCTimeLineView extends RegisteredVerticalLayout {
 
-    private static Logger log = LoggerFactory.getLogger(PCTimeLineView.class);
+    private static final Logger log = LoggerFactory.getLogger(PCTimeLineView.class);
 
     private final SessionService sessionService;
     private final CacheService cacheService;
@@ -50,7 +50,7 @@ public class PCTimeLineView extends RegisteredVerticalLayout {
             return;
         }
 
-        User gm = sessionService.getUserRepository().findById(game.getGameMasterId()).get();
+        User gm = sessionService.getUserRepository().findById(game.getGameMasterId()).orElse(new User());
 
         add( new H3("Game: "+game.getName()+ " by "+ gm.getDisplayName()));
 
@@ -69,14 +69,6 @@ public class PCTimeLineView extends RegisteredVerticalLayout {
             if (lastEvent != null) {
                 item.setReactTime(lastEvent.getTime() - item.getTime());
             }
-            /*
-            item.getActionTimes().add(ActionSelect.unselectedActionTime);
-            for (ActionTimeDefault atd: AtdCache.getAtds()) {
-                item.getActionTimes().add(
-                        new ActionTime(atd.getName(),
-                                atd.getTime() + item.getStun()
-                                        + item.getDeltas().get(atd.getName()).getDelta()));
-            }*/
         }
 
         Grid<TimeLineItem> grid = new Grid<>();
@@ -93,24 +85,6 @@ public class PCTimeLineView extends RegisteredVerticalLayout {
 
         add(grid);
     }
-
-/*
-    private Registration tlbReg;
-    @Override
-    protected void onAttach(AttachEvent attachEvent) {
-        UI ui = attachEvent.getUI();
-        tlbReg = Broadcaster.register(newMessage -> {
-            ui.access(() -> {
-
-            });
-        });
-    }
-
-    @Override
-    protected void onDetach(DetachEvent detachEvent) {
-        tlbReg.remove();
-        tlbReg = null;
-    }*/
 
     @Override
     protected void handleMessage(Entry entry) {

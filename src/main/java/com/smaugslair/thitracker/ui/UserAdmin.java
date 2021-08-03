@@ -53,7 +53,7 @@ public class UserAdmin extends VerticalLayout {
         userGrid.setDataProvider(dataProvider);
 
         UserFilter filterObject = new UserFilter();
-        dataProvider.setFilter(user -> filterObject.test(user));
+        dataProvider.setFilter(filterObject::test);
 
         Grid.Column<User> nameColumn = userGrid.addColumn(User::getName).setHeader("Name");
         Grid.Column<User> dnColumn = userGrid.addColumn(User::getDisplayName).setHeader("Display Name");
@@ -93,8 +93,10 @@ public class UserAdmin extends VerticalLayout {
         add(userGrid);
         GridContextMenu<User> contextMenu = new GridContextMenu<>(userGrid);
         GridMenuItem<User> editMenu = contextMenu.addItem("Edit", event -> {
-            userForm.setUser(event.getItem().get());
-            editUserDialog.open();
+            if (event.getItem().isPresent()) {
+                userForm.setUser(event.getItem().get());
+                editUserDialog.open();
+            }
         });
 
     }

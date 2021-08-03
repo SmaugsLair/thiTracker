@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 @CssImport(value = "./styles/color.css", themeFor = "vaadin-grid")
 public class GMTimeLineView extends VerticalLayout {
 
-    private static Logger log = LoggerFactory.getLogger(GMTimeLineView.class);
+    private static final Logger log = LoggerFactory.getLogger(GMTimeLineView.class);
 
     private final SessionService sessionService;
     private final CacheService cacheService;
@@ -104,7 +104,8 @@ public class GMTimeLineView extends VerticalLayout {
             add(new H1("Game not found!"));
             return null;
         }
-        if (!game.getGameMasterId().equals(SecurityUtils.getLoggedInUser().getId())) {
+        User user = SecurityUtils.getLoggedInUser();
+        if (user == null || !game.getGameMasterId().equals(user.getId())) {
             add(new H1("You are not the GameMaster for this game!"));
             return null;
         }
@@ -198,59 +199,55 @@ public class GMTimeLineView extends VerticalLayout {
         ColorDialog colorDialog = new ColorDialog(this);
         GridContextMenu<TimeLineItem> contextMenu = new GridContextMenu<>(grid);
         GridMenuItem<TimeLineItem> colorMenu = contextMenu.addItem("Color", event -> {
-            colorDialog.openWith(event.getItem());
+            if (event.getItem().isPresent()) {
+                colorDialog.openWith(event.getItem().get());
+            }
         });
 
-        contextMenu.addItem("Copy", event -> {
-            event.getItem().ifPresent(item -> {
-                TimeLineItem copy = new TimeLineItem();
-                copy.setTime(item.getTime());
-                copy.setName(item.getName());
-                copy.setStun(item.getStun());
-                copy.setHidden(item.getHidden());
-                copy.setGameId(item.getGameId());
-                copy.setColor(item.getColor());
-                for (ActionTimeDelta delta: item.getDeltas().values()) {
-                    ActionTimeDelta deltaCopy = new ActionTimeDelta();
-                    deltaCopy.setDelta(delta.getDelta());
-                    deltaCopy.setName(delta.getName());
-                    copy.getDeltas().put(delta.getName(), deltaCopy);
-                }
-                getTliCache().save(copy);
-                refreshAndBroadcast();
-            });
-        });
+        contextMenu.addItem("Copy", event -> event.getItem().ifPresent(item -> {
+            TimeLineItem copy = new TimeLineItem();
+            copy.setTime(item.getTime());
+            copy.setName(item.getName());
+            copy.setStun(item.getStun());
+            copy.setHidden(item.getHidden());
+            copy.setGameId(item.getGameId());
+            copy.setColor(item.getColor());
+            for (ActionTimeDelta delta: item.getDeltas().values()) {
+                ActionTimeDelta deltaCopy = new ActionTimeDelta();
+                deltaCopy.setDelta(delta.getDelta());
+                deltaCopy.setName(delta.getName());
+                copy.getDeltas().put(delta.getName(), deltaCopy);
+            }
+            getTliCache().save(copy);
+            refreshAndBroadcast();
+        }));
 
-        contextMenu.addItem("Remove", event -> {
-            event.getItem().ifPresent(item -> {
-                if(item.getId().equals(game.getLastEventId())) {
-                    game.setLastEventId(null);
-                    getGameCache().save(game);
-                }
-                getTliCache().delete(item);
-                refreshAndBroadcast();
-            });
-        });
+        contextMenu.addItem("Remove", event -> event.getItem().ifPresent(item -> {
+            if(item.getId().equals(game.getLastEventId())) {
+                game.setLastEventId(null);
+                getGameCache().save(game);
+            }
+            getTliCache().delete(item);
+            refreshAndBroadcast();
+        }));
 
-        contextMenu.addItem("Collect", event -> {
-            event.getItem().ifPresent(item -> {
-                CollectedItem collectedItem = new CollectedItem();
-                collectedItem.setColor(item.getColor());
-                collectedItem.setName(item.getName());
-                collectedItem.setGmId(game.getGameMasterId());
-                for (ActionTimeDelta delta : item.getDeltas().values()) {
-                    CollectedDelta collectedDelta = new CollectedDelta();
-                    collectedDelta.setDelta(delta.getDelta());
-                    collectedDelta.setName(delta.getName());
-                    collectedItem.getDeltas().add(collectedDelta);
-                }
-                cacheService.getCiRepo().save(collectedItem);
-                Component oldButton = buttonBarTop.getComponentAt(1);
-                buttonBarTop.replace(oldButton, createImportButton());
-                Notification.show("Saved "+collectedItem.getName()+" to your collection",
-                        2000, Notification.Position.TOP_CENTER);
-            });
-        });
+        contextMenu.addItem("Collect", event -> event.getItem().ifPresent(item -> {
+            CollectedItem collectedItem = new CollectedItem();
+            collectedItem.setColor(item.getColor());
+            collectedItem.setName(item.getName());
+            collectedItem.setGmId(game.getGameMasterId());
+            for (ActionTimeDelta delta : item.getDeltas().values()) {
+                CollectedDelta collectedDelta = new CollectedDelta();
+                collectedDelta.setDelta(delta.getDelta());
+                collectedDelta.setName(delta.getName());
+                collectedItem.getDeltas().add(collectedDelta);
+            }
+            cacheService.getCiRepo().save(collectedItem);
+            Component oldButton = buttonBarTop.getComponentAt(1);
+            buttonBarTop.replace(oldButton, createImportButton());
+            Notification.show("Saved "+collectedItem.getName()+" to your collection",
+                    2000, Notification.Position.TOP_CENTER);
+        }));
 
         add(grid);
 
@@ -261,21 +258,23 @@ public class GMTimeLineView extends VerticalLayout {
     private void sendPlayerInvitation(String name, String email) {
 
         User gm = SecurityUtils.getLoggedInUser();
+        if (gm == null) {
+            return;
+        }
 
         SimpleMailMessage msg = new SimpleMailMessage();
         msg.setTo(email);
-        msg.setCc(SecurityUtils.getLoggedInUser().getEmail());
+        msg.setCc(gm.getEmail());
 
         msg.setSubject("Invitation to The Hero Instant App");
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("Hello ").append(name).append("\n You've been invited to create an account on The Hero Instance app and join a game with ")
-            .append(gm.getDisplayName()).append("!\n").append("To start, point your browser to ")
-                .append(sessionService.getThiProperties().getAppUrl()).append(", create an account, sign in, click on the Friends tab, ")
-                .append("and enter \nUsername: ").append(gm.getName()).append("\nFriend code: ")
-                .append(gm.getFriendCode()).append("\nin the Friend Finder. Then create a character and ")
-                .append(gm.getDisplayName()).append(" will be able to add you to their game.");
-        msg.setText(sb.toString());
+        String sb = "Hello " + name + "\n You've been invited to create an account on The Hero Instance app and join a game with " +
+                gm.getDisplayName() + "!\n" + "To start, point your browser to " +
+                sessionService.getThiProperties().getAppUrl() + ", create an account, sign in, click on the Friends tab, " +
+                "and enter \nUsername: " + gm.getName() + "\nFriend code: " +
+                gm.getFriendCode() + "\nin the Friend Finder. Then create a character and " +
+                gm.getDisplayName() + " will be able to add you to their game.";
+        msg.setText(sb);
 
         sessionService.getJavaMailSender().send(msg);
     }
@@ -290,7 +289,7 @@ public class GMTimeLineView extends VerticalLayout {
                 game.setLastEventId(item.getId());
                 getGameCache().save(game);
             }
-            StringBuffer sb = new StringBuffer(item.getName()).append(" spent ").append(item.getActionTime().time);
+            StringBuilder sb = new StringBuilder(item.getName()).append(" spent ").append(item.getActionTime().time);
             sb.append(" TU on a ").append(item.getActionTime().name).append(" action");
             logText = sb.toString();
         }
@@ -316,8 +315,8 @@ public class GMTimeLineView extends VerticalLayout {
             Optional<PlayerCharacter> opc = cacheService.getPcCache().findOneById(item.getPcId());
             if (opc.isPresent()) {
                 PlayerCharacter pc = opc.get();
-                User user = sessionService.getUserRepository().findById(pc.getUserId()).get();
-                gmSession.setHero(pc, user);
+                Optional<User> user = sessionService.getUserRepository().findById(pc.getUserId());
+                user.ifPresent(value -> gmSession.setHero(pc, value));
                 return;
             }
         }
@@ -350,7 +349,7 @@ public class GMTimeLineView extends VerticalLayout {
         }
     }
     private Button createClearRollsButton() {
-        Button button = new Button("Clear rolls", event -> {
+        return new Button("Clear rolls", event -> {
             clearLogs(EventType.DiceRoll);
             gmSession.clearRolls();
             Entry entry = new Entry();
@@ -358,19 +357,17 @@ public class GMTimeLineView extends VerticalLayout {
             entry.setType(EventType.ClearRolls);
             Broadcaster.broadcast(entry);
         });
-        return button;
     }
 
     private Button createClearActionsButton() {
-        Button button = new Button("Clear actions", event -> {
+        return new Button("Clear actions", event -> {
             clearLogs(EventType.GMAction);
             gmSession.clearActions();
         });
-        return button;
     }
 
     private Button createResetTimeButton() {
-        Button resetTime = new Button("Reset time", event -> {
+        return new Button("Reset time", event -> {
             Iterable<TimeLineItem> timeLineItems = getTliCache().findManyByProperty(gameIdProp);
             timeLineItems.forEach(item -> {
                 item.setTime(0);
@@ -380,7 +377,6 @@ public class GMTimeLineView extends VerticalLayout {
             getGameCache().save(game);
             refreshAndBroadcast();
         });
-        return resetTime;
     }
 
     private Button createResetStunButton() {
@@ -399,6 +395,9 @@ public class GMTimeLineView extends VerticalLayout {
 
     private Button createAddEventButton() {
         User user = SecurityUtils.getLoggedInUser();
+        if (user == null) {
+            return new Button();
+        }
 
         List<Friendship> friendships = sessionService.getFriendsRepo().findAllByUserOrFriend(user, user);
 
@@ -423,7 +422,8 @@ public class GMTimeLineView extends VerticalLayout {
             TimeLineItem item = new TimeLineItem();
             if (newItemForm.isPC()) {
                 PlayerCharacter pc = newItemForm.getPC();
-                item.setName(pc.getCharacterAndPlayerName(sessionService.getUserRepository().findById(pc.getUserId()).get()));
+                User player = sessionService.getUserRepository().findById(pc.getUserId()).orElse(new User());
+                item.setName(pc.getCharacterAndPlayerName(user));
                 item.setPcId(pc.getId());
                 pc.setGameId(getGameId());
                 cacheService.getPcCache().save(pc);

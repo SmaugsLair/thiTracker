@@ -29,7 +29,7 @@ public class TimeLineItem implements ThiEntity, Comparable<TimeLineItem> {
     @Column
     private String color;
 
-    @Column(nullable = true)
+    @Column()
     private Long pcId;
 
     @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL)

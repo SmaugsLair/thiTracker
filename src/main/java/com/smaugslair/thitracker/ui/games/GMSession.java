@@ -17,13 +17,12 @@ public class GMSession extends SplitLayout {
 
     private final TimeLineHistory timeLineHistory;
     private final DiceHistory diceHistory;
-    private final GMTimeLineView gmTimeLineView;
     private final CharacterDetails characterDetails;
 
     public GMSession(SessionService sessionService, CacheService cacheService) {
 
-        gmTimeLineView = new GMTimeLineView(this, sessionService, cacheService);
-        characterDetails = new CharacterDetails(sessionService, gmTimeLineView);
+        GMTimeLineView gmTimeLineView = new GMTimeLineView(this, sessionService, cacheService);
+        characterDetails = new CharacterDetails(gmTimeLineView);
         diceHistory = new DiceHistory(sessionService, cacheService);
         timeLineHistory = new TimeLineHistory(gmTimeLineView);
 

@@ -2,8 +2,8 @@ package com.smaugslair.thitracker.data.powers;
 
 public interface Sheetable {
 
-    public String getSsid() ;
+    String getSsid() ;
 
-    public String getName();
+    String getName();
 
 }

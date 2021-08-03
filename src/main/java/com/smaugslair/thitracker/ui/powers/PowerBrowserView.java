@@ -29,19 +29,12 @@ public class PowerBrowserView extends Grid<Power> {
         setDataProvider(dataProvider);
 
         PowerFilter filterObject = new PowerFilter();
-        dataProvider.setFilter(power -> filterObject.test(power));
+        dataProvider.setFilter(filterObject::test);
 
         //setDetailsVisibleOnClick(true);
         addColumn(new NativeButtonRenderer<>(
                 item -> isDetailsVisible(item) ? "-" : "+",
                 item -> setDetailsVisible(item, !isDetailsVisible(item))));
-       /* addColumn(new ComponentRenderer<>(power -> {
-            return new Button("+", event -> {
-                boolean visible = !isDetailsVisible(power);
-                setDetailsVisible(power, visible);
-                event.getSource().setText(visible ? "-" : "+");
-            });
-        }));*/
 
         Grid.Column<Power> nameColumn =  addColumn(Power::getName).setHeader("Name").setSortable(true);
         Grid.Column<Power> tierColumn = addColumn(Power::getTier).setHeader("Tier").setSortable(true);
@@ -54,9 +47,7 @@ public class PowerBrowserView extends Grid<Power> {
         List<GridSortOrder<Power>> sortByName = new GridSortOrderBuilder<Power>().thenAsc(nameColumn).build();
         sort(sortByName);
 
-        setItemDetailsRenderer(new ComponentRenderer<>(power -> {
-            return new PowerDetails(power);
-        }));
+        setItemDetailsRenderer(new ComponentRenderer<>(PowerDetails::new));
 
         HeaderRow filterRow = appendHeaderRow();
 

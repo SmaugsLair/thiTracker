@@ -17,13 +17,13 @@ public class UserForm extends FormLayout {
 
     private User user;
 
-    Binder<User> binder = new Binder<>(User.class);
+    final Binder<User> binder = new Binder<>(User.class);
 
-    private TextField name = new TextField();
-    private EmailField email = new EmailField();
-    private TextField displayName = new TextField();
+    private final TextField name = new TextField();
+    private final EmailField email = new EmailField();
+    private final TextField displayName = new TextField();
     private final boolean admin;
-    private Checkbox adminBox = new Checkbox();
+    private final Checkbox adminBox = new Checkbox();
 
     public UserForm(User user) {
         this.user = user;
@@ -44,9 +44,7 @@ public class UserForm extends FormLayout {
         name.setMinLength(6);
         name.setMaxLength(20);
         name.setRequiredIndicatorVisible(true);
-        name.addValueChangeListener(event -> {
-            user.setName(event.getValue());
-        });
+        name.addValueChangeListener(event -> user.setName(event.getValue()));
         addFormItem(name, "Username");
         binder.forField(name)
                 .asRequired("Required")
@@ -62,9 +60,7 @@ public class UserForm extends FormLayout {
         name.setMinLength(6);
         name.setMaxLength(30);
         displayName.setRequiredIndicatorVisible(true);
-        displayName.addValueChangeListener(event -> {
-            user.setDisplayName(event.getValue());
-        });
+        displayName.addValueChangeListener(event -> user.setDisplayName(event.getValue()));
         addFormItem(displayName, "Display Name");
         binder.forField(displayName)
                 .asRequired("Required")
@@ -76,9 +72,7 @@ public class UserForm extends FormLayout {
         }
 
         if (admin) {
-            adminBox.addValueChangeListener(event -> {
-                user.setAdmin(event.getValue());
-            });
+            adminBox.addValueChangeListener(event -> user.setAdmin(event.getValue()));
             addFormItem(adminBox, "Admin");
             binder.forField(adminBox).bind("admin");
         }

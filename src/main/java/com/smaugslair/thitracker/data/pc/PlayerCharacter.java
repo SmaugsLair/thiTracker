@@ -20,7 +20,7 @@ public class PlayerCharacter implements ThiEntity {
     @Column(nullable = false)
     private Integer userId;
 
-    @Column(nullable = true)
+    @Column()
     private Long gameId;
 
     @Column(nullable = false)
@@ -93,9 +93,7 @@ public class PlayerCharacter implements ThiEntity {
 
     public String getCharacterAndPlayerName(User user) {
         if (pcPlayerName == null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(name).append(" (").append(user.getDisplayName()).append(")");
-            pcPlayerName = sb.toString();
+            pcPlayerName = name + " (" + user.getDisplayName() + ")";
         }
         return pcPlayerName;
     }

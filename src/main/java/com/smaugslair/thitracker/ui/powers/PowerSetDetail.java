@@ -28,9 +28,6 @@ public class PowerSetDetail extends VerticalLayout {
         formLayout.addFormItem(new Paragraph(powerSet.getAbilityMods()), "");
         formLayout.addFormItem(new Details("", new Paragraph(powerSet.getPowersText())), "Details");
 
-        //Accordion powersAccordion = new Accordion();
-        //powersAccordion.close();
-
         VerticalLayout powersLayout = new VerticalLayout();
         powersLayout.setWidthFull();
 
@@ -49,9 +46,7 @@ public class PowerSetDetail extends VerticalLayout {
             grid.addColumn(Power::getPrereq).setHeader("Prerequisites");
             grid.addColumn(Power::getMaxTaken).setHeader("Limit");
 
-            grid.setItemDetailsRenderer(new ComponentRenderer<>(power -> {
-                return new Paragraph(power.getFullDescr());
-            }));
+            grid.setItemDetailsRenderer(new ComponentRenderer<>(power -> new Paragraph(power.getFullDescr())));
 
             grid.getColumns().forEach(powerColumn -> powerColumn.setAutoWidth(true));
             grid.setWidthFull();

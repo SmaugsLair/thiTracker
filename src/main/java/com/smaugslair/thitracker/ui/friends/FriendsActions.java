@@ -11,14 +11,14 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import java.util.List;
+import java.util.Objects;
 
 
 public class FriendsActions extends VerticalLayout {
 
-    private final Friendship friendship;
 
     public FriendsActions(Friendship friendship, List<PlayerCharacter> pcs, FriendsList parent) {
-        this.friendship = friendship;
+
         if (friendship.getAccepted()) {
             Button deleteButton = new Button("Remove");
             add(new Button("Remove", event -> parent.delete(friendship)));
@@ -38,7 +38,7 @@ public class FriendsActions extends VerticalLayout {
         }
         else {
             HorizontalLayout buttonRow = new HorizontalLayout();
-            if (SecurityUtils.getLoggedInUser().equals(friendship.getUser())) {
+            if (Objects.equals(SecurityUtils.getLoggedInUser(), friendship.getUser())) {
                 buttonRow.add(new Label("Waiting..."));
                 buttonRow.add(new Button("Cancel", event -> parent.delete(friendship)));
             }

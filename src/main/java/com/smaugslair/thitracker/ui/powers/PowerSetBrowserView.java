@@ -30,9 +30,7 @@ public class PowerSetBrowserView extends HorizontalLayout {
             tabs.add(tab);
             map.put(tab, powerSet);
         });
-        tabs.addSelectedChangeListener(event -> {
-            powerSetDetails.setPowerSet(map.get(event.getSelectedTab()));
-        });
+        tabs.addSelectedChangeListener(event -> powerSetDetails.setPowerSet(map.get(event.getSelectedTab())));
         if (!powersCache.getPowerSetList().isEmpty()) {
             powerSetDetails.setPowerSet(powersCache.getPowerSetList().get(0));
         }

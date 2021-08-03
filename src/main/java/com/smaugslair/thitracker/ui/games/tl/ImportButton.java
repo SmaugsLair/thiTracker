@@ -8,12 +8,8 @@ import com.smaugslair.thitracker.ui.games.GMTimeLineView;
 import com.vaadin.flow.component.button.Button;
 
 public class ImportButton extends Button {
-    private final CollectedItem item;
-    private final GMTimeLineView gmTimeLineView;
 
     public ImportButton(CollectedItem item, GMTimeLineView gmTimeLineView) {
-        this.item = item;
-        this.gmTimeLineView = gmTimeLineView;
         setText("Import");
         addClickListener(event -> {
             TimeLineItem tli = new TimeLineItem();

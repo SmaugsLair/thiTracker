@@ -7,15 +7,13 @@ import com.vaadin.flow.data.binder.Binder;
 
 public class PasswordForm extends FormLayout {
 
-    private PasswordVerify passwordVerify = new PasswordVerify();
+    final Binder<PasswordVerify> binder = new Binder<>(PasswordVerify.class);
 
-    Binder<PasswordVerify> binder = new Binder<>(PasswordVerify.class);
-
-    private PasswordField password = new PasswordField();
-    private PasswordField verify = new PasswordField();
+    private final PasswordField password = new PasswordField();
 
     public PasswordForm() {
         binder.bindInstanceFields(this);
+        PasswordVerify passwordVerify = new PasswordVerify();
         binder.readBean(passwordVerify);
 
         password.setRequired(true);
@@ -29,6 +27,7 @@ public class PasswordForm extends FormLayout {
                 .withValidator(password -> password.length() >= 8, "8 char min")
                 .bind("password");
 
+        PasswordField verify = new PasswordField();
         verify.setRequired(true);
         verify.setMinLength(8);
         verify.setMaxLength(20);

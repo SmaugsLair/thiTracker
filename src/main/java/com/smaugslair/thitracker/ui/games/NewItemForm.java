@@ -1,6 +1,7 @@
 package com.smaugslair.thitracker.ui.games;
 
 import com.smaugslair.thitracker.data.pc.PlayerCharacter;
+import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.services.SessionService;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -30,10 +31,8 @@ public class NewItemForm extends FormLayout {
 
         Div radioFields = new Div();
         pcField = new Select<>();
-        pcField.setItemLabelGenerator(item -> {
-            return item.getCharacterAndPlayerName(
-                    sessionService.getUserRepository().findById(item.getUserId()).get());
-        });
+        pcField.setItemLabelGenerator(item -> item.getCharacterAndPlayerName(
+                sessionService.getUserRepository().findById(item.getUserId()).orElse(new User())));
 
         otherField = new TextField();
         otherField.setPlaceholder("Other");
@@ -53,7 +52,7 @@ public class NewItemForm extends FormLayout {
 
 
         radioGroup.addValueChangeListener(event -> {
-            if (event.getValue() == "PC") {
+            if ("PC".equals(event.getValue())) {
                 radioFields.remove(otherField);
                 radioFields.add(pcField);
             }

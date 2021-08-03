@@ -1,7 +1,5 @@
 package com.smaugslair.thitracker.util;
 
-import com.smaugslair.thitracker.data.ThiEntity;
-
 import java.util.StringJoiner;
 
 public class NameValue {

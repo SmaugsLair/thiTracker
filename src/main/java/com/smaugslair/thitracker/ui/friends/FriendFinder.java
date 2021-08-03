@@ -3,7 +3,6 @@ package com.smaugslair.thitracker.ui.friends;
 import com.smaugslair.thitracker.data.user.Friendship;
 import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.security.SecurityUtils;
-import com.smaugslair.thitracker.services.CacheService;
 import com.smaugslair.thitracker.services.SessionService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Label;
@@ -17,15 +16,13 @@ import java.util.Optional;
 public class FriendFinder extends VerticalLayout {
 
     private final SessionService sessionService;
-    private final CacheService cacheService;
     private final FriendsSession friendsSession;
-    private User self = SecurityUtils.getLoggedInUser();
+    private final User self = SecurityUtils.getLoggedInUser();
     private User friend = null;
 
-    public FriendFinder(FriendsSession friendsSession, SessionService sessionService, CacheService cacheService) {
+    public FriendFinder(FriendsSession friendsSession, SessionService sessionService) {
         this.sessionService = sessionService;
         this.friendsSession = friendsSession;
-        this.cacheService = cacheService;
         init();
     }
 

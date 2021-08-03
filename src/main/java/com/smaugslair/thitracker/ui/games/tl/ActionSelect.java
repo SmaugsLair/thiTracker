@@ -7,7 +7,7 @@ import com.vaadin.flow.component.select.Select;
 
 public class ActionSelect extends Select<ActionTime> {
 
-    public static ActionTime unselectedActionTime = new ActionTime("Choose action:");
+    public static final ActionTime unselectedActionTime = new ActionTime("Choose action:");
 
     public ActionSelect(TimeLineItem item, GMTimeLineView gmTimeLineView) {
         setItems(item.getActionTimes());

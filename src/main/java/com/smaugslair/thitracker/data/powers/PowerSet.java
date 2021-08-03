@@ -15,7 +15,7 @@ public class PowerSet implements Sheetable {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = true)
+    @Column()
     @Temporal(TemporalType.DATE)
     private Date updated;
 

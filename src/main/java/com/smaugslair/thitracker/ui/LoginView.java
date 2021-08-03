@@ -3,7 +3,6 @@ package com.smaugslair.thitracker.ui;
 import com.smaugslair.thitracker.data.user.Credentials;
 import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.security.SecurityUtils;
-import com.smaugslair.thitracker.services.CacheService;
 import com.smaugslair.thitracker.services.PasswordResetService;
 import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.ui.users.PasswordForm;
@@ -35,11 +34,9 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 
 	private SessionService sessionService;
 
-	private CacheService cacheService;
-
 	private PasswordResetService passwordResetService;
 
-	private LoginForm login = new LoginForm(); 
+	private final LoginForm login = new LoginForm();
 
 	public LoginView(){
 		addClassName("login-view");
@@ -98,9 +95,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 			Notification.show("Check your inbox", 10000, Notification.Position.MIDDLE);
 		}));
 
-		login.addForgotPasswordListener(event -> {
-			forgotPasswordDialog.open();
-		});
+		login.addForgotPasswordListener(event -> forgotPasswordDialog.open());
 
 		add(new Button("Create new account", event -> dialog.open()));
 	}
@@ -126,13 +121,8 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 		this.passwordResetService = passwordResetService;
 	}
 
-	@Autowired
-	public void setCacheService(CacheService cacheService) {
-		this.cacheService = cacheService;
-	}
-
 	private String generateFriendCode() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < 4; ++i) {
 			sb.append((int)(Math.random() * 10));
 		}

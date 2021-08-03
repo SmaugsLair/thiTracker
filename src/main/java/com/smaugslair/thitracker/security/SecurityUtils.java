@@ -15,8 +15,8 @@ import java.util.stream.Stream;
 
 public final class SecurityUtils {
 
-    private static Logger log = LoggerFactory.getLogger(SecurityUtils.class);
-    private static BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+    private static final Logger log = LoggerFactory.getLogger(SecurityUtils.class);
+    private static final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     private SecurityUtils() {
         // Util methods only
@@ -52,9 +52,4 @@ public final class SecurityUtils {
         return encoder.encode(rawPassword);
     }
 
-    /*private final static String passwordReset = "/passwordreset";
-    public static boolean isPasswordReset(HttpServletRequest request) {
-        log.info("isPasswordReset getServletPath: "+ request.getServletPath());
-        return passwordReset.equals(request.getServletPath());
-    }*/
 }

@@ -10,7 +10,7 @@ import java.util.List;
 
 public class ValidTextField extends TextField {
 
-  class Content {
+  static class Content {
     String content;
     public String getContent() {
       return content;
@@ -20,12 +20,11 @@ public class ValidTextField extends TextField {
     }
   }
 
-  private Content content = new Content();
-  private Binder<Content> binder = new Binder<>();
-  private List<Validator<String>> validators = new ArrayList<>();
+  private final Binder<Content> binder = new Binder<>();
+  private final List<Validator<String>> validators = new ArrayList<>();
 
   public ValidTextField() {
-    binder.setBean(content);
+    binder.setBean(new Content());
   }
 
   public void addValidator(

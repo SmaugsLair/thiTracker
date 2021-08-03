@@ -9,13 +9,13 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
 
-    public Optional<User> findUserByEmail(String email);
+    Optional<User> findUserByEmail(String email);
 
-    public User findUserByName(String name);
+    User findUserByName(String name);
 
     @Override
     @Cacheable("users")
-    public Optional<User> findById(Integer id);
+    Optional<User> findById(Integer id);
 
     @Override
     @CacheEvict(value = "users", allEntries = true)

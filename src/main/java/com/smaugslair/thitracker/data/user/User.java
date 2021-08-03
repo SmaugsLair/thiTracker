@@ -1,7 +1,6 @@
 package com.smaugslair.thitracker.data.user;
 
 import com.smaugslair.thitracker.data.ThiEntity;
-import org.apache.poi.ss.formula.functions.T;
 
 import javax.persistence.*;
 import java.util.Objects;

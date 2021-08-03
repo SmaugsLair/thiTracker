@@ -36,9 +36,7 @@ import java.util.Map;
 @Route(value = "powersupload", layout = MainView.class)
 public class PowersUpload extends VerticalLayout {
 
-    private static Logger log = LoggerFactory.getLogger(PowersUpload.class);
-
-    private final SessionService sessionService;
+    private static final Logger log = LoggerFactory.getLogger(PowersUpload.class);
 
     private final List<PowerSet> newPowerSets = new ArrayList<>();
     private final List<PowerSet> unchangedPowerSets = new ArrayList<>();
@@ -51,7 +49,6 @@ public class PowersUpload extends VerticalLayout {
     private final ProgressBar progressBar = new ProgressBar();
 
     public PowersUpload(SessionService sessionService) {
-        this.sessionService = sessionService;
 
         Map<String, PowerSet> cachedPowerSetMap = new HashMap<>();
         sessionService.getPowersCache().getPowerSetList().forEach(powerSet -> cachedPowerSetMap.put(powerSet.getSsid(), powerSet));
@@ -68,7 +65,7 @@ public class PowersUpload extends VerticalLayout {
             sessionService.getPowerSetRepo().saveAll(newPowerSets);
             sessionService.getPowerSetRepo().saveAll(updatedPowerSets);
             sessionService.getPowersCache().load();
-            event.getSource().getUI().get().navigate(PowerSetBrowserView.class);
+            event.getSource().getUI().ifPresent(ui -> ui.navigate(PowerSetBrowserView.class));
         });
         saveButton.setEnabled(false);
         HorizontalLayout results = new HorizontalLayout();
@@ -98,7 +95,7 @@ public class PowersUpload extends VerticalLayout {
             output.add(new Label("Filename uploaded: "+event.getFileName()));
             progressBar.setIndeterminate(true);
             output.add(progressBar);
-            OPCPackage pkg = null;
+            OPCPackage pkg;
             try {
                 pkg = OPCPackage.open(buffer.getInputStream());
                 XSSFWorkbook workbook = new XSSFWorkbook(pkg);
@@ -112,13 +109,6 @@ public class PowersUpload extends VerticalLayout {
 
                 Map<String, Power> powersInSheet = (Map<String, Power>) loadSheet(workbook, powerTransformer);
                 log.info("Powers found:"+ powersInSheet.size());
-
-                //powerSetsInSheet.forEach((s, clutch) -> log.info("clutch: "+clutch));
-
-
-
-
-                //final int[] max = {0};
 
 
                 powerSetsInSheet.forEach((name, loadedPowerSet) -> {
@@ -187,20 +177,18 @@ public class PowersUpload extends VerticalLayout {
             output.removeAll();
             output.add(event.getErrorMessage());
         });
-        upload.getElement().addEventListener("file-remove", event -> {
-            output.removeAll();
-        });
+        upload.getElement().addEventListener("file-remove", event -> output.removeAll());
 
         add(upload, output, saveButton, results);
     }
 
-    private void validateSheetMetadata(XSSFWorkbook workbook, Transformer transformer) throws IllegalArgumentException {
+    private void validateSheetMetadata(XSSFWorkbook workbook, Transformer<? extends Sheetable> transformer) throws IllegalArgumentException {
         XSSFSheet sheet = workbook.getSheet(transformer.getSheetName());
         if (sheet == null) {
             throw new IllegalArgumentException("Didn't find a sheet named: "+transformer.getSheetName());
         }
         String[] labels = transformer.getLabels();
-        Integer labelRowIndex = transformer.getLabelRowIndex();
+        int labelRowIndex = transformer.getLabelRowIndex();
         XSSFRow labelRow = sheet.getRow(labelRowIndex);
         for (int i = 0; i < labels.length; ++i) {
             if (!labels[i].equals(labelRow.getCell(i).toString())) {
@@ -213,7 +201,7 @@ public class PowersUpload extends VerticalLayout {
     }
 
 
-    private Map<String, ? extends Sheetable> loadSheet(XSSFWorkbook workbook, Transformer transformer) throws TransformerException {
+    private Map<String, ? extends Sheetable> loadSheet(XSSFWorkbook workbook, Transformer<? extends Sheetable> transformer) throws TransformerException {
         Map<String, Sheetable> map = new HashMap<>();
         XSSFSheet sheet = workbook.getSheet(transformer.getSheetName());
         log.info("sheet size: "+sheet.getPhysicalNumberOfRows());

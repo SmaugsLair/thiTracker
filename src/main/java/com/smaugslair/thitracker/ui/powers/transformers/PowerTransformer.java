@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 public class PowerTransformer extends Transformer<Power>{
 
-    private static Logger log = LoggerFactory.getLogger(PowerTransformer.class);
+    private static final Logger log = LoggerFactory.getLogger(PowerTransformer.class);
 
     public static final String[] labels = {"name", "ssid", "am_Perception", "am_Stealth", "am_Aim",	"am_Dodge",
             "am_Strength", "am_Toughness",	"am_Influence",	"am_Self-Control",	"am_Initiative",
@@ -64,7 +64,6 @@ public class PowerTransformer extends Transformer<Power>{
         boolean found = false;
         while (!found) {
             if (labelRow.getCell(i) == null) {
-                found = true;
                 break;
             }
             String label = labelRow.getCell(i).toString();

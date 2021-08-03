@@ -154,7 +154,7 @@ public class Power implements Sheetable {
 
     public void addToPowerSets(String name, Integer tier) {
         powerSetMap.put(name, tier);
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, Integer> entry: powerSetMap.entrySet()) {
             sb.append(entry.getKey()).append("|").append(entry.getValue()).append("|");
         }
@@ -164,7 +164,7 @@ public class Power implements Sheetable {
     @Transient Integer tier;
     public Integer getTier() {
         if (tier == null) {
-            Integer working = 11;
+            int working = 11;
             for (Integer i: powerSetMap.values()) {
                 working = Math.min(working, i);
             }

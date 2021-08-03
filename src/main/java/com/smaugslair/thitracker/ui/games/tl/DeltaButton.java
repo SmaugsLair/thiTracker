@@ -14,18 +14,12 @@ import java.util.Map;
 
 public class DeltaButton extends Button {
 
-    private final TimeLineItem item;
-
-    private final GMTimeLineView gmTimeLineView;
-
-    private Map<String, IntegerField> fieldMap = new HashMap<>();
+    private final Map<String, IntegerField> fieldMap = new HashMap<>();
 
     public DeltaButton(TimeLineItem item, GMTimeLineView gmTimeLineView) {
-        this.item = item;
-        this.gmTimeLineView = gmTimeLineView;
 
         FormLayout formLayout = new FormLayout();
-        Integer count = 0;
+        int count = 0;
         for (ActionTimeDefault atd : gmTimeLineView.getAtds()) {
             ActionTimeDelta delta = item.getDeltas().get(atd.getName());
             if (delta.getDelta() != 0) {
@@ -37,7 +31,7 @@ public class DeltaButton extends Button {
             formLayout.addFormItem(deltaField, delta.getName());
             fieldMap.put(delta.getName(), deltaField);
         }
-        setText(count.toString());
+        setText(Integer.toString(count));
 
         ConfirmDialog deltaDialog = new ConfirmDialog(formLayout);
 

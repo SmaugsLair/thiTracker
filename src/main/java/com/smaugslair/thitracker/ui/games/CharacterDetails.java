@@ -6,7 +6,6 @@ import com.smaugslair.thitracker.data.pc.PlayerCharacter;
 import com.smaugslair.thitracker.data.pc.Trait;
 import com.smaugslair.thitracker.data.pc.TraitType;
 import com.smaugslair.thitracker.data.user.User;
-import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.ui.games.tl.ProgressionPoint;
 import com.smaugslair.thitracker.ui.games.tl.TraitPoint;
 import com.smaugslair.thitracker.websockets.RegisteredVerticalLayout;
@@ -24,13 +23,11 @@ public class CharacterDetails extends RegisteredVerticalLayout {
 
     private final static Logger log = LoggerFactory.getLogger(CharacterDetails.class);
 
-    private final SessionService sessionService;
     private final GMTimeLineView gmTimeLineView;
     PlayerCharacter pc = null;
     User user = null;
 
-    public CharacterDetails(SessionService sessionService, GMTimeLineView gmTimeLineView) {
-        this.sessionService = sessionService;
+    public CharacterDetails(GMTimeLineView gmTimeLineView) {
         this.gmTimeLineView = gmTimeLineView;
         setPadding(false);
         setSpacing(false);

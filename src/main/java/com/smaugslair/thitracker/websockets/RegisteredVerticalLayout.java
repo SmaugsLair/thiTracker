@@ -18,33 +18,19 @@ public abstract class RegisteredVerticalLayout extends VerticalLayout {
 
     private Registration tlbReg;
 
-    //final Entry ping = new Entry(EventType.Ping);
-
-/*
-    ScheduledExecutorService keepAlive = Executors.newScheduledThreadPool(1);
-    Runnable r = () -> {
-        //log.info(this.getClass().getSimpleName()+" ---- ping -------");
-        Broadcaster.broadcast(ping);
-    };*/
-
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         //log.info("attaching "+this.getClass().getSimpleName());
         UI ui = attachEvent.getUI();
-        tlbReg = Broadcaster.register(entry -> {
-            ui.access(() -> {
-                handleMessage(entry);
-            });
-        });
-        //keepAlive.scheduleAtFixedRate(r, 0, 50, TimeUnit.SECONDS);
+        if (ui.getUI().isPresent()) {
+            tlbReg = Broadcaster.register(entry -> ui.access(() -> handleMessage(entry)));
+        }
     }
 
     @Override
     protected void onDetach(DetachEvent detachEvent) {
-        //log.info("Detaching "+this.getClass().getSimpleName());
         tlbReg.remove();
         tlbReg = null;
-        //keepAlive.shutdown();
     }
 
     protected abstract void handleMessage(Entry entry);

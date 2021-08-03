@@ -30,7 +30,8 @@ public class CollectionView extends VerticalLayout {
     public void init() {
 
         add(new H3("Collection"));
-        List<CollectedItem> items = sessionService.getCacheService().getCiRepo().findAllByGmId(SecurityUtils.getLoggedInUser().getId());
+        List<CollectedItem> items = sessionService.getCacheService().getCiRepo()
+                .findAllByGmId(SecurityUtils.getLoggedInUser().getId());
 
         if (items.isEmpty()) {
             add("Empty Collection - Items can be added from an active timeline");

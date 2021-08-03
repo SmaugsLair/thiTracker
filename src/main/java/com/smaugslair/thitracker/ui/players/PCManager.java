@@ -147,13 +147,11 @@ public class PCManager extends VerticalLayout {
         HorizontalLayout layout = new HorizontalLayout();
         if (pc.getGameId() != null) {
             Button launch = new Button("Launch "+ game.getName());
-            launch.addClickListener(e -> {
-                launch.getUI().ifPresent(ui -> {
-                    sessionService.setGameId(pc.getGameId());
-                    sessionService.setPc(pc);
-                    ui.navigate("playersession");
-                });
-            });
+            launch.addClickListener(e -> launch.getUI().ifPresent(ui -> {
+                sessionService.setGameId(pc.getGameId());
+                sessionService.setPc(pc);
+                ui.navigate("playersession");
+            }));
             layout.add(launch);
         }
         else {

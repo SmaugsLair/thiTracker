@@ -19,13 +19,13 @@ public class PowersCache {
     private PowerRepository powerRepo;
     private PowerSetRepository powerSetRepo;
 
-    private List<PowerSet> powerSetList = new ArrayList<>();
+    private final List<PowerSet> powerSetList = new ArrayList<>();
 
-    private Map<String, Map<Integer, List<Power>>> powersMap = new HashMap<>();
+    private final Map<String, Map<Integer, List<Power>>> powersMap = new HashMap<>();
 
-    private Map<String, PowerSet> powerSetMap = new HashMap<>();
+    private final Map<String, PowerSet> powerSetMap = new HashMap<>();
 
-    private List<Power> powerList = new ArrayList<>();
+    private final List<Power> powerList = new ArrayList<>();
 
     public synchronized Map<String, Map<Integer, List<Power>>> getPowersMap() {
         if (powersMap.isEmpty()) {
@@ -74,7 +74,7 @@ public class PowersCache {
         powerSetRepo.findAll(Sort.by(Sort.Direction.ASC, "name")).forEach(powerSet -> {
             powerSetList.add(powerSet);
             powerSetMap.put(powerSet.getName(), powerSet);
-            powersMap.put(powerSet.getName(), new HashMap<Integer, List<Power>>());
+            powersMap.put(powerSet.getName(), new HashMap<>());
         });
         powerRepo.findAll().forEach(power -> {
             power.fillPowerSetMap();
@@ -82,11 +82,7 @@ public class PowersCache {
             power.getPowerSetMap().forEach((psName, tier) -> {
                 Map<Integer, List<Power>> tieredListMap = powersMap.get(psName);
                 if (tieredListMap != null) {
-                    List<Power> list = tieredListMap.get(tier);
-                    if (list == null) {
-                        list = new ArrayList<>();
-                        tieredListMap.put(tier, list);
-                    }
+                    List<Power> list = tieredListMap.computeIfAbsent(tier, k -> new ArrayList<>());
                     list.add(power);
                 }
             });

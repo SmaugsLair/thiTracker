@@ -9,25 +9,21 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 
 @CssImport(value = "./styles/color.css", themeFor = "vaadin-grid")
 public class ColorDialog extends Dialog {
 
 
     private final GMTimeLineView gmTimeLineView;
-    private Optional<TimeLineItem> item;
+    private TimeLineItem item;
 
     public ColorDialog(GMTimeLineView gmTimeLineView) {
         this.gmTimeLineView = gmTimeLineView;
         HorizontalLayout horizontalLayout = new HorizontalLayout();
-        List<Grid<ColorCollection.Color>> grids = new ArrayList<>(5);
+        //List<Grid<ColorCollection.Color>> grids = new ArrayList<>(5);
         for (int i = 0 ; i < 5 ; ++i) {
             Grid<ColorCollection.Color> grid = new Grid<>();
-            grids.add(grid);
+            //grids.add(grid);
             horizontalLayout.add(grid);
 
             grid.setItems(ColorCollection.colorLists.get(i));
@@ -40,7 +36,7 @@ public class ColorDialog extends Dialog {
         setWidthFull();
     }
 
-    public void openWith(Optional<TimeLineItem> item) {
+    public void openWith(TimeLineItem item) {
         this.item = item;
         open();
     }
@@ -50,12 +46,9 @@ public class ColorDialog extends Dialog {
         ColorButton(ColorCollection.Color color) {
             setText(color.getName());
             addClickListener(event -> {
-                if (item.isPresent()) {
-                    item.get().setColor(color.getName());
-                    gmTimeLineView.updateItem(item.get());
-                    close();
-                }
-
+                item.setColor(color.getName());
+                gmTimeLineView.updateItem(item);
+                close();
             });
         }
     }

@@ -112,13 +112,11 @@ public class GamesManager extends VerticalLayout {
 
         HorizontalLayout layout = new HorizontalLayout();
         Button launch = new Button("Launch");
-        launch.addClickListener(e -> {
-            launch.getUI().ifPresent(ui -> {
-                sessionService.setGameId(game.getId());
-                ui.navigate("gmsession");
-                //ui.navigate(GMTimeLineView.class, new RouteParameters("gameId", game.getId().toString())));
-            });
-        });
+        launch.addClickListener(e -> launch.getUI().ifPresent(ui -> {
+            sessionService.setGameId(game.getId());
+            ui.navigate("gmsession");
+            //ui.navigate(GMTimeLineView.class, new RouteParameters("gameId", game.getId().toString())));
+        }));
         layout.add(launch);
         Button delete = new Button("Delete", event -> deleteDialog.open());
         layout.add(delete);

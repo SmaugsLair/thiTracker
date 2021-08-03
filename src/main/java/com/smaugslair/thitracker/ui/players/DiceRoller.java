@@ -1,5 +1,6 @@
 package com.smaugslair.thitracker.ui.players;
 
+import com.smaugslair.thitracker.data.game.Game;
 import com.smaugslair.thitracker.data.log.Entry;
 import com.smaugslair.thitracker.data.log.EventType;
 import com.smaugslair.thitracker.data.pc.PlayerCharacter;
@@ -25,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 
 public class DiceRoller extends RegisteredVerticalLayout {
@@ -38,26 +40,26 @@ public class DiceRoller extends RegisteredVerticalLayout {
     private final SessionService sessionService;
     private final CacheService cacheService;
 
-    private IntegerField d10s = new IntegerField();
-    private IntegerField maxDice = new IntegerField();
-    private FormLayout resultLayout = new FormLayout();
-    private Label progressLabel = new Label();
-    private ProgressBar progressBar = new ProgressBar();
-    private Label expectedValue = new Label(exp_val+(3*5.5));
-    private Label expectedHeroValue = new Label(exp_val+(4*5.5));
-    private TextField diceText = new TextField();
-    private TextField droppedText = new TextField();
-    private Label droppedLabel = new Label("Dropped");
+    private final IntegerField d10s = new IntegerField();
+    private final IntegerField maxDice = new IntegerField();
+    private final FormLayout resultLayout = new FormLayout();
+    private final Label progressLabel = new Label();
+    private final ProgressBar progressBar = new ProgressBar();
+    private final Label expectedValue = new Label(exp_val+(3*5.5));
+    private final Label expectedHeroValue = new Label(exp_val+(4*5.5));
+    private final TextField diceText = new TextField();
+    private final TextField droppedText = new TextField();
+    private final Label droppedLabel = new Label("Dropped");
 
-    private Button preHeroRollButton = new Button("Hero roll 4");
+    private final Button preHeroRollButton = new Button("Hero roll 4");
 
-    private Dialog traitRollDialog = new Dialog();
+    private final Dialog traitRollDialog = new Dialog();
 
-    Button postHeroRollButton = new Button("Roll 1 more, drop lowest",
+    final Button postHeroRollButton = new Button("Roll 1 more, drop lowest",
             event -> showTraitRollDialog(TraitType.Hero, false)); //rollAgain(TokenType.HERO));
 
 
-    private List<Integer> dice = new ArrayList<>();
+    private final List<Integer> dice = new ArrayList<>();
     private int sum = 0;
 
 
@@ -162,11 +164,10 @@ public class DiceRoller extends RegisteredVerticalLayout {
         add(resultLayout);
     }
 
-    private int captureD10roll() {
+    private void captureD10roll() {
         int roll = (int)(Math.random() * 10) + 1;
         sum += roll;
         dice.add(roll);
-        return roll;
     }
 
     //Assumes sorted
@@ -232,7 +233,7 @@ public class DiceRoller extends RegisteredVerticalLayout {
         droppedText.setValue(dropped.toString());
 
         PlayerCharacter pc = sessionService.getPc();
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append(pc.getName()).append(" rolled ").append(sum);
         sb.append("  ").append(dice);
         if (trait != null) {
@@ -313,8 +314,8 @@ public class DiceRoller extends RegisteredVerticalLayout {
     }
 
     private Integer getMaxDiceForGame() {
-        return cacheService.getGameCache().findOneById(sessionService.getGameId())
-                .get().getMaxDice();
+        Optional<Game> game = cacheService.getGameCache().findOneById(sessionService.getGameId());
+        return game.isPresent() ? game.get().getMaxDice() : 10;
     }
 
     private void showTraitRollDialog(TraitType type, boolean initial) {

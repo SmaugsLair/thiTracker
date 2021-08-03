@@ -19,7 +19,7 @@ public class CollectedItem implements ThiEntity {
     @Column(nullable = false)
     private Integer gmId;
 
-    @Column(nullable = true)
+    @Column()
     private String color;
 
     @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL)

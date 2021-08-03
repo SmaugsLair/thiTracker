@@ -13,7 +13,7 @@ public class JPACache<T extends ThiEntity, ID extends Number> {
     //private static final Logger log = LoggerFactory.getLogger(JPACache.class);
 
     private final T starter;
-    private Map<ID, T> map = new HashMap<>();
+    private final Map<ID, T> map = new HashMap<>();
 
     private final JpaRepository<T, ID> repo;
 
@@ -55,11 +55,7 @@ public class JPACache<T extends ThiEntity, ID extends Number> {
             result.ifPresent(t -> map.put(t.getId(), t));
             //log.info("returning:"+result);
             return result;
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             e.printStackTrace();
         }
         return Optional.empty();
@@ -80,11 +76,7 @@ public class JPACache<T extends ThiEntity, ID extends Number> {
                     list.add(t);
                 }
             }
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             e.printStackTrace();
         }
         if (list.isEmpty()) {
@@ -109,9 +101,7 @@ public class JPACache<T extends ThiEntity, ID extends Number> {
 
     public void saveAll(List<T> items) {
         List<T> saved = repo.saveAll(items);
-        saved.forEach(t -> {
-            map.replace(t.getId(), t);
-        });
+        saved.forEach(t -> map.replace(t.getId(), t));
     }
 
     public void deleteAllByProperty(NameValue nameValue) {
@@ -124,11 +114,7 @@ public class JPACache<T extends ThiEntity, ID extends Number> {
         T sample = starter.createEmptyObject();
         try {
             PropertyUtils.setProperty(sample, nameValue.getName(), nameValue.getValue());
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             e.printStackTrace();
         }
         return Example.of(sample);

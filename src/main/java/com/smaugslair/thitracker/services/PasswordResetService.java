@@ -70,12 +70,11 @@ public class PasswordResetService {
 
         msg.setSubject("Password reset for The Hero Instant app");
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("The Hero Instant application received a password reset request for this email address.\n");
-        sb.append("Follow the link below to complete this reset. This request will expire in 5 minutes. \n\n");
-        sb.append(thiProperties.getAppUrl()).append('/').append(thiProperties.getResetEndpoint());
-        sb.append("?resetToken=").append(uuid);
-        msg.setText(sb.toString());
+        String sb = "The Hero Instant application received a password reset request for this email address.\n" +
+                "Follow the link below to complete this reset. This request will expire in 5 minutes. \n\n" +
+                thiProperties.getAppUrl() + '/' + thiProperties.getResetEndpoint() +
+                "?resetToken=" + uuid;
+        msg.setText(sb);
 
 
         javaMailSender.send(msg);
