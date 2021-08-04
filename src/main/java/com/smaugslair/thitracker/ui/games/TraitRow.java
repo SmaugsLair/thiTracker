@@ -8,18 +8,25 @@ public class TraitRow {
 
     private final String name;
     private final Component component;
-    private final boolean subHead;
+    private final String color;
 
     public TraitRow(PointField pointField) {
         name = pointField.getPointName();
         component = pointField;
-        subHead = false;
+        color = "";
+    }
+
+
+    public TraitRow(String name, String color) {
+        this.name = name;
+        component = new Span();
+        this.color = color;
     }
 
     public TraitRow(String name) {
         this.name = name;
         component = new Span();
-        subHead = true;
+        color = "w3-light-grey";
     }
 
     public String getName() {
@@ -30,7 +37,7 @@ public class TraitRow {
         return component;
     }
 
-    public boolean isSubHead() {
-        return subHead;
+    public String getColor() {
+        return color;
     }
 }

@@ -316,11 +316,11 @@ public class GMTimeLineView extends VerticalLayout {
             if (opc.isPresent()) {
                 PlayerCharacter pc = opc.get();
                 Optional<User> user = sessionService.getUserRepository().findById(pc.getUserId());
-                user.ifPresent(value -> gmSession.setHero(pc, value));
+                user.ifPresent(value -> gmSession.setHero(pc, value, item.getColor()));
                 return;
             }
         }
-        gmSession.setHero(null, null);
+        gmSession.setHero(null, null, "");
     }
 
     public void updatePc(PlayerCharacter pc) {

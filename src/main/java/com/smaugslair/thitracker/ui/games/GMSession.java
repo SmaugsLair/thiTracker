@@ -56,7 +56,7 @@ public class GMSession extends SplitLayout {
         timeLineHistory.removeAll();
     }
 
-    public void setHero(PlayerCharacter pc, User user) {
-        characterDetails.setPc(pc, user);
+    public void setHero(PlayerCharacter pc, User user, String color) {
+        characterDetails.setPc(pc, user, color);
     }
 }

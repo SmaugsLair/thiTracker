@@ -9,8 +9,8 @@ import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.ui.games.tl.ProgressionPoint;
 import com.smaugslair.thitracker.ui.games.tl.TraitPoint;
 import com.smaugslair.thitracker.websockets.RegisteredVerticalLayout;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Paragraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,13 +19,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@CssImport(value = "./styles/color.css", themeFor = "vaadin-grid")
 public class CharacterDetails extends RegisteredVerticalLayout {
 
     private final static Logger log = LoggerFactory.getLogger(CharacterDetails.class);
 
     private final GMTimeLineView gmTimeLineView;
-    PlayerCharacter pc = null;
-    User user = null;
+    private PlayerCharacter pc = null;
+    private User user = null;
+    private String color;
 
     public CharacterDetails(GMTimeLineView gmTimeLineView) {
         this.gmTimeLineView = gmTimeLineView;
@@ -34,9 +36,10 @@ public class CharacterDetails extends RegisteredVerticalLayout {
         init();
     }
 
-    public void setPc(PlayerCharacter pc, User user) {
+    public void setPc(PlayerCharacter pc, User user, String color) {
         this.pc = pc;
         this.user = user;
+        this.color = color;
         removeAll();
         init();
     }
@@ -47,9 +50,8 @@ public class CharacterDetails extends RegisteredVerticalLayout {
             return;
         }
 
-        add(new Label(pc.getCharacterAndPlayerName(user)));
-
         List<TraitRow> traitRows = new ArrayList<>(9);
+        traitRows.add(new TraitRow(pc.getCharacterAndPlayerName(user), "w3-"+color));
         traitRows.add(new TraitRow(new ProgressionPoint(pc, this)));
 
         List<Trait> traits = pc.getTraits().stream().sorted().collect(Collectors.toList());
@@ -75,7 +77,7 @@ public class CharacterDetails extends RegisteredVerticalLayout {
         grid.addColumn(TraitRow::getName).setFlexGrow(2);
         grid.addComponentColumn(TraitRow::getComponent).setFlexGrow(1);
 
-        grid.setClassNameGenerator(item -> item.isSubHead() ? "w3-light-grey" : "");
+        grid.setClassNameGenerator(item -> item.getColor());
 
         add(grid);
     }
