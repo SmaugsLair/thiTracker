@@ -148,18 +148,10 @@ public class Power implements Sheetable {
 
     public void fillPowerSetMap() {
         if (powerSets == null) return;
-        if (powerSets.endsWith("|")) {
-            StringTokenizer st = new StringTokenizer(powerSets, "|");
-            while (st.hasMoreTokens()) {
-                powerSetMap.put(st.nextToken(), Integer.parseInt(st.nextToken()));
-            }
-        }
-        else {
-            StringTokenizer st = new StringTokenizer(powerSets, ",");
-            while (st.hasMoreTokens()) {
-                StringTokenizer ist = new StringTokenizer(st.nextToken(), ":");
-                powerSetMap.put(ist.nextToken(), Integer.parseInt(ist.nextToken()));
-            }
+        StringTokenizer st = new StringTokenizer(powerSets, ",");
+        while (st.hasMoreTokens()) {
+            StringTokenizer ist = new StringTokenizer(st.nextToken(), ":");
+            powerSetMap.put(ist.nextToken().trim(), Integer.parseInt(ist.nextToken()));
         }
     }
 
