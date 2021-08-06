@@ -10,6 +10,7 @@ import com.smaugslair.thitracker.ui.games.tl.ProgressionPoint;
 import com.smaugslair.thitracker.ui.games.tl.TraitPoint;
 import com.smaugslair.thitracker.websockets.RegisteredVerticalLayout;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Paragraph;
 import org.slf4j.Logger;
@@ -74,8 +75,8 @@ public class CharacterDetails extends RegisteredVerticalLayout {
         grid.setHeightByRows(true);
         grid.setItems(traitRows);
 
-        grid.addColumn(TraitRow::getName).setFlexGrow(2);
-        grid.addComponentColumn(TraitRow::getComponent).setFlexGrow(1);
+        grid.addColumn(TraitRow::getName);//.setFlexGrow(2);
+        grid.addComponentColumn(TraitRow::getComponent).setTextAlign(ColumnTextAlign.END);
 
         grid.setClassNameGenerator(item -> item.getColor());
 

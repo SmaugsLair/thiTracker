@@ -74,16 +74,22 @@ public class PowersUpload extends VerticalLayout {
         VerticalLayout updatedClutchLayout = new VerticalLayout();
         VerticalLayout unchangedClutchLayout = new VerticalLayout();
         Details newClutchDetails = new Details("New PowerSets", newClutchLayout);
+        newClutchDetails.setEnabled(false);
         Details updatedClutchDetails = new Details("Modified PowerSets", updatedClutchLayout);
+        updatedClutchDetails.setEnabled(false);
         Details unchangedClutchDetails = new Details("Unchanged PowerSets", unchangedClutchLayout);
+        unchangedClutchDetails.setEnabled(false);
 
 
         VerticalLayout newPowerLayout = new VerticalLayout();
         VerticalLayout updatedPowerLayout = new VerticalLayout();
         VerticalLayout unchangedPowerLayout = new VerticalLayout();
         Details newPowerDetails = new Details("New Powers", newPowerLayout);
+        newPowerDetails.setEnabled(false);
         Details updatedPowerDetails = new Details("Modified Powers", updatedPowerLayout);
+        updatedPowerDetails.setEnabled(false);
         Details unchangedPowerDetails = new Details("Unchanged Powers", unchangedPowerLayout);
+        unchangedPowerDetails.setEnabled(false);
 
 
         results.add(newClutchDetails, updatedClutchDetails, unchangedClutchDetails);
@@ -132,8 +138,11 @@ public class PowersUpload extends VerticalLayout {
                 //log.info("Max ability text:"+max[0]);
 
                 newClutchDetails.setSummaryText("New PowerSets: " + newPowerSets.size());
+                newClutchDetails.setEnabled(true);
                 unchangedClutchDetails.setSummaryText("Unchanged PowerSets: " + unchangedPowerSets.size());
+                unchangedClutchDetails.setEnabled(true);
                 updatedClutchDetails.setSummaryText("Modified PowerSets: " + updatedPowerSets.size());
+                updatedClutchDetails.setEnabled(true);
 
                 powersInSheet.forEach((name, loadedPower) -> {
                     //max[0] = Math.max(max[0], loadedPower.getSubPowers().length());
@@ -155,8 +164,11 @@ public class PowersUpload extends VerticalLayout {
 
 
                 newPowerDetails.setSummaryText("New Powers: " +newPowers.size());
+                newPowerDetails.setEnabled(true);
                 unchangedPowerDetails.setSummaryText("Unchanged Powers: " +unchangedPowers.size());
+                unchangedPowerDetails.setEnabled(true);
                 updatedPowerDetails.setSummaryText("Modified Powers: " +updatedPowers.size());
+                updatedPowerDetails.setEnabled(true);
 
                 progressBar.setValue(1);
                 saveButton.setEnabled(!newPowers.isEmpty() || !newPowerSets.isEmpty()

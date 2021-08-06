@@ -47,6 +47,20 @@ public class PowerTransformer extends Transformer<Power>{
                 else if (label.equals("metaPower")) {
                     power.setMetaPower(cell.toString().equals("1.0"));
                 }
+                else if (label.equals("maxTaken")) {
+                    if (cell.toString().isEmpty()) {
+                        power.setMaxTaken("1");
+                    }
+                    else {
+                        //log.info("row:" + row.getRowNum() + ", maxTaken cell:" + cell);
+                        String value = cell.toString();
+                        try {
+                            value = Integer.valueOf(Double.valueOf(value).intValue()).toString();
+                        }
+                        catch (NumberFormatException nfe) {}
+                        BeanUtils.setProperty(power, label, value);
+                    }
+                }
                 else {
                     BeanUtils.setProperty(power, label, cell.toString());
                 }

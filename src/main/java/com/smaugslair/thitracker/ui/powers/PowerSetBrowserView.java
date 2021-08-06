@@ -3,7 +3,7 @@ package com.smaugslair.thitracker.ui.powers;
 import com.smaugslair.thitracker.data.powers.PowerSet;
 import com.smaugslair.thitracker.services.PowersCache;
 import com.smaugslair.thitracker.ui.MainView;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.router.PageTitle;
@@ -14,14 +14,15 @@ import java.util.Map;
 
 @PageTitle("Power Set Browser")
 @Route(value = "powersetbrowser", layout = MainView.class)
-public class PowerSetBrowserView extends HorizontalLayout {
+public class PowerSetBrowserView extends VerticalLayout {
 
     public PowerSetBrowserView(PowersCache powersCache) {
 
         Tabs tabs = new Tabs();
-        tabs.setOrientation(Tabs.Orientation.VERTICAL);
+        tabs.setOrientation(Tabs.Orientation.HORIZONTAL);
         PowerSetDetails powerSetDetails = new PowerSetDetails(powersCache);
-        powerSetDetails.setWidthFull();
+        tabs.setFlexGrowForEnclosedTabs(0);
+        //powerSetDetails.setWidthFull();
 
         Map<Tab, PowerSet> map = new HashMap<>();
 

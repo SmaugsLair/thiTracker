@@ -1,5 +1,7 @@
 package com.smaugslair.thitracker.data.powers;
 
+import org.apache.commons.lang3.StringUtils;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -146,9 +148,18 @@ public class Power implements Sheetable {
 
     public void fillPowerSetMap() {
         if (powerSets == null) return;
-        StringTokenizer st = new StringTokenizer(powerSets, "|");
-        while (st.hasMoreTokens()) {
-            powerSetMap.put(st.nextToken(), Integer.parseInt(st.nextToken()));
+        if (powerSets.endsWith("|")) {
+            StringTokenizer st = new StringTokenizer(powerSets, "|");
+            while (st.hasMoreTokens()) {
+                powerSetMap.put(st.nextToken(), Integer.parseInt(st.nextToken()));
+            }
+        }
+        else {
+            StringTokenizer st = new StringTokenizer(powerSets, ",");
+            while (st.hasMoreTokens()) {
+                StringTokenizer ist = new StringTokenizer(st.nextToken(), ":");
+                powerSetMap.put(ist.nextToken(), Integer.parseInt(ist.nextToken()));
+            }
         }
     }
 
@@ -156,9 +167,9 @@ public class Power implements Sheetable {
         powerSetMap.put(name, tier);
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, Integer> entry: powerSetMap.entrySet()) {
-            sb.append(entry.getKey()).append("|").append(entry.getValue()).append("|");
+            sb.append(entry.getKey()).append(":").append(entry.getValue()).append(", ");
         }
-        powerSets = sb.toString().trim();
+        powerSets = StringUtils.removeEnd(sb.toString(), ", ");
     }
 
     @Transient Integer tier;
