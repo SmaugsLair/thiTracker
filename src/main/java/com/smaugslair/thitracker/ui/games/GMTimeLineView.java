@@ -57,14 +57,6 @@ public class GMTimeLineView extends VerticalLayout {
     private Accordion gameAccordion;
     private boolean accordionOpen = false;
 
-    static final Icon eyeCon = VaadinIcon.EYE_SLASH.create();
-    static final Icon deltaCon = VaadinIcon.CARET_UP.create();
-
-    static {
-        eyeCon.setSize("16px");
-        deltaCon.setSize("16px");
-    }
-
 
 
     public GMTimeLineView(GMSession gmSession, SessionService sessionService, CacheService cacheService) {
@@ -191,8 +183,12 @@ public class GMTimeLineView extends VerticalLayout {
         grid.addComponentColumn(item -> new ActionSelect(item, this));
         grid.addComponentColumn(item -> new TimeField(item, this)).setHeader("Time");
         grid.addComponentColumn(ReactText::new).setHeader("React");
-        grid.addComponentColumn(item -> new HiddenField(item, this)).setHeader(eyeCon);
-        grid.addComponentColumn(item -> new DeltaButton(item, this)).setHeader(deltaCon);
+        Icon icon = VaadinIcon.EYE_SLASH.create();
+        icon.setSize("16px");
+        grid.addComponentColumn(item -> new HiddenField(item, this)).setHeader(icon);
+        icon = VaadinIcon.CARET_UP.create();
+        icon.setSize("16px");
+        grid.addComponentColumn(item -> new DeltaButton(item, this)).setHeader(icon);
 
         grid.setClassNameGenerator(item -> "w3-"+item.getColor());
         grid.getColumns().forEach(itemColumn -> {
