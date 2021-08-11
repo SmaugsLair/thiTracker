@@ -11,6 +11,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 
 @CssImport(value = "./styles/color.css", themeFor = "vaadin-grid")
+@CssImport(value = "./styles/minPadding.css", themeFor = "vaadin-grid")
 public class ColorDialog extends Dialog {
 
 
@@ -23,6 +24,7 @@ public class ColorDialog extends Dialog {
         //List<Grid<ColorCollection.Color>> grids = new ArrayList<>(5);
         for (int i = 0 ; i < 5 ; ++i) {
             Grid<ColorCollection.Color> grid = new Grid<>();
+            grid.setThemeName("min-padding");
             //grids.add(grid);
             horizontalLayout.add(grid);
 

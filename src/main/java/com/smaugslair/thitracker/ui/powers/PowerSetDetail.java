@@ -3,6 +3,7 @@ package com.smaugslair.thitracker.ui.powers;
 import com.smaugslair.thitracker.data.powers.Power;
 import com.smaugslair.thitracker.data.powers.PowerSet;
 import com.smaugslair.thitracker.services.PowersCache;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
@@ -11,9 +12,10 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.NativeButtonRenderer;
 
-import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
 
+@CssImport(value = "./styles/minPadding.css", themeFor = "vaadin-grid")
 public class PowerSetDetail extends VerticalLayout {
 
     public PowerSetDetail(PowerSet powerSet, PowersCache powersCache) {
@@ -31,10 +33,11 @@ public class PowerSetDetail extends VerticalLayout {
         VerticalLayout powersLayout = new VerticalLayout();
         powersLayout.setWidthFull();
 
-        Map<Integer, List<Power>> powerMap = powersCache.getPowersMap().get(powerSet.getName());
+        Map<Integer, SortedSet<Power>> powerMap = powersCache.getPowersMap().get(powerSet.getName());
 
         powerMap.forEach((tier, powers) -> {
             Grid<Power> grid = new Grid<>();
+            grid.setThemeName("min-padding");
             grid.setItems(powers);
 
 

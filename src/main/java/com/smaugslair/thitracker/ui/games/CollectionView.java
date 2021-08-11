@@ -5,6 +5,7 @@ import com.smaugslair.thitracker.security.SecurityUtils;
 import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.ui.MainView;
 import com.smaugslair.thitracker.ui.components.ci.DeleteButton;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -13,6 +14,7 @@ import com.vaadin.flow.router.Route;
 import java.util.List;
 
 @Route(value = "collection", layout = MainView.class)
+@CssImport(value = "./styles/minPadding.css", themeFor = "vaadin-grid")
 public class CollectionView extends VerticalLayout {
 
     private final SessionService sessionService;
@@ -39,6 +41,7 @@ public class CollectionView extends VerticalLayout {
         }
 
         Grid<CollectedItem> grid = new Grid<>();
+        grid.setThemeName("min-padding");
         grid.setItems(items);
         grid.setHeightByRows(true);
         grid.setClassNameGenerator(item -> "w3-"+item.getColor());

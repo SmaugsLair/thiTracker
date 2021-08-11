@@ -1,16 +1,16 @@
 package com.smaugslair.thitracker.ui.games.tl;
 
-import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.component.textfield.NumberField;
 
-public class DerivedInteger extends IntegerField implements PointField {
+public class DerivedDouble extends NumberField implements PointField {
 
     private final String name;
 
-    public DerivedInteger(String name, Integer value) {
+    public DerivedDouble(String name, Double value) {
         this.name = name;
         setValue(value);
         setReadOnly(true);
-        setWidth("50px");
+        setWidth("40px");
     }
 
     public String getPointName() {

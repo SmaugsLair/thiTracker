@@ -6,6 +6,7 @@ import com.smaugslair.thitracker.data.user.UserRepository;
 import com.smaugslair.thitracker.ui.components.FilterField;
 import com.smaugslair.thitracker.ui.users.UserForm;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.HeaderRow;
@@ -18,6 +19,7 @@ import com.vaadin.flow.router.Route;
 
 @PageTitle("Admin Page")
 @Route(value = "useradmin", layout = MainView.class)
+@CssImport(value = "./styles/minPadding.css", themeFor = "vaadin-grid")
 public class UserAdmin extends VerticalLayout {
 
     private final UserRepository userRepository;
@@ -49,11 +51,13 @@ public class UserAdmin extends VerticalLayout {
     private void init() {
 
         Grid<User> userGrid = new Grid<>();
+        userGrid.setThemeName("min-padding");
         ListDataProvider<User> dataProvider = new ListDataProvider<>(userRepository.findAll());
         userGrid.setDataProvider(dataProvider);
 
-        UserFilter filterObject = new UserFilter();
+        UserFilter filterObject = new UserFilter(dataProvider);
         dataProvider.setFilter(filterObject::test);
+
 
         Grid.Column<User> nameColumn = userGrid.addColumn(User::getName).setHeader("Name");
         Grid.Column<User> dnColumn = userGrid.addColumn(User::getDisplayName).setHeader("Display Name");
@@ -61,34 +65,10 @@ public class UserAdmin extends VerticalLayout {
         Grid.Column<User> adminColumn = userGrid.addColumn(User::isAdmin).setHeader("Admin");
 
         HeaderRow filterRow = userGrid.appendHeaderRow();
-
-        FilterField nameFilterField = new FilterField();
-        nameFilterField.addValueChangeListener(event -> {
-            filterObject.setName(event.getValue());
-            dataProvider.refreshAll();
-        });
-        filterRow.getCell(nameColumn).setComponent(nameFilterField);
-
-        FilterField dnFilterField = new FilterField();
-        dnFilterField.addValueChangeListener(event -> {
-            filterObject.setDisplayName(event.getValue());
-            dataProvider.refreshAll();
-        });
-        filterRow.getCell(dnColumn).setComponent(dnFilterField);
-
-        FilterField emailFilterField = new FilterField();
-        emailFilterField.addValueChangeListener(event -> {
-            filterObject.setEmail(event.getValue());
-            dataProvider.refreshAll();
-        });
-        filterRow.getCell(emailColumn).setComponent(emailFilterField);
-
-        FilterField adminFilterField = new FilterField();
-        adminFilterField.addValueChangeListener(event -> {
-            filterObject.setAdmin(event.getValue());
-            dataProvider.refreshAll();
-        });
-        filterRow.getCell(adminColumn).setComponent(adminFilterField);
+        filterRow.getCell(nameColumn).setComponent(new FilterField(filterObject::setName));
+        filterRow.getCell(dnColumn).setComponent(new FilterField(filterObject::setDisplayName));
+        filterRow.getCell(emailColumn).setComponent(new FilterField(filterObject::setEmail));
+        filterRow.getCell(adminColumn).setComponent(new FilterField(filterObject::setAdmin, "50px"));
 
         add(userGrid);
         GridContextMenu<User> contextMenu = new GridContextMenu<>(userGrid);

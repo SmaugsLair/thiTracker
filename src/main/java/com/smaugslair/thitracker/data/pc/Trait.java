@@ -11,7 +11,7 @@ public class Trait implements Comparable<Trait>{
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "pcId")
+    @JoinColumn(name = "pc_id")
     private PlayerCharacter playerCharacter;
 
     @Column(nullable = false)

@@ -1,10 +1,15 @@
 package com.smaugslair.thitracker.data.user;
 
 
+import com.vaadin.flow.data.provider.ListDataProvider;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class UserFilter {
 
+    private final ListDataProvider<User> dataProvider;
+    private final static Logger log = LoggerFactory.getLogger(UserFilter.class);
 
     private String name = "";
 
@@ -14,12 +19,18 @@ public class UserFilter {
 
     private String admin = "";
 
+    public UserFilter(ListDataProvider<User> dataProvider) {
+        this.dataProvider = dataProvider;
+        dataProvider.setFilter(this::test);
+    }
+
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
+        dataProvider.refreshAll();
     }
 
     public String getEmail() {
@@ -28,6 +39,7 @@ public class UserFilter {
 
     public void setEmail(String email) {
         this.email = email;
+        dataProvider.refreshAll();
     }
 
     public String getDisplayName() {
@@ -36,6 +48,7 @@ public class UserFilter {
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+        dataProvider.refreshAll();
     }
 
     public String getAdmin() {
@@ -44,6 +57,7 @@ public class UserFilter {
 
     public void setAdmin(String admin) {
         this.admin = admin;
+        dataProvider.refreshAll();
     }
 
 

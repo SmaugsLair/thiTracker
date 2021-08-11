@@ -25,11 +25,10 @@ public class PowerBrowserView extends Grid<Power> {
 
         setHeightFull();
 
-        ListDataProvider<Power> dataProvider = new ListDataProvider<>(powersCache.getPowerList());
+        ListDataProvider<Power> dataProvider = new ListDataProvider<>(powersCache.getPowers());
         setDataProvider(dataProvider);
 
-        PowerFilter filterObject = new PowerFilter();
-        dataProvider.setFilter(filterObject::test);
+        PowerFilter filterObject = new PowerFilter(dataProvider);
 
         //setDetailsVisibleOnClick(true);
         addColumn(new NativeButtonRenderer<>(
@@ -51,45 +50,10 @@ public class PowerBrowserView extends Grid<Power> {
 
         HeaderRow filterRow = appendHeaderRow();
 
-        FilterField nameFilterField = new FilterField();
-        nameFilterField.addValueChangeListener(event -> {
-            filterObject.setName(event.getValue());
-            dataProvider.refreshAll();
-        });
-        filterRow.getCell(nameColumn).setComponent(nameFilterField);
-
-        FilterField tierFilterField = new FilterField();
-        tierFilterField.setWidth("50px");
-        tierFilterField.addValueChangeListener(event -> {
-            filterObject.setTier(event.getValue());
-            dataProvider.refreshAll();
-        });
-        filterRow.getCell(tierColumn).setComponent(tierFilterField);
-
-
-        FilterField metaFilterField = new FilterField();
-        metaFilterField.setWidth("50px");
-        metaFilterField.addValueChangeListener(event -> {
-            filterObject.setMetaPower(event.getValue());
-            dataProvider.refreshAll();
-        });
-        filterRow.getCell(metaColumn).setComponent(metaFilterField);
-
-
-        FilterField tagFilterField = new FilterField();
-        tagFilterField.addValueChangeListener(event -> {
-            filterObject.setPowerTag(event.getValue());
-            dataProvider.refreshAll();
-        });
-        filterRow.getCell(tagColumn).setComponent(tagFilterField);
-
-
-        FilterField maxFilterField = new FilterField();
-        maxFilterField.setWidth("50px");
-        maxFilterField.addValueChangeListener(event -> {
-            filterObject.setMaxTaken(event.getValue());
-            dataProvider.refreshAll();
-        });
-        filterRow.getCell(maxColumn).setComponent(maxFilterField);
+        filterRow.getCell(nameColumn).setComponent(new FilterField(filterObject::setName));
+        filterRow.getCell(tierColumn).setComponent(new FilterField(filterObject::setTier, "50px"));
+        filterRow.getCell(metaColumn).setComponent(new FilterField(filterObject::setMetaPower, "50px"));
+        filterRow.getCell(tagColumn).setComponent(new FilterField(filterObject::setPowerTag));
+        filterRow.getCell(maxColumn).setComponent(new FilterField(filterObject::setMaxTaken));
     }
 }

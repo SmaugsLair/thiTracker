@@ -1,8 +1,6 @@
 package com.smaugslair.thitracker.ui.games.tl;
 
-import com.vaadin.flow.component.textfield.IntegerField;
-
-public abstract class PointField extends IntegerField {
+public interface PointField {
 
     public abstract String getPointName();
 }

@@ -1,39 +1,20 @@
 package com.smaugslair.thitracker.ui.games;
 
-import com.smaugslair.thitracker.data.pc.Trait;
-import com.smaugslair.thitracker.data.pc.TraitType;
-import com.smaugslair.thitracker.ui.games.tl.TraitPoint;
+public class AbilityRowFilter {
 
-public class TraitRowFilter {
+    private boolean showRows = false;
 
-    private boolean showHero = false;
-    private boolean showDrama = false;
-
-    public boolean isShowHero() {
-        return showHero;
+    public boolean isShowRows() {
+        return showRows;
     }
 
-    public void setShowHero(boolean showHero) {
-        this.showHero = showHero;
+    public void setShowRows(boolean showRows) {
+        this.showRows = showRows;
     }
 
-    public boolean isShowDrama() {
-        return showDrama;
-    }
-
-    public void setShowDrama(boolean showDrama) {
-        this.showDrama = showDrama;
-    }
-
-    public boolean test(TraitRow traitRow) {
-        if (traitRow.getComponent() instanceof TraitPoint) {
-            Trait trait = ((TraitPoint)traitRow.getComponent()).getTrait();
-            if (!showDrama && trait.getType().equals(TraitType.Drama)) {
-                return false;
-            }
-            if (!showHero && trait.getType().equals(TraitType.Hero)) {
-                return false;
-            }
+    public boolean test(AbilityRow abilityRow) {
+        if (!showRows && !abilityRow.isHeader()) {
+            return false;
         }
         return true;
     }

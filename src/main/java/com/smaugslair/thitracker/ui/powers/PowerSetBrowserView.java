@@ -33,7 +33,7 @@ public class PowerSetBrowserView extends VerticalLayout {
         });
         tabs.addSelectedChangeListener(event -> powerSetDetails.setPowerSet(map.get(event.getSelectedTab())));
         if (!powersCache.getPowerSetList().isEmpty()) {
-            powerSetDetails.setPowerSet(powersCache.getPowerSetList().get(0));
+            powerSetDetails.setPowerSet(powersCache.getPowerSetList().first());
         }
         add(tabs, powerSetDetails);
 

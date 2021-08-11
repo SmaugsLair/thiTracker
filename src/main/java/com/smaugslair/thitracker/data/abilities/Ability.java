@@ -1,9 +1,9 @@
-package com.smaugslair.thitracker.data.atd;
+package com.smaugslair.thitracker.data.abilities;
 
 import javax.persistence.*;
 
 @Entity
-public class ActionTimeDefault {
+public class Ability implements Comparable<Ability>{
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
@@ -12,17 +12,19 @@ public class ActionTimeDefault {
     @Column(unique = true)
     private String name;
 
-    private Integer time;
+    @Column(nullable = false)
+    private Integer baseValue;
 
-    private boolean stunable;
+    @Column(nullable = false)
+    private Integer sortOrder;
 
-    public ActionTimeDefault() {
+    public Ability() {
     }
 
-    public ActionTimeDefault(String name, Integer time, boolean stunable) {
+    public Ability(String name, Integer baseValue, Integer sortOrder) {
         this.name = name;
-        this.time = time;
-        this.stunable = stunable;
+        this.baseValue = baseValue;
+        this.sortOrder = sortOrder;
     }
 
     public Integer getId() {
@@ -41,20 +43,24 @@ public class ActionTimeDefault {
         this.name = name;
     }
 
-    public Integer getTime() {
-        return time;
+    public Integer getBaseValue() {
+        return baseValue;
     }
 
-    public void setTime(Integer time) {
-        this.time = time;
+    public void setBaseValue(Integer baseValue) {
+        this.baseValue = baseValue;
     }
 
-    public boolean isStunable() {
-        return stunable;
+    public Integer getSortOrder() {
+        return sortOrder;
     }
 
-    public void setStunable(boolean stunable) {
-        this.stunable = stunable;
+    public void setSortOrder(Integer sortOrder) {
+        this.sortOrder = sortOrder;
     }
 
+    @Override
+    public int compareTo(Ability o) {
+        return sortOrder.compareTo(o.sortOrder);
+    }
 }

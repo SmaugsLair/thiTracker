@@ -5,13 +5,12 @@ import com.smaugslair.thitracker.data.powers.PowerRepository;
 import com.smaugslair.thitracker.data.powers.PowerSet;
 import com.smaugslair.thitracker.data.powers.PowerSetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 @Service
 public class PowersCache {
@@ -19,15 +18,15 @@ public class PowersCache {
     private PowerRepository powerRepo;
     private PowerSetRepository powerSetRepo;
 
-    private final List<PowerSet> powerSetList = new ArrayList<>();
+    private final SortedSet<PowerSet> powerSets = new TreeSet<>();
 
-    private final Map<String, Map<Integer, List<Power>>> powersMap = new HashMap<>();
+    private final Map<String, Map<Integer, SortedSet<Power>>> powersMap = new HashMap<>();
 
     private final Map<String, PowerSet> powerSetMap = new HashMap<>();
 
-    private final List<Power> powerList = new ArrayList<>();
+    private final SortedSet<Power> powers = new TreeSet<>();
 
-    public synchronized Map<String, Map<Integer, List<Power>>> getPowersMap() {
+    public synchronized Map<String, Map<Integer, SortedSet<Power>>> getPowersMap() {
         if (powersMap.isEmpty()) {
             load();
         }
@@ -41,18 +40,18 @@ public class PowersCache {
         return powerSetMap;
     }
 
-    public synchronized List<Power> getPowerList() {
-        if (powerList.isEmpty()) {
+    public synchronized SortedSet<Power> getPowers() {
+        if (powers.isEmpty()) {
             load();
         }
-        return powerList;
+        return powers;
     }
 
-    public synchronized List<PowerSet> getPowerSetList() {
-        if (powerSetList.isEmpty()) {
+    public synchronized SortedSet<PowerSet> getPowerSetList() {
+        if (powerSets.isEmpty()) {
             load();
         }
-        return powerSetList;
+        return powerSets;
     }
 
     @Autowired
@@ -67,22 +66,22 @@ public class PowersCache {
 
 
     public synchronized void load() {
-        powerList.clear();
-        powerSetList.clear();
+        powers.clear();
+        powerSets.clear();
         powerSetMap.clear();
         powersMap.clear();
-        powerSetRepo.findAll(Sort.by(Sort.Direction.ASC, "name")).forEach(powerSet -> {
-            powerSetList.add(powerSet);
+        powerSetRepo.findAll().forEach(powerSet -> {
+            powerSets.add(powerSet);
             powerSetMap.put(powerSet.getName(), powerSet);
             powersMap.put(powerSet.getName(), new HashMap<>());
         });
         powerRepo.findAll().forEach(power -> {
             power.fillPowerSetMap();
-            powerList.add(power);
+            powers.add(power);
             power.getPowerSetMap().forEach((psName, tier) -> {
-                Map<Integer, List<Power>> tieredListMap = powersMap.get(psName);
+                Map<Integer, SortedSet<Power>> tieredListMap = powersMap.get(psName);
                 if (tieredListMap != null) {
-                    List<Power> list = tieredListMap.computeIfAbsent(tier, k -> new ArrayList<>());
+                    SortedSet<Power> list = tieredListMap.computeIfAbsent(tier, k -> new TreeSet<>());
                     list.add(power);
                 }
             });

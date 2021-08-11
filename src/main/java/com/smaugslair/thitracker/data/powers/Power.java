@@ -9,7 +9,7 @@ import javax.persistence.Transient;
 import java.util.*;
 
 @Entity
-public class Power implements Sheetable {
+public class Power implements Sheetable, Comparable<Power> {
 
     @Id
     private String ssid;
@@ -225,5 +225,10 @@ public class Power implements Sheetable {
     @Override
     public int hashCode() {
         return Objects.hash(ssid);
+    }
+
+    @Override
+    public int compareTo(Power o) {
+        return name.compareTo(o.name);
     }
 }

@@ -1,10 +1,13 @@
 package com.smaugslair.thitracker.data.powers;
 
 
+import com.vaadin.flow.data.provider.ListDataProvider;
 import org.apache.commons.lang3.StringUtils;
 
 public class PowerFilter {
 
+
+    private final ListDataProvider<Power> dataProvider;
 
     private String name = "";
 
@@ -16,12 +19,18 @@ public class PowerFilter {
 
     private String maxTaken = "";
 
+    public PowerFilter(ListDataProvider<Power> dataProvider) {
+        this.dataProvider = dataProvider;
+        dataProvider.setFilter(this::test);
+    }
+
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
+        dataProvider.refreshAll();
     }
 
     public String getPowerTag() {
@@ -30,6 +39,7 @@ public class PowerFilter {
 
     public void setPowerTag(String powerTag) {
         this.powerTag = powerTag;
+        dataProvider.refreshAll();
     }
 
     public String getMetaPower() {
@@ -38,6 +48,7 @@ public class PowerFilter {
 
     public void setMetaPower(String metaPower) {
         this.metaPower = metaPower;
+        dataProvider.refreshAll();
     }
 
     public String getTier() {
@@ -46,6 +57,7 @@ public class PowerFilter {
 
     public void setTier(String tier) {
         this.tier = tier;
+        dataProvider.refreshAll();
     }
 
     public String getMaxTaken() {
@@ -54,6 +66,7 @@ public class PowerFilter {
 
     public void setMaxTaken(String maxTaken) {
         this.maxTaken = maxTaken;
+        dataProvider.refreshAll();
     }
 
     public boolean test(Power power) {

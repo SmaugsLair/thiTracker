@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @CssImport(value = "./styles/color.css", themeFor = "vaadin-grid")
+@CssImport(value = "./styles/minPadding.css", themeFor = "vaadin-grid")
 public class PCTimeLineView extends RegisteredVerticalLayout {
 
     private static final Logger log = LoggerFactory.getLogger(PCTimeLineView.class);

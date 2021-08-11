@@ -22,7 +22,7 @@ public class GMSession extends SplitLayout {
     public GMSession(SessionService sessionService, CacheService cacheService) {
 
         GMTimeLineView gmTimeLineView = new GMTimeLineView(this, sessionService, cacheService);
-        characterDetails = new CharacterDetails(gmTimeLineView);
+        characterDetails = new CharacterDetails(gmTimeLineView, cacheService);
         diceHistory = new DiceHistory(sessionService, cacheService);
         timeLineHistory = new TimeLineHistory(gmTimeLineView);
 

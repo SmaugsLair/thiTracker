@@ -44,6 +44,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @CssImport(value = "./styles/color.css", themeFor = "vaadin-grid")
+@CssImport(value = "./styles/minPadding.css", themeFor = "vaadin-grid")
 public class GMTimeLineView extends VerticalLayout {
 
     private static final Logger log = LoggerFactory.getLogger(GMTimeLineView.class);
@@ -175,6 +176,8 @@ public class GMTimeLineView extends VerticalLayout {
         }
 
         Grid<TimeLineItem> grid = new Grid<>();
+        grid.setThemeName("min-padding");
+
         grid.setHeightByRows(true);
         grid.setItems(items);
 
@@ -456,6 +459,7 @@ public class GMTimeLineView extends VerticalLayout {
         List<CollectedItem> collectedItems = cacheService.getCiRepo().findAllByGmId(SecurityUtils.getLoggedInUser().getId());
         if (!collectedItems.isEmpty()) {
             Grid<CollectedItem> ciGrid = new Grid<>();
+            ciGrid.setThemeName("min-padding");
             ciGrid.setItems(collectedItems);
             ciGrid.setHeightByRows(true);
             ciGrid.setClassNameGenerator(item -> "w3-"+item.getColor());

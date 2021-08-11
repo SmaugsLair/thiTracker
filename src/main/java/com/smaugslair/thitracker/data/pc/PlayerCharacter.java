@@ -5,7 +5,9 @@ import com.smaugslair.thitracker.data.user.User;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Entity
 public class PlayerCharacter implements ThiEntity {
@@ -20,16 +22,25 @@ public class PlayerCharacter implements ThiEntity {
     @Column(nullable = false)
     private Integer userId;
 
-    @Column()
+    @Column
     private Long gameId;
 
     @Column(nullable = false)
     private Integer progressionTokens = 0;
 
+    @Column
+    private String civilianId;
+
     @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL)
-    @JoinColumn(name = "trait_id" )
+    @JoinColumn(name = "pc_id" )
     @OrderBy("sortOrder ASC")
     List<Trait> traits = new ArrayList<>();
+
+
+    @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL)
+    @JoinColumn(name = "pc_id" )
+    @MapKey(name = "name")
+    Map<String, AbilityScore> abilityScores = new HashMap<>();
 
 
     public Long getId() {
@@ -80,11 +91,28 @@ public class PlayerCharacter implements ThiEntity {
         this.traits = traits;
     }
 
+    public String getCivilianId() {
+        return civilianId;
+    }
+
+    public void setCivilianId(String civilianId) {
+        this.civilianId = civilianId;
+    }
+
+    public Map<String, AbilityScore> getAbilityScores() {
+        return abilityScores;
+    }
+
+    public void setAbilityScores(Map<String, AbilityScore> abilityScores) {
+        this.abilityScores = abilityScores;
+    }
+
     @Override
     public PlayerCharacter createEmptyObject() {
         PlayerCharacter pc = new PlayerCharacter();
         pc.setTraits(null);
         pc.setProgressionTokens(null);
+        pc.setAbilityScores(null);
         return pc;
     }
 

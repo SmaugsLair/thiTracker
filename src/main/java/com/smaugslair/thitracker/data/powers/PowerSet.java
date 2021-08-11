@@ -6,7 +6,7 @@ import java.util.Objects;
 import java.util.StringJoiner;
 
 @Entity
-public class PowerSet implements Sheetable {
+public class PowerSet implements Sheetable, Comparable<PowerSet> {
 
 
     @Id
@@ -123,5 +123,10 @@ public class PowerSet implements Sheetable {
     @Override
     public int hashCode() {
         return Objects.hash(ssid);
+    }
+
+    @Override
+    public int compareTo(PowerSet o) {
+        return name.compareTo(o.getName());
     }
 }

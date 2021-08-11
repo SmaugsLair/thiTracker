@@ -1,0 +1,3 @@
+:host([theme="min-padding"]) [part~="cell"] ::slotted(vaadin-grid-cell-content) {
+    padding: 4px;
+}

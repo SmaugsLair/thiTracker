@@ -12,7 +12,7 @@ public class TraitRow {
 
     public TraitRow(PointField pointField) {
         name = pointField.getPointName();
-        component = pointField;
+        component = (Component) pointField;
         color = "";
     }
 

@@ -1,30 +1,26 @@
 package com.smaugslair.thitracker.data.pc;
 
 import javax.persistence.*;
-import java.util.StringJoiner;
 
 @Entity
-public class Trait implements Comparable<Trait>{
+public class AbilityScore implements Comparable<AbilityScore> {
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "pcId")
+    @JoinColumn(name = "pc_id")
     private PlayerCharacter playerCharacter;
-
-    @Column(nullable = false)
-    private Integer sortOrder;
 
     @Column(nullable = false)
     private String name;
 
     @Column(nullable = false)
-    private Integer points = 0;
+    private Integer points;
 
     @Column(nullable = false)
-    private TraitType type;
+    private Integer sortOrder;
 
     public Long getId() {
         return id;
@@ -58,36 +54,20 @@ public class Trait implements Comparable<Trait>{
         this.points = points;
     }
 
-    public TraitType getType() {
-        return type;
-    }
-
-    public void setType(TraitType type) {
-        this.type = type;
-    }
-
     public Integer getSortOrder() {
         return sortOrder;
     }
 
-    public void setSortOrder(Integer order) {
-        this.sortOrder = order;
+    public void setSortOrder(Integer sortOrder) {
+        this.sortOrder = sortOrder;
     }
 
     @Override
-    public String toString() {
-        return new StringJoiner(", ", Trait.class.getSimpleName() + "[", "]")
-                .add("id=" + id)
-                .add("playerCharacter=" + playerCharacter)
-                .add("sortOrder=" + sortOrder)
-                .add("name='" + name + "'")
-                .add("points=" + points)
-                .add("type=" + type)
-                .toString();
-    }
-
-    @Override
-    public int compareTo(Trait o) {
+    public int compareTo(AbilityScore o) {
         return sortOrder.compareTo(o.sortOrder);
+    }
+
+    public boolean isLeftColumn() {
+        return sortOrder < 10 && sortOrder%2 == 0;
     }
 }
