@@ -112,7 +112,9 @@ public class CharacterDetails extends RegisteredVerticalLayout {
         add(grid);
 
         if (pc.getAbilityScores().isEmpty()) {
+            log.info("Empty ability scores");
             List<Ability> abilities = cacheService.getAbilityRepository().findAll();
+            log.info("loaded abilities:"+abilities.size());
             abilities.forEach(ability -> {
                 AbilityScore abilityScore = new AbilityScore();
                 abilityScore.setPoints(ability.getBaseValue());
@@ -122,6 +124,10 @@ public class CharacterDetails extends RegisteredVerticalLayout {
                 pc.getAbilityScores().put(abilityScore.getName(), abilityScore);
             });
         }
+        else {
+            log.info("Already have ability scores:"+pc.getAbilityScores().size());
+        }
+
 
 
 

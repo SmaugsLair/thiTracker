@@ -67,7 +67,14 @@ public class AbilityScore implements Comparable<AbilityScore> {
         return sortOrder.compareTo(o.sortOrder);
     }
 
-    public boolean isLeftColumn() {
-        return sortOrder < 10 && sortOrder%2 == 0;
+    @Override
+    public String toString() {
+        return "AbilityScore{" +
+                "id=" + id +
+                ", playerCharacter=" + playerCharacter +
+                ", name='" + name + '\'' +
+                ", points=" + points +
+                ", sortOrder=" + sortOrder +
+                '}';
     }
 }
