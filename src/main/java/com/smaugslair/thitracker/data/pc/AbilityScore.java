@@ -1,9 +1,14 @@
 package com.smaugslair.thitracker.data.pc;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.persistence.*;
 
 @Entity
 public class AbilityScore implements Comparable<AbilityScore> {
+
+    private static final Logger log = LoggerFactory.getLogger(AbilityScore.class);
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
@@ -27,6 +32,7 @@ public class AbilityScore implements Comparable<AbilityScore> {
     }
 
     public void setId(Long id) {
+        log.info("setId");
         this.id = id;
     }
 
@@ -35,6 +41,7 @@ public class AbilityScore implements Comparable<AbilityScore> {
     }
 
     public void setPlayerCharacter(PlayerCharacter playerCharacter) {
+        log.info("setPlayerCharacter");
         this.playerCharacter = playerCharacter;
     }
 
@@ -43,6 +50,7 @@ public class AbilityScore implements Comparable<AbilityScore> {
     }
 
     public void setName(String name) {
+        log.info("setName");
         this.name = name;
     }
 
@@ -51,6 +59,7 @@ public class AbilityScore implements Comparable<AbilityScore> {
     }
 
     public void setPoints(Integer points) {
+        log.info("setPoints");
         this.points = points;
     }
 
@@ -59,6 +68,7 @@ public class AbilityScore implements Comparable<AbilityScore> {
     }
 
     public void setSortOrder(Integer sortOrder) {
+        log.info("setSortOrder");
         this.sortOrder = sortOrder;
     }
 

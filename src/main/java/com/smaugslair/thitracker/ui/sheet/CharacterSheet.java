@@ -1,4 +1,4 @@
-package com.smaugslair.thitracker.ui.games;
+package com.smaugslair.thitracker.ui.sheet;
 
 import com.smaugslair.thitracker.data.abilities.Ability;
 import com.smaugslair.thitracker.data.log.Entry;
@@ -9,8 +9,10 @@ import com.smaugslair.thitracker.data.pc.Trait;
 import com.smaugslair.thitracker.data.pc.TraitType;
 import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.services.CacheService;
-import com.smaugslair.thitracker.ui.games.tl.*;
+import com.smaugslair.thitracker.services.SessionService;
+import com.smaugslair.thitracker.util.NameValue;
 import com.smaugslair.thitracker.websockets.RegisteredVerticalLayout;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
@@ -21,34 +23,54 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @CssImport(value = "./styles/color.css", themeFor = "vaadin-grid")
 @CssImport(value = "./styles/minPadding.css", themeFor = "vaadin-grid")
-public class CharacterDetails extends RegisteredVerticalLayout {
+public class CharacterSheet extends RegisteredVerticalLayout {
 
-    private final static Logger log = LoggerFactory.getLogger(CharacterDetails.class);
+    private final static Logger log = LoggerFactory.getLogger(CharacterSheet.class);
 
-    private final GMTimeLineView gmTimeLineView;
+    private final static String[][] abilityLayout = {
+            {"Perception", "Stealth"},
+            {"Aim", "Dodge"},
+            {"Strength", "Toughness"},
+            {"Influence", "Self-Control"},
+            {"Initiative", "Movement"},
+            {"", "Travel Mult"}
+    };
+
+    private final Function<PlayerCharacter, PlayerCharacter> pcUpdater;
     private final CacheService cacheService;
+    private final SessionService sessionService;
     private PlayerCharacter pc = null;
-    private User user = null;
     private String color;
-    private final DerivedInteger tsSpace = new DerivedInteger("Speed (spaces)", 0);
-    private final DerivedDouble tsMPH = new DerivedDouble("Speed (MPH)", 0.0);
+    private DerivedField tsSpace;
+    private DerivedField tsMPH;
 
-    public CharacterDetails(GMTimeLineView gmTimeLineView, CacheService cacheService) {
-        this.gmTimeLineView = gmTimeLineView;
+    private boolean heroExpanded = false;
+    private boolean dramaExpanded = false;
+    private boolean abilitiesExpanded = false;
+
+    public CharacterSheet(Function<PlayerCharacter, PlayerCharacter> pcUpdater,
+                          CacheService cacheService, SessionService sessionService) {
+        this.pcUpdater = pcUpdater;
         this.cacheService = cacheService;
+        this.sessionService = sessionService;
         setPadding(false);
         setSpacing(false);
         init();
     }
 
-    public void setPc(PlayerCharacter pc, User user, String color) {
+    public void setPc(PlayerCharacter pc) {
         this.pc = pc;
-        this.user = user;
-        this.color = color;
+        if (pc != null) {
+            NameValue nameValue = new NameValue("pcId", pc.getId());
+            cacheService.getTliCache().findOneByProperty(nameValue)
+                    .ifPresent(timeLineItem -> color = timeLineItem.getColor());
+        }
         removeAll();
         init();
     }
@@ -58,24 +80,52 @@ public class CharacterDetails extends RegisteredVerticalLayout {
             add(new Paragraph("Choose a Hero to view details"));
             return;
         }
-
+        User user = sessionService.getUserRepository().findById(pc.getUserId()).orElse(new User());
         List<TraitRow> traitRows = new ArrayList<>(9);
-        traitRows.add(new TraitRow(pc.getCharacterAndPlayerName(user), "w3-"+color));
-        traitRows.add(new TraitRow(new ProgressionPoint(pc, this)));
+        traitRows.add(new HeaderRow(pc.getName(), user.getDisplayName(), color));
+        traitRows.add(new CivilianName(pc, this));
+        traitRows.add(new ProgressionPoint(pc, this));
 
         List<Trait> traits = pc.getTraits().stream().sorted().collect(Collectors.toList());
 
-        traitRows.add(new TraitRow("Hero Traits"));
+        AtomicInteger dramaCount = new AtomicInteger();
+        AtomicInteger sortOrder = new AtomicInteger();
+
+        traitRows.add(new HeaderRow("Hero Traits"));
         traits.forEach(trait -> {
             if (trait.getType().equals(TraitType.Hero)) {
-                traitRows.add(new TraitRow(new TraitPoint(trait, this)));
+                traitRows.add(new TraitField(trait, this));
+            }
+            else {
+                dramaCount.incrementAndGet();
+                sortOrder.set(trait.getSortOrder());
             }
         });
 
-        traitRows.add(new TraitRow("Drama Traits"));
+        int newDrama = dramaCount.get() + 1;
+
+        if (dramaCount.get() < 5) {
+            Button button = new Button("Add Drama Trait "+newDrama, event -> {
+                Trait trait = new Trait();
+                trait.setType(TraitType.Drama);
+                trait.setPoints(0);
+                trait.setName("Drama Trait "+newDrama);
+                trait.setSortOrder(sortOrder.get()+1);
+                trait.setPlayerCharacter(pc);
+                pc.getTraits().add(trait);
+                updatePC();
+                removeAll();
+                init();
+            });
+            traitRows.add(new HeaderRow("Drama Traits", button));
+        }
+        else {
+            traitRows.add(new HeaderRow("Drama Traits"));
+        }
+
         traits.forEach(trait -> {
             if (trait.getType().equals(TraitType.Drama)) {
-                traitRows.add(new TraitRow(new TraitPoint(trait, this)));
+                traitRows.add(new TraitField(trait, this));
             }
         });
 
@@ -84,26 +134,28 @@ public class CharacterDetails extends RegisteredVerticalLayout {
         grid.setHeightByRows(true);
 
         TraitRowFilter filter = new TraitRowFilter();
-        filter.setShowDrama(false);
-        filter.setShowHero(false);
+        filter.setShowDrama(dramaExpanded);
+        filter.setShowHero(heroExpanded);
 
         ListDataProvider<TraitRow> dataProvider = new ListDataProvider<>(traitRows);
         dataProvider.setFilter(filter::test);
         grid.setDataProvider(dataProvider);
 
-        grid.addColumn(TraitRow::getName);//.setFlexGrow(2);
+        grid.addComponentColumn(TraitRow::getLabel);//.setFlexGrow(2);
         grid.addComponentColumn(TraitRow::getComponent).setTextAlign(ColumnTextAlign.END);
 
         grid.setClassNameGenerator(item -> item.getColor());
 
         grid.addItemClickListener(event -> {
-            switch (event.getItem().getName()) {
+            switch (event.getItem().getLabelValue()) {
                 case "Hero Traits":
-                    filter.setShowHero(!filter.isShowHero());
+                    heroExpanded = !heroExpanded;
+                    filter.setShowHero(heroExpanded);
                     dataProvider.refreshAll();
                     break;
                 case "Drama Traits":
-                    filter.setShowDrama(!filter.isShowDrama());
+                    dramaExpanded = !dramaExpanded;
+                    filter.setShowDrama(dramaExpanded);
                     dataProvider.refreshAll();
                     break;
             }
@@ -112,9 +164,7 @@ public class CharacterDetails extends RegisteredVerticalLayout {
         add(grid);
 
         if (pc.getAbilityScores().isEmpty()) {
-            log.info("Empty ability scores");
             List<Ability> abilities = cacheService.getAbilityRepository().findAll();
-            log.info("loaded abilities:"+abilities.size());
             abilities.forEach(ability -> {
                 AbilityScore abilityScore = new AbilityScore();
                 abilityScore.setPoints(ability.getBaseValue());
@@ -124,59 +174,27 @@ public class CharacterDetails extends RegisteredVerticalLayout {
                 pc.getAbilityScores().put(abilityScore.getName(), abilityScore);
             });
         }
-        else {
-            log.info("Already have ability scores:"+pc.getAbilityScores().size());
-        }
-
-
-
 
         List<AbilityRow> abilityRows = new ArrayList<>(8);
 
         abilityRows.add(0, new AbilityRow()); //Header row
-        abilityRows.add(new AbilityRow(
-                new TraitRow(new AbilityPoint(pc.getAbilityScores().get("Perception"), this)),
-                new TraitRow(new AbilityPoint(pc.getAbilityScores().get("Stealth"), this))
-        ));
+        for (int i = 0; i < 6; ++i) {
+            abilityRows.add(new AbilityRow(
+                    pc.getAbilityScores().get(abilityLayout[i][0]),
+                    pc.getAbilityScores().get(abilityLayout[i][1]), this
+            ));
+        }
 
-        abilityRows.add(new AbilityRow(
-                new TraitRow(new AbilityPoint(pc.getAbilityScores().get("Aim"), this)),
-                new TraitRow(new AbilityPoint(pc.getAbilityScores().get("Dodge"), this))
-        ));
+        tsSpace = new DerivedField("Speed (spaces)", "0");
+        tsMPH = new DerivedField("Speed (MPH)", "0.0");
 
-        abilityRows.add(new AbilityRow(
-                new TraitRow(new AbilityPoint(pc.getAbilityScores().get("Strength"), this)),
-                new TraitRow(new AbilityPoint(pc.getAbilityScores().get("Toughness"), this))
-        ));
-
-        abilityRows.add(new AbilityRow(
-                new TraitRow(new AbilityPoint(pc.getAbilityScores().get("Influence"), this)),
-                new TraitRow(new AbilityPoint(pc.getAbilityScores().get("Self-Control"), this))
-        ));
-
-        abilityRows.add(new AbilityRow(
-                new TraitRow(new AbilityPoint(pc.getAbilityScores().get("Initiative"), this)),
-                new TraitRow(new AbilityPoint(pc.getAbilityScores().get("Movement"), this))
-        ));
-
-        abilityRows.add(new AbilityRow(
-                new TraitRow("", ""),
-                new TraitRow(new AbilityPoint(pc.getAbilityScores().get("Travel Mult"), this))
-        ));
-
-        abilityRows.add(new AbilityRow(
-                new TraitRow("", ""),
-                new TraitRow(tsSpace)
-        ));
-        abilityRows.add(new AbilityRow(
-                new TraitRow("", ""),
-                new TraitRow(tsMPH)
-        ));
+        abilityRows.add(new AbilityRow(tsSpace));
+        abilityRows.add(new AbilityRow(tsMPH));
 
         calcSpeeds();
 
         AbilityRowFilter abilityRowFilter = new AbilityRowFilter();
-        abilityRowFilter.setShowRows(false);
+        abilityRowFilter.setShowRows(abilitiesExpanded);
 
         ListDataProvider<AbilityRow> abilityRowListDataProvider = new ListDataProvider<>(abilityRows);
         abilityRowListDataProvider.setFilter(abilityRowFilter::test);
@@ -188,14 +206,15 @@ public class CharacterDetails extends RegisteredVerticalLayout {
 
         abilityRowGrid.addItemClickListener(event -> {
             if (event.getItem().isHeader()) {
-                abilityRowFilter.setShowRows(!abilityRowFilter.isShowRows());
+                abilitiesExpanded = !abilitiesExpanded;
+                abilityRowFilter.setShowRows(abilitiesExpanded);
                 abilityRowListDataProvider.refreshAll();
             }
         });
 
-        abilityRowGrid.addColumn(AbilityRow::getName1).setFlexGrow(3);
+        abilityRowGrid.addColumn(AbilityRow::getLabel1).setFlexGrow(3);
         abilityRowGrid.addComponentColumn(AbilityRow::getComponent1).setFlexGrow(1);
-        abilityRowGrid.addColumn(AbilityRow::getName2).setFlexGrow(3);
+        abilityRowGrid.addColumn(AbilityRow::getLabel2).setFlexGrow(3);
         abilityRowGrid.addComponentColumn(AbilityRow::getComponent2).setFlexGrow(1);
 
         abilityRowGrid.setHeightByRows(true);
@@ -211,22 +230,32 @@ public class CharacterDetails extends RegisteredVerticalLayout {
     private void calcSpeeds() {
         int travelSpeed = pc.getAbilityScores().get("Movement").getPoints()
                 * pc.getAbilityScores().get("Travel Mult").getPoints();
-        tsSpace.setValue(travelSpeed);
-        tsMPH.setValue(travelSpeed*1.5);
+        tsSpace.getSpan().setText(String.valueOf(travelSpeed));
+        tsMPH.getSpan().setText(String.valueOf(travelSpeed*1.5));
     }
 
     public void updatePC() {
-        gmTimeLineView.updatePc(pc);
+        pc = pcUpdater.apply(pc);
         calcSpeeds();
     }
 
     @Override
     protected void handleMessage(Entry entry) {
-        if (EventType.PlayerPCUpdate.equals(entry.getType())) {
+        if (EventType.PCUpdate.equals(entry.getType())) {
             if (pc != null && entry.getPcId().equals(pc.getId())) {
                 removeAll();
+                cacheService.getPcCache().findOneById(pc.getId()).ifPresent(playerCharacter -> {
+                    pc = playerCharacter;
+                });
                 init();
             }
         }
+    }
+
+    public void removeTrait(Trait trait) {
+        pc.getTraits().remove(trait);
+        updatePC();
+        removeAll();
+        init();
     }
 }

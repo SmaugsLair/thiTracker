@@ -4,13 +4,10 @@ import com.smaugslair.thitracker.data.ThiEntity;
 import com.smaugslair.thitracker.data.user.User;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Entity
-public class PlayerCharacter implements ThiEntity {
+public class PlayerCharacter implements ThiEntity, Comparable<PlayerCharacter> {
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
@@ -34,7 +31,7 @@ public class PlayerCharacter implements ThiEntity {
     @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL)
     @JoinColumn(name = "pc_id" )
     @OrderBy("sortOrder ASC")
-    List<Trait> traits = new ArrayList<>();
+    SortedSet<Trait> traits = new TreeSet<>();
 
 
     @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL)
@@ -83,11 +80,11 @@ public class PlayerCharacter implements ThiEntity {
         this.progressionTokens = progressionTokens;
     }
 
-    public List<Trait> getTraits() {
+    public SortedSet<Trait> getTraits() {
         return traits;
     }
 
-    public void setTraits(List<Trait> traits) {
+    public void setTraits(SortedSet<Trait> traits) {
         this.traits = traits;
     }
 
@@ -135,5 +132,27 @@ public class PlayerCharacter implements ThiEntity {
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        PlayerCharacter that = (PlayerCharacter) o;
+        return id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    @Override
+    public int compareTo(PlayerCharacter o) {
+        return name.compareTo(o.name);
     }
 }

@@ -40,7 +40,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.SimpleMailMessage;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @CssImport(value = "./styles/color.css", themeFor = "vaadin-grid")
@@ -193,7 +196,7 @@ public class GMTimeLineView extends VerticalLayout {
         icon.setSize("16px");
         grid.addComponentColumn(item -> new DeltaButton(item, this)).setHeader(icon);
 
-        grid.setClassNameGenerator(item -> "w3-"+item.getColor());
+        grid.setClassNameGenerator(item -> item.getColor());
         grid.getColumns().forEach(itemColumn -> {
             itemColumn.setAutoWidth(true);
             itemColumn.setTextAlign(ColumnTextAlign.CENTER);
@@ -318,27 +321,24 @@ public class GMTimeLineView extends VerticalLayout {
 
     public void showHeroDetails(TimeLineItem item) {
         if (item.getPcId() != null) {
-            Optional<PlayerCharacter> opc = cacheService.getPcCache().findOneById(item.getPcId());
-            if (opc.isPresent()) {
-                PlayerCharacter pc = opc.get();
-                Optional<User> user = sessionService.getUserRepository().findById(pc.getUserId());
-                user.ifPresent(value -> gmSession.setHero(pc, value, item.getColor()));
-                return;
-            }
+            cacheService.getPcCache().findOneById(item.getPcId()).ifPresent(playerCharacter -> {
+                gmSession.setHero(playerCharacter);
+            });
         }
-        gmSession.setHero(null, null, "");
+        gmSession.setHero(null);
     }
 
-    public void updatePc(PlayerCharacter pc) {
-        log.info("updatePc");
-        cacheService.getPcCache().save(pc);
+    public PlayerCharacter updatePc(PlayerCharacter pc) {
+        //log.info("updatePc");
+        pc = cacheService.getPcCache().save(pc);
         Entry entry = new Entry();
-        entry.setType(EventType.GMPCUpdate);
+        entry.setType(EventType.PCUpdate);
         entry.setPcId(pc.getId());
         entry.setGameId(getGameId());
         Broadcaster.broadcast(entry);
         removeAll();
         init();
+        return pc;
     }
 
     public List<ActionTimeDefault> getAtds() {
@@ -462,7 +462,7 @@ public class GMTimeLineView extends VerticalLayout {
             ciGrid.setThemeName("min-padding");
             ciGrid.setItems(collectedItems);
             ciGrid.setHeightByRows(true);
-            ciGrid.setClassNameGenerator(item -> "w3-"+item.getColor());
+            ciGrid.setClassNameGenerator(item -> item.getColor());
             ciGrid.getColumns().forEach(itemColumn -> itemColumn.setAutoWidth(true));
             ciGrid.addColumn(CollectedItem::getName);
             ciGrid.addComponentColumn((CollectedItem item1) -> new ImportButton(item1, this));

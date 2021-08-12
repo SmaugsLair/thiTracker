@@ -32,7 +32,7 @@ public class ColorDialog extends Dialog {
             //grid.addColumn(ColorCollection.Color::getName);
             grid.addComponentColumn(ColorButton::new);
 
-            grid.setClassNameGenerator(item -> "w3-"+item.getName());
+            grid.setClassNameGenerator(item -> item.getName());
         }
         add(horizontalLayout);
         setWidthFull();

@@ -2,11 +2,11 @@ package com.smaugslair.thitracker.ui.games;
 
 import com.smaugslair.thitracker.data.log.Entry;
 import com.smaugslair.thitracker.data.pc.PlayerCharacter;
-import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.services.CacheService;
 import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.ui.MainView;
 import com.smaugslair.thitracker.ui.components.DiceHistory;
+import com.smaugslair.thitracker.ui.sheet.CharacterSheet;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -17,12 +17,12 @@ public class GMSession extends SplitLayout {
 
     private final TimeLineHistory timeLineHistory;
     private final DiceHistory diceHistory;
-    private final CharacterDetails characterDetails;
+    private final CharacterSheet characterSheet;
 
     public GMSession(SessionService sessionService, CacheService cacheService) {
 
         GMTimeLineView gmTimeLineView = new GMTimeLineView(this, sessionService, cacheService);
-        characterDetails = new CharacterDetails(gmTimeLineView, cacheService);
+        characterSheet = new CharacterSheet(gmTimeLineView::updatePc, cacheService, sessionService);
         diceHistory = new DiceHistory(sessionService, cacheService);
         timeLineHistory = new TimeLineHistory(gmTimeLineView);
 
@@ -37,11 +37,11 @@ public class GMSession extends SplitLayout {
         timelineLayout.setSplitterPosition(75);
         timelineLayout.addToPrimary(gmTimeLineView);
         timelineLayout.addToSecondary(historyLayout);
-        addToPrimary(characterDetails);
+        addToPrimary(characterSheet);
 
         addToSecondary(timelineLayout);
         setHeightFull();
-        setSplitterPosition(25);
+        setSplitterPosition(33);
     }
 
     public void logAction(Entry entry) {
@@ -56,7 +56,7 @@ public class GMSession extends SplitLayout {
         timeLineHistory.removeAll();
     }
 
-    public void setHero(PlayerCharacter pc, User user, String color) {
-        characterDetails.setPc(pc, user, color);
+    public void setHero(PlayerCharacter pc) {
+        characterSheet.setPc(pc);
     }
 }

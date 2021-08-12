@@ -2,8 +2,6 @@ package com.smaugslair.thitracker.ui.players;
 
 import com.smaugslair.thitracker.data.game.Game;
 import com.smaugslair.thitracker.data.game.TimeLineItem;
-import com.smaugslair.thitracker.data.log.Entry;
-import com.smaugslair.thitracker.data.log.EventType;
 import com.smaugslair.thitracker.data.pc.PlayerCharacter;
 import com.smaugslair.thitracker.data.pc.Trait;
 import com.smaugslair.thitracker.data.pc.TraitType;
@@ -14,7 +12,6 @@ import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.ui.components.ConfirmDialog;
 import com.smaugslair.thitracker.ui.components.ValidTextField;
 import com.smaugslair.thitracker.util.NameValue;
-import com.smaugslair.thitracker.websockets.Broadcaster;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
@@ -27,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class PCManager extends VerticalLayout {
@@ -35,28 +33,12 @@ public class PCManager extends VerticalLayout {
 
     private final SessionService sessionService;
     private final CacheService cacheService;
-    private final TraitForm traitForm;
-    private final ConfirmDialog editTraitsDialog;
+    private final Consumer<PlayerCharacter> pcSelector;
 
-    public PCManager(SessionService sessionService, CacheService cacheService) {
+    public PCManager(SessionService sessionService, CacheService cacheService, Consumer<PlayerCharacter> pcSelector) {
         this.sessionService = sessionService;
         this.cacheService = cacheService;
-
-        traitForm = new TraitForm();
-        editTraitsDialog = new ConfirmDialog(traitForm);
-        editTraitsDialog.setConfirmButton(traitForm.getSaveButton());
-        traitForm.getSaveButton().addClickListener(event -> {
-            if (traitForm.isValid()) {
-                PlayerCharacter playerCharacter = traitForm.getPC();
-                sessionService.getCacheService().getPcCache().save(playerCharacter);
-                editTraitsDialog.close();
-                Entry entry = new Entry(EventType.PlayerPCUpdate);
-                entry.setPcId(playerCharacter.getId());
-                Broadcaster.broadcast(entry);
-            }
-
-        });
-        editTraitsDialog.setWidth("500px");
+        this.pcSelector = pcSelector;
 
         init();
     }
@@ -74,7 +56,8 @@ public class PCManager extends VerticalLayout {
 
         NameValue nameValue = new NameValue("userId", user.getId());
 
-        Iterable<PlayerCharacter> pcs = cacheService.getPcCache().findManyByProperty(nameValue);
+        Iterable<PlayerCharacter> pcs = cacheService.getPcCache().findManyByProperty(nameValue)
+                .stream().sorted().collect(Collectors.toList());
 
         Accordion accordion = new Accordion();
         for (PlayerCharacter pc : pcs) {
@@ -114,7 +97,6 @@ public class PCManager extends VerticalLayout {
                         pc.getTraits().add(trait);
                     }
                 }
-                pc.setTraits(pc.getTraits().stream().sorted().collect(Collectors.toList()));
                 cacheService.getPcCache().save(pc);
                 confirmDialog.close();
                 refresh();
@@ -142,8 +124,6 @@ public class PCManager extends VerticalLayout {
         });
         deleteDialog.setConfirmButton(confirmButton);
 
-        //ConfirmDialog editDialog = new ConfirmDialog()
-
         HorizontalLayout layout = new HorizontalLayout();
         if (pc.getGameId() != null) {
             Button launch = new Button("Launch "+ game.getName());
@@ -159,13 +139,13 @@ public class PCManager extends VerticalLayout {
             icon.setSize("16px");
             layout.add(icon);
         }
-        Button edit = new Button("Edit traits", event -> {
-            traitForm.setPc(pc);
-            editTraitsDialog.open();
-        });
-        layout.add(edit);
+
         Button delete = new Button("Delete", event -> deleteDialog.open());
         layout.add(delete);
+
+        Button sheet = new Button("Sheet -->", event -> pcSelector.accept(pc));
+        layout.add(sheet);
+
         return layout;
     }
 

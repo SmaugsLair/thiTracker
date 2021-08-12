@@ -81,7 +81,7 @@ public class PCTimeLineView extends RegisteredVerticalLayout {
         grid.addColumn(TimeLineItem::getTime).setHeader("Time");
         grid.addColumn(TimeLineItem::getReactTime).setHeader("React");
 
-        grid.setClassNameGenerator(item -> "w3-"+item.getColor());
+        grid.setClassNameGenerator(item -> item.getColor());
         grid.getColumns().forEach(itemColumn -> itemColumn.setAutoWidth(true));
 
         add(grid);

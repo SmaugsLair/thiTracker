@@ -5,9 +5,10 @@ import com.smaugslair.thitracker.data.pc.PlayerCharacter;
 import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.security.SecurityUtils;
 import com.smaugslair.thitracker.services.CacheService;
+import com.smaugslair.thitracker.services.SessionService;
+import com.smaugslair.thitracker.ui.MainView;
 import com.smaugslair.thitracker.ui.components.ConfirmDialog;
 import com.smaugslair.thitracker.ui.components.ValidTextField;
-import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.util.NameValue;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.button.Button;
@@ -16,11 +17,13 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.data.validator.StringLengthValidator;
+import com.vaadin.flow.router.Route;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+@Route(value = "games", layout = MainView.class)
 public class GamesManager extends VerticalLayout {
 
 

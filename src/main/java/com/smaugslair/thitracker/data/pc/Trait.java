@@ -1,6 +1,7 @@
 package com.smaugslair.thitracker.data.pc;
 
 import javax.persistence.*;
+import java.util.Objects;
 import java.util.StringJoiner;
 
 @Entity
@@ -89,5 +90,26 @@ public class Trait implements Comparable<Trait>{
     @Override
     public int compareTo(Trait o) {
         return sortOrder.compareTo(o.sortOrder);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Trait trait = (Trait) o;
+        return Objects.equals(playerCharacter, trait.playerCharacter) && Objects.equals(sortOrder, trait.sortOrder);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(playerCharacter, sortOrder);
+    }
+
+    public boolean isDeletable() {
+        return sortOrder > 6;
     }
 }

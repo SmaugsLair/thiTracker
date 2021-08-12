@@ -266,7 +266,7 @@ public class DiceRoller extends RegisteredVerticalLayout {
         Entry entry = new Entry();
         entry.setPcId(pc.getId());
         entry.setGameId(sessionService.getGameId());
-        entry.setType(EventType.PlayerPCUpdate);
+        entry.setType(EventType.PCUpdate);
         Broadcaster.broadcast(entry);
     }
 
@@ -298,8 +298,7 @@ public class DiceRoller extends RegisteredVerticalLayout {
     protected void handleMessage(Entry entry) {
 
         switch (entry.getType()) {
-            case GMPCUpdate:
-            case PlayerPCUpdate:
+            case PCUpdate:
                 if (entry.getPcId().equals(sessionService.getPc().getId())) {
                     handlePcUpdates();
                 }

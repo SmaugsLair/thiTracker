@@ -1,4 +1,4 @@
-package com.smaugslair.thitracker.ui.games;
+package com.smaugslair.thitracker.ui.sheet;
 
 public class AbilityRowFilter {
 

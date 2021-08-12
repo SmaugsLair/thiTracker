@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-@Cacheable(value = "abilities")
+@Cacheable("abilities")
 public interface AbilityRepository extends JpaRepository<Ability, Integer> {
 
     @Override

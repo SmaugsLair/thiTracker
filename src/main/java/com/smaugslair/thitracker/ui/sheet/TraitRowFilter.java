@@ -1,8 +1,6 @@
-package com.smaugslair.thitracker.ui.games;
+package com.smaugslair.thitracker.ui.sheet;
 
-import com.smaugslair.thitracker.data.pc.Trait;
 import com.smaugslair.thitracker.data.pc.TraitType;
-import com.smaugslair.thitracker.ui.games.tl.TraitPoint;
 
 public class TraitRowFilter {
 
@@ -26,12 +24,12 @@ public class TraitRowFilter {
     }
 
     public boolean test(TraitRow traitRow) {
-        if (traitRow.getComponent() instanceof TraitPoint) {
-            Trait trait = ((TraitPoint)traitRow.getComponent()).getTrait();
-            if (!showDrama && trait.getType().equals(TraitType.Drama)) {
+        TraitType traitType = traitRow.getTraitType();
+        if (traitType != null) {
+            if (!showDrama && traitType.equals(TraitType.Drama)) {
                 return false;
             }
-            if (!showHero && trait.getType().equals(TraitType.Hero)) {
+            if (!showHero && traitType.equals(TraitType.Hero)) {
                 return false;
             }
         }

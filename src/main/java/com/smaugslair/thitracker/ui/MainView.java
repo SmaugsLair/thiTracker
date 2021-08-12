@@ -4,6 +4,7 @@ import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.security.SecurityUtils;
 import com.smaugslair.thitracker.ui.friends.FriendsSession;
 import com.smaugslair.thitracker.ui.games.CollectionView;
+import com.smaugslair.thitracker.ui.games.GamesManager;
 import com.smaugslair.thitracker.ui.powers.PowerBrowserView;
 import com.smaugslair.thitracker.ui.powers.PowerSetBrowserView;
 import com.smaugslair.thitracker.ui.users.UserDetailsView;
@@ -25,7 +26,8 @@ public class MainView extends AppLayout {
         H3 h1 = new H3("The Hero Instant   ");
 
         Tabs tabs = new Tabs(
-                new Tab( new RouterLink("Home", HomeView.class)),
+                new Tab( new RouterLink("Heros", HeroView.class)),
+                new Tab( new RouterLink("Games", GamesManager.class)),
                 new Tab(new RouterLink("Friends", FriendsSession.class)),
                 new Tab(new RouterLink("Collection", CollectionView.class)),
                 new Tab(new RouterLink("Power Sets", PowerSetBrowserView.class)),
