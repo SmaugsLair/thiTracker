@@ -325,7 +325,9 @@ public class GMTimeLineView extends VerticalLayout {
                 gmSession.setHero(playerCharacter);
             });
         }
-        gmSession.setHero(null);
+        else {
+            gmSession.setHero(null);
+        }
     }
 
     public PlayerCharacter updatePc(PlayerCharacter pc) {
