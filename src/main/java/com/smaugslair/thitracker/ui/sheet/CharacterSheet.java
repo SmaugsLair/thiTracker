@@ -1,6 +1,7 @@
 package com.smaugslair.thitracker.ui.sheet;
 
 import com.smaugslair.thitracker.data.abilities.Ability;
+import com.smaugslair.thitracker.data.game.TimeLineItem;
 import com.smaugslair.thitracker.data.log.Entry;
 import com.smaugslair.thitracker.data.log.EventType;
 import com.smaugslair.thitracker.data.pc.AbilityScore;
@@ -68,10 +69,16 @@ public class CharacterSheet extends RegisteredVerticalLayout {
     public void setPc(PlayerCharacter pc) {
         this.pc = pc;
         color = "";
-        if (pc != null) {
-            NameValue nameValue = new NameValue("pcId", pc.getId());
-            cacheService.getTliCache().findOneByProperty(nameValue)
-                    .ifPresent(timeLineItem -> color = timeLineItem.getColor());
+        if (pc != null && pc.getGameId() != null) {
+            NameValue nameValue = new NameValue("", pc.getGameId());
+            //Loading the whole list so that the cache is not loaded with only a single item
+            List<TimeLineItem> items = cacheService.getTliCache().findManyByProperty(nameValue);
+            for (TimeLineItem item : items) {
+                if (pc.getId().equals(item.getPcId())) {
+                    color = item.getColor();
+                    break;
+                }
+            }
         }
         removeAll();
         init();

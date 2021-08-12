@@ -38,6 +38,12 @@ public class JPACache<T extends ThiEntity, ID extends Number> {
         return result;
     }
 
+
+/*
+
+This is not reliable as a call to this will load the cache with a single value, and a subsequent call to
+findMany will only return the one without looking for others in the database
+
     public Optional<T> findOneByProperty(NameValue nameValue){
         //log.info("findOneByProperty: "+nameValue+", class:"+starter.getClass().getSimpleName());
         try {
@@ -60,7 +66,7 @@ public class JPACache<T extends ThiEntity, ID extends Number> {
         }
         return Optional.empty();
 
-    }
+    }*/
 
 
     public List<T> findManyByProperty(NameValue nameValue){

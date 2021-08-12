@@ -62,7 +62,7 @@ public class ThiTrackerApplication {
                 abilityRepository.save(new Ability("Self-Control", 3, 7));
                 abilityRepository.save(new Ability("Initiative", 3, 8));
                 abilityRepository.save(new Ability("Movement", 3, 9));
-                abilityRepository.save(new Ability("Travel Mult", 1, 10));
+                abilityRepository.save(new Ability("Travel Mult", 2, 10));
             }
             //log.info(thiProperties.toString());
             if (userRepository.findAll().isEmpty()) {
