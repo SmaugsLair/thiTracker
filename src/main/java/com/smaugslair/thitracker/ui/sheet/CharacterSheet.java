@@ -14,7 +14,6 @@ import com.smaugslair.thitracker.util.NameValue;
 import com.smaugslair.thitracker.websockets.RegisteredVerticalLayout;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
-import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.data.provider.ListDataProvider;
@@ -33,7 +32,7 @@ public class CharacterSheet extends RegisteredVerticalLayout {
 
     private final static Logger log = LoggerFactory.getLogger(CharacterSheet.class);
 
-    private final static String[][] abilityLayout = {
+    private final static String[][] ABILITY_LAYOUT = {
             {"Perception", "Stealth"},
             {"Aim", "Dodge"},
             {"Strength", "Toughness"},
@@ -41,6 +40,8 @@ public class CharacterSheet extends RegisteredVerticalLayout {
             {"Initiative", "Movement"},
             {"", "Travel Mult"}
     };
+
+    private final static int MAX_DRAMA = 10;
 
     private final Function<PlayerCharacter, PlayerCharacter> pcUpdater;
     private final CacheService cacheService;
@@ -66,6 +67,7 @@ public class CharacterSheet extends RegisteredVerticalLayout {
 
     public void setPc(PlayerCharacter pc) {
         this.pc = pc;
+        color = "";
         if (pc != null) {
             NameValue nameValue = new NameValue("pcId", pc.getId());
             cacheService.getTliCache().findOneByProperty(nameValue)
@@ -82,7 +84,7 @@ public class CharacterSheet extends RegisteredVerticalLayout {
         }
         User user = sessionService.getUserRepository().findById(pc.getUserId()).orElse(new User());
         List<TraitRow> traitRows = new ArrayList<>(9);
-        traitRows.add(new HeaderRow(pc.getName(), user.getDisplayName(), color));
+        traitRows.add(new MetaRow(pc.getName(), user.getDisplayName(), color));
         traitRows.add(new CivilianName(pc, this));
         traitRows.add(new ProgressionPoint(pc, this));
 
@@ -91,7 +93,7 @@ public class CharacterSheet extends RegisteredVerticalLayout {
         AtomicInteger dramaCount = new AtomicInteger();
         AtomicInteger sortOrder = new AtomicInteger();
 
-        traitRows.add(new HeaderRow("Hero Traits"));
+        traitRows.add(new MetaRow("Hero Traits"));
         traits.forEach(trait -> {
             if (trait.getType().equals(TraitType.Hero)) {
                 traitRows.add(new TraitField(trait, this));
@@ -104,8 +106,14 @@ public class CharacterSheet extends RegisteredVerticalLayout {
 
         int newDrama = dramaCount.get() + 1;
 
-        if (dramaCount.get() < 5) {
-            Button button = new Button("Add Drama Trait "+newDrama, event -> {
+        traitRows.add(new MetaRow("Drama Traits"));
+        traits.forEach(trait -> {
+            if (trait.getType().equals(TraitType.Drama)) {
+                traitRows.add(new TraitField(trait, this));
+            }
+        });
+        if (dramaCount.get() < MAX_DRAMA) {
+            Button button = new Button("+", event -> {
                 Trait trait = new Trait();
                 trait.setType(TraitType.Drama);
                 trait.setPoints(0);
@@ -117,17 +125,8 @@ public class CharacterSheet extends RegisteredVerticalLayout {
                 removeAll();
                 init();
             });
-            traitRows.add(new HeaderRow("Drama Traits", button));
+            traitRows.add(new MetaRow(button, TraitType.Drama));
         }
-        else {
-            traitRows.add(new HeaderRow("Drama Traits"));
-        }
-
-        traits.forEach(trait -> {
-            if (trait.getType().equals(TraitType.Drama)) {
-                traitRows.add(new TraitField(trait, this));
-            }
-        });
 
         Grid<TraitRow> grid = new Grid<>();
         grid.setThemeName("min-padding");
@@ -142,7 +141,7 @@ public class CharacterSheet extends RegisteredVerticalLayout {
         grid.setDataProvider(dataProvider);
 
         grid.addComponentColumn(TraitRow::getLabel);//.setFlexGrow(2);
-        grid.addComponentColumn(TraitRow::getComponent).setTextAlign(ColumnTextAlign.END);
+        grid.addComponentColumn(TraitRow::getComponent);//.setTextAlign(ColumnTextAlign.END);
 
         grid.setClassNameGenerator(item -> item.getColor());
 
@@ -180,8 +179,8 @@ public class CharacterSheet extends RegisteredVerticalLayout {
         abilityRows.add(0, new AbilityRow()); //Header row
         for (int i = 0; i < 6; ++i) {
             abilityRows.add(new AbilityRow(
-                    pc.getAbilityScores().get(abilityLayout[i][0]),
-                    pc.getAbilityScores().get(abilityLayout[i][1]), this
+                    pc.getAbilityScores().get(ABILITY_LAYOUT[i][0]),
+                    pc.getAbilityScores().get(ABILITY_LAYOUT[i][1]), this
             ));
         }
 

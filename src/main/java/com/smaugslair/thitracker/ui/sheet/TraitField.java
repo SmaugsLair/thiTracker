@@ -20,7 +20,7 @@ public class TraitField implements TraitRow {
 
         nameField = new TextField();
         nameField.setValue(trait.getName());
-        nameField.setReadOnly(true);
+        //nameField.setReadOnly(true);
         nameField.addValueChangeListener(event -> {
             trait.setName(event.getValue());
             sheet.updatePC();

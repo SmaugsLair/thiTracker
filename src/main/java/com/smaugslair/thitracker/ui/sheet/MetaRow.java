@@ -5,24 +5,26 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
 
-public class HeaderRow implements TraitRow {
+public class MetaRow implements TraitRow {
 
     private final Span label = new Span();
     private final Component component;
     private final String color;
+    private TraitType traitType = null;
 
-    public HeaderRow(String text) {
+    public MetaRow(String text) {
         label.setText(text);
         component = new Span();
         color = "light-grey";
     }
-    public HeaderRow(String text, Button button) {
-        label.setText(text);
-        color = "light-grey";
+    public MetaRow(Button button, TraitType traitType) {
+        label.setText("");
         component = button;
+        color = "";
+        this.traitType = traitType;
     }
 
-    public HeaderRow(String heroName, String displayName, String color) {
+    public MetaRow(String heroName, String displayName, String color) {
         label.setText(heroName);
         component = new Span(displayName);
         this.color = color;
@@ -50,6 +52,6 @@ public class HeaderRow implements TraitRow {
 
     @Override
     public TraitType getTraitType() {
-        return null;
+        return traitType;
     }
 }
