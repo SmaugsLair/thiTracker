@@ -1,9 +1,11 @@
 package com.smaugslair.thitracker.data.pc;
 
+import com.smaugslair.thitracker.rules.Ability;
+
 import javax.persistence.*;
 
 @Entity
-public class AbilityScore implements Comparable<AbilityScore> {
+public class AbilityScore {
 
     //private static final Logger log = LoggerFactory.getLogger(AbilityScore.class);
 
@@ -16,13 +18,10 @@ public class AbilityScore implements Comparable<AbilityScore> {
     private PlayerCharacter playerCharacter;
 
     @Column(nullable = false)
-    private String name;
+    private Ability ability;
 
     @Column(nullable = false)
     private Integer points;
-
-    @Column(nullable = false)
-    private Integer sortOrder;
 
     public Long getId() {
         return id;
@@ -40,12 +39,12 @@ public class AbilityScore implements Comparable<AbilityScore> {
         this.playerCharacter = playerCharacter;
     }
 
-    public String getName() {
-        return name;
+    public Ability getAbility() {
+        return ability;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setAbility(Ability ability) {
+        this.ability = ability;
     }
 
     public Integer getPoints() {
@@ -56,27 +55,13 @@ public class AbilityScore implements Comparable<AbilityScore> {
         this.points = points;
     }
 
-    public Integer getSortOrder() {
-        return sortOrder;
-    }
-
-    public void setSortOrder(Integer sortOrder) {
-        this.sortOrder = sortOrder;
-    }
-
-    @Override
-    public int compareTo(AbilityScore o) {
-        return sortOrder.compareTo(o.sortOrder);
-    }
-
     @Override
     public String toString() {
         return "AbilityScore{" +
                 "id=" + id +
                 ", playerCharacter=" + playerCharacter +
-                ", name='" + name + '\'' +
+                ", ability='" + ability + '\'' +
                 ", points=" + points +
-                ", sortOrder=" + sortOrder +
                 '}';
     }
 }

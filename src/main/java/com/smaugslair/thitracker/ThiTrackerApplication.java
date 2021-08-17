@@ -1,7 +1,5 @@
 package com.smaugslair.thitracker;
 
-import com.smaugslair.thitracker.data.abilities.Ability;
-import com.smaugslair.thitracker.data.abilities.AbilityRepository;
 import com.smaugslair.thitracker.data.atd.ActionTimeDefault;
 import com.smaugslair.thitracker.data.atd.AtdRepository;
 import com.smaugslair.thitracker.data.user.Credentials;
@@ -36,8 +34,7 @@ public class ThiTrackerApplication {
     public CommandLineRunner loadData(
             AtdRepository repository,
             UserRepository userRepository,
-            CredentialsRepository credentialsRepository,
-            AbilityRepository abilityRepository
+            CredentialsRepository credentialsRepository
             ) {
         return (args) -> {
 
@@ -50,19 +47,6 @@ public class ThiTrackerApplication {
                 repository.save(new ActionTimeDefault("Full Round", 10, true));
                 repository.save(new ActionTimeDefault("Recovery", 10, false));
                 repository.save(new ActionTimeDefault("Repair", 10, true));
-            }
-            if (abilityRepository.findAll().isEmpty()) {
-                abilityRepository.save(new Ability("Perception", 3, 0));
-                abilityRepository.save(new Ability("Aim", 3, 1));
-                abilityRepository.save(new Ability("Strength", 3, 2));
-                abilityRepository.save(new Ability("Influence", 3, 3));
-                abilityRepository.save(new Ability("Stealth", 3, 4));
-                abilityRepository.save(new Ability("Dodge", 3, 5));
-                abilityRepository.save(new Ability("Toughness", 3, 6));
-                abilityRepository.save(new Ability("Self-Control", 3, 7));
-                abilityRepository.save(new Ability("Initiative", 3, 8));
-                abilityRepository.save(new Ability("Movement", 3, 9));
-                abilityRepository.save(new Ability("Travel Mult", 2, 10));
             }
             //log.info(thiProperties.toString());
             if (userRepository.findAll().isEmpty()) {

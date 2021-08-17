@@ -31,10 +31,10 @@ public class AbilityRow {
             component1 = new Span();
         }
         else {
-            label1 = abilityScore1.getName();
+            label1 = abilityScore1.getAbility().getDisplayName();
             component1 = new AbilityField(abilityScore1, sheet).getPointField();
         }
-        label2 = abilityScore2.getName();
+        label2 = abilityScore2.getAbility().getDisplayName();
         component2 = new AbilityField(abilityScore2, sheet).getPointField();
     }
 

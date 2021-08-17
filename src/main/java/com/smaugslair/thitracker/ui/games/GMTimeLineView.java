@@ -180,6 +180,7 @@ public class GMTimeLineView extends VerticalLayout {
 
         Grid<TimeLineItem> grid = new Grid<>();
         grid.setThemeName("min-padding");
+        //grid.addThemeVariants(GridVariant.LUMO_COMPACT);
 
         grid.setHeightByRows(true);
         grid.setItems(items);

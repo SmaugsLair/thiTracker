@@ -24,6 +24,12 @@ public class Game implements ThiEntity {
     @Column(nullable = false)
     private Integer maxDice = 10;
 
+    @Column(nullable = false)
+    private Integer powerSetLimit = 2;
+
+    @Column(nullable = false)
+    private Integer powerLimit = 9;
+
     public Game() {}
 
     public Game(String name) {
@@ -68,6 +74,22 @@ public class Game implements ThiEntity {
 
     public void setMaxDice(Integer maxDice) {
         this.maxDice = maxDice;
+    }
+
+    public Integer getPowerSetLimit() {
+        return powerSetLimit;
+    }
+
+    public void setPowerSetLimit(Integer powerSetLimit) {
+        this.powerSetLimit = powerSetLimit;
+    }
+
+    public Integer getPowerLimit() {
+        return powerLimit;
+    }
+
+    public void setPowerLimit(Integer powerLimit) {
+        this.powerLimit = powerLimit;
     }
 
     @Override

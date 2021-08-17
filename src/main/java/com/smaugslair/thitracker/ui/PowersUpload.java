@@ -11,6 +11,7 @@ import com.smaugslair.thitracker.ui.powers.transformers.Transformer;
 import com.smaugslair.thitracker.ui.powers.transformers.TransformerException;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.details.Details;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -191,7 +192,12 @@ public class PowersUpload extends VerticalLayout {
         });
         upload.getElement().addEventListener("file-remove", event -> output.removeAll());
 
-        add(upload, output, saveButton, results);
+        Dialog dialog = new Dialog();
+        dialog.add(output, saveButton, results);
+
+        upload.addStartedListener(event -> {dialog.open();});
+
+        add(upload);
     }
 
     private void validateSheetMetadata(XSSFWorkbook workbook, Transformer<? extends Sheetable> transformer) throws IllegalArgumentException {

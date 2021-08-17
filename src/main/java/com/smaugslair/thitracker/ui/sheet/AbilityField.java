@@ -21,7 +21,7 @@ public class AbilityField {
     }
 
     public String getLabel() {
-        return abilityScore.getName();
+        return abilityScore.getAbility().getDisplayName();
     }
 
     public IntegerField getPointField() {

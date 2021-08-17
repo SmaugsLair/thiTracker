@@ -2,6 +2,7 @@ package com.smaugslair.thitracker.data.pc;
 
 import com.smaugslair.thitracker.data.ThiEntity;
 import com.smaugslair.thitracker.data.user.User;
+import com.smaugslair.thitracker.rules.Ability;
 
 import javax.persistence.*;
 import java.util.*;
@@ -36,8 +37,8 @@ public class PlayerCharacter implements ThiEntity, Comparable<PlayerCharacter> {
 
     @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL)
     @JoinColumn(name = "pc_id" )
-    @MapKey(name = "name")
-    Map<String, AbilityScore> abilityScores = new HashMap<>();
+    @MapKey(name = "ability")
+    Map<Ability, AbilityScore> abilityScores = new HashMap<>();
 
 
     public Long getId() {
@@ -96,11 +97,11 @@ public class PlayerCharacter implements ThiEntity, Comparable<PlayerCharacter> {
         this.civilianId = civilianId;
     }
 
-    public Map<String, AbilityScore> getAbilityScores() {
+    public Map<Ability, AbilityScore> getAbilityScores() {
         return abilityScores;
     }
 
-    public void setAbilityScores(Map<String, AbilityScore> abilityScores) {
+    public void setAbilityScores(Map<Ability, AbilityScore> abilityScores) {
         this.abilityScores = abilityScores;
     }
 

@@ -1,6 +1,5 @@
 package com.smaugslair.thitracker.ui.sheet;
 
-import com.smaugslair.thitracker.data.abilities.Ability;
 import com.smaugslair.thitracker.data.game.TimeLineItem;
 import com.smaugslair.thitracker.data.log.Entry;
 import com.smaugslair.thitracker.data.log.EventType;
@@ -9,6 +8,7 @@ import com.smaugslair.thitracker.data.pc.PlayerCharacter;
 import com.smaugslair.thitracker.data.pc.Trait;
 import com.smaugslair.thitracker.data.pc.TraitType;
 import com.smaugslair.thitracker.data.user.User;
+import com.smaugslair.thitracker.rules.Ability;
 import com.smaugslair.thitracker.services.CacheService;
 import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.util.NameValue;
@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 public class CharacterSheet extends RegisteredVerticalLayout {
 
     private final static Logger log = LoggerFactory.getLogger(CharacterSheet.class);
-
+/*
     private final static String[][] ABILITY_LAYOUT = {
             {"Perception", "Stealth"},
             {"Aim", "Dodge"},
@@ -40,7 +40,7 @@ public class CharacterSheet extends RegisteredVerticalLayout {
             {"Influence", "Self-Control"},
             {"Initiative", "Movement"},
             {"", "Travel Mult"}
-    };
+    };*/
 
     private final static int MAX_DRAMA = 10;
 
@@ -70,7 +70,7 @@ public class CharacterSheet extends RegisteredVerticalLayout {
         this.pc = pc;
         color = "";
         if (pc != null && pc.getGameId() != null) {
-            NameValue nameValue = new NameValue("", pc.getGameId());
+            NameValue nameValue = new NameValue("gameId", pc.getGameId());
             //Loading the whole list so that the cache is not loaded with only a single item
             List<TimeLineItem> items = cacheService.getTliCache().findManyByProperty(nameValue);
             for (TimeLineItem item : items) {
@@ -170,15 +170,13 @@ public class CharacterSheet extends RegisteredVerticalLayout {
         add(grid);
 
         if (pc.getAbilityScores().isEmpty()) {
-            List<Ability> abilities = cacheService.getAbilityRepository().findAll();
-            abilities.forEach(ability -> {
+            for (Ability ability : Ability.values()) {
                 AbilityScore abilityScore = new AbilityScore();
+                abilityScore.setAbility(ability);
                 abilityScore.setPoints(ability.getBaseValue());
-                abilityScore.setName(ability.getName());
                 abilityScore.setPlayerCharacter(pc);
-                abilityScore.setSortOrder(ability.getSortOrder());
-                pc.getAbilityScores().put(abilityScore.getName(), abilityScore);
-            });
+                pc.getAbilityScores().put(ability, abilityScore);
+            }
         }
 
         List<AbilityRow> abilityRows = new ArrayList<>(8);
@@ -186,8 +184,8 @@ public class CharacterSheet extends RegisteredVerticalLayout {
         abilityRows.add(0, new AbilityRow()); //Header row
         for (int i = 0; i < 6; ++i) {
             abilityRows.add(new AbilityRow(
-                    pc.getAbilityScores().get(ABILITY_LAYOUT[i][0]),
-                    pc.getAbilityScores().get(ABILITY_LAYOUT[i][1]), this
+                    pc.getAbilityScores().get(Ability.getAt(i, 0)),
+                    pc.getAbilityScores().get(Ability.getAt(i, 1)), this
             ));
         }
 
@@ -234,8 +232,8 @@ public class CharacterSheet extends RegisteredVerticalLayout {
     }
 
     private void calcSpeeds() {
-        int travelSpeed = pc.getAbilityScores().get("Movement").getPoints()
-                * pc.getAbilityScores().get("Travel Mult").getPoints();
+        int travelSpeed = pc.getAbilityScores().get(Ability.Movement).getPoints()
+                * pc.getAbilityScores().get(Ability.TravelMult).getPoints();
         tsSpace.getSpan().setText(String.valueOf(travelSpeed));
         tsMPH.getSpan().setText(String.valueOf(travelSpeed*1.5));
     }

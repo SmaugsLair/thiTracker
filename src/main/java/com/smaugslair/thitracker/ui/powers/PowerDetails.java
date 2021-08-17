@@ -12,7 +12,7 @@ public class PowerDetails extends FormLayout {
         addFormItem(new Span(power.getFullDescr()), "Full Description");
         addFormItem(new Span(power.getAbilityMods()), "Ability Mods");
         addFormItem(new Span(power.getAssRules()), "Associated Rules");
-        addFormItem(new Span(power.getPrereq()), "Prerequisites");
+        addFormItem(new Span(power.getPrerequisite()), "Prerequisites");
         addFormItem(new Span(power.getPowerSets()), "Power Sets");
         addFormItem(new Span(power.getSubPowers()), "SubPowers");
 

@@ -11,10 +11,10 @@ public class PowerTransformer extends Transformer<Power>{
 
     private static final Logger log = LoggerFactory.getLogger(PowerTransformer.class);
 
-    public static final String[] labels = {"name", "ssid", "am_Perception", "am_Stealth", "am_Aim",	"am_Dodge",
-            "am_Strength", "am_Toughness",	"am_Influence",	"am_Self-Control",	"am_Initiative",
-            "am_Movement",	"am_choice", "am_Travel Mult",	"shortDescr",	"fullDescr",	"metaPower",
-            "subPowers", 	"powerTag",	"assRules",	"prerequisite",	"maxTaken"};
+    public static final String[] labels = {"name", "ssid", "amPerception", "amStealth", "amAim",
+            "amDodge", "amStrength", "amToughness",	"amInfluence",	"amSelfControl", "amInitiative",
+            "amMovement", "amChoice", "amTravelMult", "shortDescr",	"fullDescr", "metaPower",
+            "subPowers", "powerTag", "assRules", "prerequisite", "maxTaken"};
 
 
     public static final String sheetName = "PowersList";
@@ -31,17 +31,20 @@ public class PowerTransformer extends Transformer<Power>{
                 break;
             }
             try {
-                if (label.startsWith("am_")) {
+                if ("amChoice".equals(label)) {
                     String value = cell.toString();
                     if (value != null && !value.isEmpty()) {
-                        if (!value.startsWith("*")) {
-                            value = String.valueOf(Double.valueOf(cell.toString()).intValue());
+                        power.setAmChoice(Double.valueOf(cell.toString()).intValue());
+                    }
+                }
+                if (label.startsWith("am")) {
+                    String value = cell.toString();
+                    if (value != null && !value.isEmpty()) {
+                        if (value.startsWith("*")) {
+                            value = value.substring(1);
                         }
-                        String pre = power.getAbilityMods();
-                        if (pre == null) {
-                            pre = "";
-                        }
-                        power.setAbilityMods(pre + " " + label.substring(3) + ":" + value);
+                        int number = Double.valueOf(value).intValue();
+                        BeanUtils.setProperty(power, label, number);
                     }
                 }
                 else if (label.equals("metaPower")) {
@@ -63,9 +66,6 @@ public class PowerTransformer extends Transformer<Power>{
                 }
                 else {
                     BeanUtils.setProperty(power, label, cell.toString());
-                }
-                if (power.getAbilityMods() != null) {
-                    power.setAbilityMods(power.getAbilityMods().trim());
                 }
             }
             catch (Throwable t) {

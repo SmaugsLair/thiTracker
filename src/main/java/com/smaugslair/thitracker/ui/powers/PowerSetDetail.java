@@ -46,7 +46,7 @@ public class PowerSetDetail extends VerticalLayout {
                     item -> grid.setDetailsVisible(item, !grid.isDetailsVisible(item))));
             grid.addColumn(Power::getName).setHeader("Name");
             grid.addColumn(Power::getShortDescr).setHeader("Short Description");
-            grid.addColumn(Power::getPrereq).setHeader("Prerequisites");
+            grid.addColumn(Power::getPrerequisite).setHeader("Prerequisites");
             grid.addColumn(Power::getMaxTaken).setHeader("Limit");
 
             grid.setItemDetailsRenderer(new ComponentRenderer<>(power -> new Paragraph(power.getFullDescr())));

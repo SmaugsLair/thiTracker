@@ -11,9 +11,9 @@ public class PowerSetTransformer extends Transformer<PowerSet>{
 
     private final Logger log = LoggerFactory.getLogger(PowerSetTransformer.class);
 
-    public static final String[] labels = {"name", "ssid", "updated", "ps_Perception", "ps_Stealth", "ps_Aim",	"ps_Dodge",
-            "ps_Strength", "ps_Toughness",	"ps_Influence",	"ps_Self-Control",	"ps_Initiative",
-            "ps_Movement",	"ps_Travel Mult",	"ps_Choice",	"openText",	"abilityText",
+    public static final String[] labels = {"name", "ssid", "updated", "amPerception", "amStealth",
+            "amAim", "amDodge", "amStrength", "amToughness", "amInfluence",	"amSelfControl",
+            "amInitiative", "amMovement", "amTravelMult", "amChoice", "openText", "abilityText",
             "powersText"};
 
 
@@ -39,17 +39,21 @@ public class PowerSetTransformer extends Transformer<PowerSet>{
                 }
             }
             try {
-                if (label.startsWith("ps_")) {
+                if("amChoice".equals(label)) {
                     String value = cell.toString();
                     if (value != null && !value.isEmpty()) {
-                        if (!value.startsWith("*")) {
-                            value = String.valueOf(Double.valueOf(cell.toString()).intValue());
+                        powerSet.setAmChoice(Double.valueOf(cell.toString()).intValue());
+                    }
+                }
+                else if (label.startsWith("am")) {
+                    String value = cell.toString();
+                    if (value != null && !value.isEmpty()) {
+                        if (value.startsWith("*")) {
+                            value = value.substring(1);
                         }
-                        String pre = powerSet.getAbilityMods();
-                        if (pre == null) {
-                            pre = "";
-                        }
-                        powerSet.setAbilityMods(pre + " " + label.substring(3) + ":" + value);
+                        int number = Double.valueOf(value).intValue();
+                        //log.info("row:"+row.getRowNum()+" label:"+label+" number:"+number);
+                        BeanUtils.setProperty(powerSet, label, number);
                     }
                 }
                 else if (label.equals("updated")) {
@@ -62,9 +66,6 @@ public class PowerSetTransformer extends Transformer<PowerSet>{
             catch (Throwable t) {
                 throw new TransformerException(createErrorMessage(row, column, label, cell, t), t);
             }
-        }
-        if (powerSet.getAbilityMods() != null) {
-            powerSet.setAbilityMods(powerSet.getAbilityMods().trim());
         }
         return powerSet;
     }

@@ -1,6 +1,5 @@
 package com.smaugslair.thitracker.services;
 
-import com.smaugslair.thitracker.data.abilities.AbilityRepository;
 import com.smaugslair.thitracker.data.atd.AtdRepository;
 import com.smaugslair.thitracker.data.game.Game;
 import com.smaugslair.thitracker.data.game.GameRepository;
@@ -29,16 +28,6 @@ public class CacheService {
 
     private AtdRepository atdRepo;
     private CollectedItemRepository ciRepo;
-    private AbilityRepository abilityRepository;
-
-    public AbilityRepository getAbilityRepository() {
-        return abilityRepository;
-    }
-
-    @Autowired
-    public void setAbilityRepository(AbilityRepository abilityRepository) {
-        this.abilityRepository = abilityRepository;
-    }
 
     public AtdRepository getAtdRepo() {
         return atdRepo;
