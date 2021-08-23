@@ -237,6 +237,12 @@ public class GMTimeLineView extends VerticalLayout {
                 game.setLastEventId(null);
                 getGameCache().save(game);
             }
+            if (item.getPcId() != null) {
+                cacheService.getPcCache().findOneById(item.getPcId()).ifPresent(pc -> {
+                    pc.setGameId(null);
+                    cacheService.getPcCache().save(pc);
+                });
+            }
             getTliCache().delete(item);
             refreshAndBroadcast();
         }));
