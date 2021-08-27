@@ -2,7 +2,6 @@ package com.smaugslair.thitracker.ui.games;
 
 import com.smaugslair.thitracker.data.log.Entry;
 import com.smaugslair.thitracker.data.pc.PlayerCharacter;
-import com.smaugslair.thitracker.services.CacheService;
 import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.ui.MainView;
 import com.smaugslair.thitracker.ui.components.DiceHistory;
@@ -19,11 +18,11 @@ public class GMSession extends SplitLayout {
     private final DiceHistory diceHistory;
     private final CharacterSheet characterSheet;
 
-    public GMSession(SessionService sessionService, CacheService cacheService) {
+    public GMSession(SessionService sessionService) {
 
-        GMTimeLineView gmTimeLineView = new GMTimeLineView(this, sessionService, cacheService);
-        characterSheet = new CharacterSheet(gmTimeLineView::updatePc, cacheService, sessionService);
-        diceHistory = new DiceHistory(sessionService, cacheService);
+        GMTimeLineView gmTimeLineView = new GMTimeLineView(this, sessionService);
+        characterSheet = new CharacterSheet(gmTimeLineView::updatePc, sessionService);
+        diceHistory = new DiceHistory(sessionService);
         timeLineHistory = new TimeLineHistory(gmTimeLineView);
 
         SplitLayout historyLayout = new SplitLayout();

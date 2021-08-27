@@ -1,12 +1,10 @@
 package com.smaugslair.thitracker.data.user;
 
-import com.smaugslair.thitracker.data.ThiEntity;
-
 import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-public class User implements ThiEntity {
+public class User {
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
@@ -15,7 +13,7 @@ public class User implements ThiEntity {
     @Column(unique = true, nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(unique = true, nullable = false)
     private String email;
 
     @Column(nullable = false)
@@ -30,7 +28,6 @@ public class User implements ThiEntity {
     public User() {
     }
 
-    @Override
     public Integer getId() {
         return id;
     }
@@ -105,11 +102,11 @@ public class User implements ThiEntity {
     public int hashCode() {
         return Objects.hash(id);
     }
-
+/*
     @Override
     public User createEmptyObject() {
         User u = new User();
         u.setAdmin(null);
         return u;
-    }
+    }*/
 }

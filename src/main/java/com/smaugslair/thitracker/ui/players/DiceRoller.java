@@ -6,7 +6,6 @@ import com.smaugslair.thitracker.data.log.EventType;
 import com.smaugslair.thitracker.data.pc.PlayerCharacter;
 import com.smaugslair.thitracker.data.pc.Trait;
 import com.smaugslair.thitracker.data.pc.TraitType;
-import com.smaugslair.thitracker.services.CacheService;
 import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.websockets.Broadcaster;
 import com.smaugslair.thitracker.websockets.RegisteredVerticalLayout;
@@ -38,7 +37,6 @@ public class DiceRoller extends RegisteredVerticalLayout {
     private static final Logger log = LoggerFactory.getLogger(DiceRoller.class);
 
     private final SessionService sessionService;
-    private final CacheService cacheService;
 
     private final IntegerField d10s = new IntegerField();
     private final IntegerField maxDice = new IntegerField();
@@ -63,9 +61,8 @@ public class DiceRoller extends RegisteredVerticalLayout {
     private int sum = 0;
 
 
-    public DiceRoller(SessionService sessionService, CacheService cacheService) {
+    public DiceRoller(SessionService sessionService) {
         this.sessionService = sessionService;
-        this.cacheService = cacheService;
 
 
         //setPadding(false);
@@ -246,7 +243,7 @@ public class DiceRoller extends RegisteredVerticalLayout {
         message.setType(EventType.DiceRoll);
         message.setText(sb.toString());
 
-        cacheService.getEntryCache().save(message);
+        sessionService.getEntryRepo().save(message);
 
         Broadcaster.broadcast(message);
 
@@ -261,7 +258,7 @@ public class DiceRoller extends RegisteredVerticalLayout {
         else {
             trait.setPoints(trait.getPoints()+1);
         }
-        pc = cacheService.getPcCache().save(pc);
+        pc = sessionService.getPcRepo().save(pc);
         sessionService.setPc(pc);
         Entry entry = new Entry();
         entry.setPcId(pc.getId());
@@ -313,7 +310,7 @@ public class DiceRoller extends RegisteredVerticalLayout {
     }
 
     private Integer getMaxDiceForGame() {
-        Optional<Game> game = cacheService.getGameCache().findOneById(sessionService.getGameId());
+        Optional<Game> game = sessionService.getGameRepo().findById(sessionService.getGameId());
         return game.isPresent() ? game.get().getMaxDice() : 10;
     }
 

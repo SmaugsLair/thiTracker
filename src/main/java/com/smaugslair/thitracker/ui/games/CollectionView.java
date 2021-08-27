@@ -32,7 +32,7 @@ public class CollectionView extends VerticalLayout {
     public void init() {
 
         add(new H3("Collection"));
-        List<CollectedItem> items = sessionService.getCacheService().getCiRepo()
+        List<CollectedItem> items = sessionService.getCiRepo()
                 .findAllByGmId(SecurityUtils.getLoggedInUser().getId());
 
         if (items.isEmpty()) {
@@ -55,7 +55,7 @@ public class CollectionView extends VerticalLayout {
     }
 
     public void deleteItem(CollectedItem item) {
-        sessionService.getCacheService().getCiRepo().delete(item);
+        sessionService.getCiRepo().delete(item);
         refresh();
     }
 }

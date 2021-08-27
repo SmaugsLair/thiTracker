@@ -1,12 +1,14 @@
 package com.smaugslair.thitracker.services;
 
+import com.smaugslair.thitracker.data.atd.AtdRepository;
+import com.smaugslair.thitracker.data.game.GameRepository;
+import com.smaugslair.thitracker.data.game.TimeLineItemRepository;
+import com.smaugslair.thitracker.data.log.EntryRepository;
 import com.smaugslair.thitracker.data.pc.PlayerCharacter;
+import com.smaugslair.thitracker.data.pc.PlayerCharacterRepository;
 import com.smaugslair.thitracker.data.powers.PowerRepository;
 import com.smaugslair.thitracker.data.powers.PowerSetRepository;
-import com.smaugslair.thitracker.data.user.CredentialsRepository;
-import com.smaugslair.thitracker.data.user.FriendshipRepository;
-import com.smaugslair.thitracker.data.user.PasswordResetRepository;
-import com.smaugslair.thitracker.data.user.UserRepository;
+import com.smaugslair.thitracker.data.user.*;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -16,12 +18,30 @@ import org.springframework.stereotype.Component;
 @VaadinSessionScope
 public class SessionService {
 
-    private final CacheService cacheService;
+    //private final CacheService cacheService;
     private Long gameId;
     private PlayerCharacter pc;
 
-    public SessionService(CacheService cacheService) {
-        this.cacheService = cacheService;
+    private JavaMailSender javaMailSender;
+    private ThiProperties thiProperties;
+    private PowersCache powersCache;
+
+    private AtdRepository atdRepo;
+    private CollectedItemRepository ciRepo;
+    private CredentialsRepository credRepo;
+    private PowerRepository powerRepo;
+    private PowerSetRepository powerSetRepo;
+    private PasswordResetRepository passwordResetRepo;
+    private FriendshipRepository friendsRepo;
+    private UserRepository userRepository;
+    private TimeLineItemRepository tliRepo;
+    private GameRepository gameRepo;
+    private PlayerCharacterRepository pcRepo;
+    private EntryRepository entryRepo;
+
+
+    public SessionService(/*CacheService cacheService*/) {
+        /*this.cacheService = cacheService;*/
     }
 
     public Long getGameId() {
@@ -40,19 +60,11 @@ public class SessionService {
 
     public void refreshPc() {
         if (pc != null) {
-            pc= cacheService.getPcCache().findOneById(pc.getId()).orElse(pc);
+            pc = pcRepo.findById(pc.getId()).orElse(pc);
+            //pc= cacheService.getPcCache().findOneById(pc.getId()).orElse(pc);
         }
     }
 
-    private CredentialsRepository credRepo;
-    private PowerRepository powerRepo;
-    private PowerSetRepository powerSetRepo;
-    private PasswordResetRepository passwordResetRepo;
-    private JavaMailSender javaMailSender;
-    private ThiProperties thiProperties;
-    private PowersCache powersCache;
-    private FriendshipRepository friendsRepo;
-    private UserRepository userRepository;
 
 
     public CredentialsRepository getCredRepo() {
@@ -127,8 +139,63 @@ public class SessionService {
     public void setPowersCache(PowersCache powersCache) {
         this.powersCache = powersCache;
     }
-
+/*
     public CacheService getCacheService() {
         return cacheService;
+    }*/
+
+
+   public AtdRepository getAtdRepo() {
+       return atdRepo;
+   }
+
+   @Autowired
+   public void setAtdRepo(AtdRepository atdRepository) {
+       this.atdRepo = atdRepository;
+   }
+
+    public CollectedItemRepository getCiRepo() {
+        return ciRepo;
+    }
+
+    @Autowired
+    public void setCiRepo(CollectedItemRepository ciRepo) {
+        this.ciRepo = ciRepo;
+    }
+
+    public TimeLineItemRepository getTliRepo() {
+        return tliRepo;
+    }
+
+    @Autowired
+    public void setTliRepo(TimeLineItemRepository tliRepo) {
+        this.tliRepo = tliRepo;
+    }
+
+    public GameRepository getGameRepo() {
+        return gameRepo;
+    }
+
+    @Autowired
+    public void setGameRepo(GameRepository gameRepo) {
+        this.gameRepo = gameRepo;
+    }
+
+    public PlayerCharacterRepository getPcRepo() {
+        return pcRepo;
+    }
+
+    @Autowired
+    public void setPcRepo(PlayerCharacterRepository pcRepo) {
+        this.pcRepo = pcRepo;
+    }
+
+    public EntryRepository getEntryRepo() {
+        return entryRepo;
+    }
+
+    @Autowired
+    public void setEntryRepo(EntryRepository entryRepo) {
+        this.entryRepo = entryRepo;
     }
 }

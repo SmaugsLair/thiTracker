@@ -1,6 +1,5 @@
 package com.smaugslair.thitracker.data.game;
 
-import com.smaugslair.thitracker.data.ThiEntity;
 import com.smaugslair.thitracker.data.atd.ActionTime;
 import com.smaugslair.thitracker.data.atd.ActionTimeDefault;
 
@@ -8,7 +7,7 @@ import javax.persistence.*;
 import java.util.*;
 
 @Entity
-public class TimeLineItem implements ThiEntity, Comparable<TimeLineItem> {
+public class TimeLineItem implements Comparable<TimeLineItem> {
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
@@ -176,7 +175,7 @@ public class TimeLineItem implements ThiEntity, Comparable<TimeLineItem> {
                 .add("reactTime=" + reactTime)
                 .toString();
     }
-
+/*
     @Override
     public TimeLineItem createEmptyObject() {
         TimeLineItem sample = new TimeLineItem();
@@ -185,5 +184,5 @@ public class TimeLineItem implements ThiEntity, Comparable<TimeLineItem> {
         sample.setDeltas(null);
         sample.actionTimes = null;
         return sample;
-    }
+    }*/
 }

@@ -7,7 +7,6 @@ import com.smaugslair.thitracker.data.pc.Trait;
 import com.smaugslair.thitracker.data.pc.TraitType;
 import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.security.SecurityUtils;
-import com.smaugslair.thitracker.services.CacheService;
 import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.ui.components.ConfirmDialog;
 import com.smaugslair.thitracker.ui.components.ValidTextField;
@@ -32,12 +31,10 @@ public class PCManager extends VerticalLayout {
     private final Logger log = LoggerFactory.getLogger(PCManager.class);
 
     private final SessionService sessionService;
-    private final CacheService cacheService;
     private final Consumer<PlayerCharacter> pcSelector;
 
-    public PCManager(SessionService sessionService, CacheService cacheService, Consumer<PlayerCharacter> pcSelector) {
+    public PCManager(SessionService sessionService, Consumer<PlayerCharacter> pcSelector) {
         this.sessionService = sessionService;
-        this.cacheService = cacheService;
         this.pcSelector = pcSelector;
 
         init();
@@ -54,14 +51,15 @@ public class PCManager extends VerticalLayout {
         User user = SecurityUtils.getLoggedInUser();
         if (user == null) return;
 
-        NameValue nameValue = new NameValue("userId", user.getId());
-
-        Iterable<PlayerCharacter> pcs = cacheService.getPcCache().findManyByProperty(nameValue)
+        Iterable<PlayerCharacter> pcs = sessionService.getPcRepo().findAllByUserId(user.getId())
                 .stream().sorted().collect(Collectors.toList());
 
         Accordion accordion = new Accordion();
         for (PlayerCharacter pc : pcs) {
-            Game game = cacheService.getGameCache().findOneById(pc.getGameId()).orElse(null);
+            Game game = null;
+            if (pc.getGameId() != null) {
+                game = sessionService.getGameRepo().findById(pc.getGameId()).orElse(null);
+            }
             accordion.add(pc.getName()+
                     (game==null ? "" : " ("+game.getName()+")"), getPcRow(pc, game));
         }
@@ -97,7 +95,7 @@ public class PCManager extends VerticalLayout {
                         pc.getTraits().add(trait);
                     }
                 }
-                cacheService.getPcCache().save(pc);
+                sessionService.getPcRepo().save(pc);
                 confirmDialog.close();
                 refresh();
             }
@@ -112,13 +110,13 @@ public class PCManager extends VerticalLayout {
         ConfirmDialog deleteDialog = new ConfirmDialog("Are you sure you want to delete the character "+pc.getName()+"?");
         Button confirmButton = new Button("Delete", event -> {
             NameValue example = new NameValue("pcId", pc.getId());
-            List<TimeLineItem> items = cacheService.getTliCache().findManyByProperty(example);
+            List<TimeLineItem> items = sessionService.getTliRepo().findByPcId(pc.getId());
             items.forEach(item -> {
                 item.setPcId(null);
                 item.setName(pc.getName());
             });
-            cacheService.getTliCache().saveAll(items);
-            cacheService.getPcCache().delete(pc);
+            sessionService.getTliRepo().saveAll(items);
+            sessionService.getPcRepo().delete(pc);
             deleteDialog.close();
             refresh();
         });

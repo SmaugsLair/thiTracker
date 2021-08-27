@@ -5,7 +5,6 @@ import com.smaugslair.thitracker.data.user.Friendship;
 import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.security.SecurityUtils;
 import com.smaugslair.thitracker.services.SessionService;
-import com.smaugslair.thitracker.util.NameValue;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -34,8 +33,8 @@ public class FriendsList extends VerticalLayout {
 
         friends.forEach(friendship -> {
             User friend = friendship.getUser().equals(user) ? friendship.getFriend(): friendship.getUser();
-            NameValue nameValue = new NameValue("userId", friend.getId());
-            List<PlayerCharacter> pcs = sessionService.getCacheService().getPcCache().findManyByProperty(nameValue);
+            //NameValue nameValue = new NameValue("userId", friend.getId());
+            List<PlayerCharacter> pcs = sessionService.getPcRepo().findAllByUserId(friend.getId());
             Details details = new Details(friend.getDisplayName(), new FriendsActions(friendship, pcs, this) );
             details.setOpened(!friendship.getAccepted());
             add(details);

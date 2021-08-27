@@ -5,9 +5,7 @@ import com.smaugslair.thitracker.data.game.TimeLineItem;
 import com.smaugslair.thitracker.data.log.Entry;
 import com.smaugslair.thitracker.data.log.EventType;
 import com.smaugslair.thitracker.data.user.User;
-import com.smaugslair.thitracker.services.CacheService;
 import com.smaugslair.thitracker.services.SessionService;
-import com.smaugslair.thitracker.util.NameValue;
 import com.smaugslair.thitracker.websockets.RegisteredVerticalLayout;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.Grid;
@@ -26,14 +24,10 @@ public class PCTimeLineView extends RegisteredVerticalLayout {
     private static final Logger log = LoggerFactory.getLogger(PCTimeLineView.class);
 
     private final SessionService sessionService;
-    private final CacheService cacheService;
 
-    public PCTimeLineView(SessionService sessionService, CacheService cacheService) {
+    public PCTimeLineView(SessionService sessionService) {
         this.sessionService = sessionService;
-        this.cacheService = cacheService;
-
         init();
-
     }
 
     public void init() {
@@ -45,7 +39,7 @@ public class PCTimeLineView extends RegisteredVerticalLayout {
             return;
         }
 
-        final Game game = cacheService.getGameCache().findOneById(gameId).orElse(new Game());
+        final Game game = sessionService.getGameRepo().findById(gameId).orElse(new Game());
         if (game.getId() == null) {
             add(new H1("Game not found"));
             return;
@@ -55,15 +49,13 @@ public class PCTimeLineView extends RegisteredVerticalLayout {
 
         add( new H3("Game: "+game.getName()+ " by "+ gm.getDisplayName()));
 
-        NameValue example = new NameValue("gameId", gameId);
-
-        List<TimeLineItem> items = cacheService.getTliCache().findManyByProperty(example)
+        List<TimeLineItem> items = sessionService.getTliRepo().findByGameId(gameId)
                 .stream().filter(item -> !item.getHidden()).sorted().collect(Collectors.toList());
 
 
         TimeLineItem lastEvent = null;
         if (game.getLastEventId() != null) {
-            lastEvent = cacheService.getTliCache().findOneById(game.getLastEventId()).orElse(null);
+            lastEvent = sessionService.getTliRepo().findById(game.getLastEventId()).orElse(null);
         }
 
         for (TimeLineItem item : items) {

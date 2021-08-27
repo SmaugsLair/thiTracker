@@ -3,7 +3,6 @@ package com.smaugslair.thitracker.ui.players;
 import com.smaugslair.thitracker.data.log.Entry;
 import com.smaugslair.thitracker.data.log.EventType;
 import com.smaugslair.thitracker.data.pc.PlayerCharacter;
-import com.smaugslair.thitracker.services.CacheService;
 import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.ui.MainView;
 import com.smaugslair.thitracker.ui.components.DiceHistory;
@@ -17,21 +16,21 @@ import com.vaadin.flow.router.Route;
 @Route(value = "playersession", layout = MainView.class)
 public class PlayerSession extends SplitLayout {
 
-    private final CacheService cacheService;
+    private final SessionService sessionService;
 
-    public PlayerSession(SessionService sessionService, CacheService cacheService) {
-        this.cacheService = cacheService;
+    public PlayerSession(SessionService sessionService) {
+        this.sessionService = sessionService;
         SplitLayout pcLayout = new SplitLayout();
-        CharacterSheet characterSheet = new CharacterSheet(this::updatePc, cacheService, sessionService);
+        CharacterSheet characterSheet = new CharacterSheet(this::updatePc, sessionService);
         characterSheet.setPc(sessionService.getPc());
         pcLayout.addToPrimary(characterSheet);
-        pcLayout.addToSecondary(new DiceRoller(sessionService, cacheService));
+        pcLayout.addToSecondary(new DiceRoller(sessionService));
         pcLayout.setSplitterPosition(50);
         addToPrimary(pcLayout);
 
         SplitLayout gameLayout = new SplitLayout();
-        gameLayout.addToPrimary(new PCTimeLineView(sessionService, cacheService));
-        gameLayout.addToSecondary(new DiceHistory(sessionService, cacheService));
+        gameLayout.addToPrimary(new PCTimeLineView(sessionService));
+        gameLayout.addToSecondary(new DiceHistory(sessionService));
         gameLayout.setOrientation(Orientation.VERTICAL);
         gameLayout.setSplitterPosition(50);
         addToSecondary(gameLayout);
@@ -41,7 +40,7 @@ public class PlayerSession extends SplitLayout {
 
     public PlayerCharacter updatePc(PlayerCharacter pc) {
         //log.info("updatePc");
-        pc = cacheService.getPcCache().save(pc);
+        pc = sessionService.getPcRepo().save(pc);
         Entry entry = new Entry();
         entry.setType(EventType.PCUpdate);
         entry.setPcId(pc.getId());

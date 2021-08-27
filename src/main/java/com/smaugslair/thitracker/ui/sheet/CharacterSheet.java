@@ -9,9 +9,7 @@ import com.smaugslair.thitracker.data.pc.Trait;
 import com.smaugslair.thitracker.data.pc.TraitType;
 import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.rules.Ability;
-import com.smaugslair.thitracker.services.CacheService;
 import com.smaugslair.thitracker.services.SessionService;
-import com.smaugslair.thitracker.util.NameValue;
 import com.smaugslair.thitracker.websockets.RegisteredVerticalLayout;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -45,7 +43,6 @@ public class CharacterSheet extends RegisteredVerticalLayout {
     private final static int MAX_DRAMA = 10;
 
     private final Function<PlayerCharacter, PlayerCharacter> pcUpdater;
-    private final CacheService cacheService;
     private final SessionService sessionService;
     private PlayerCharacter pc = null;
     private String color;
@@ -57,9 +54,8 @@ public class CharacterSheet extends RegisteredVerticalLayout {
     private boolean abilitiesExpanded = false;
 
     public CharacterSheet(Function<PlayerCharacter, PlayerCharacter> pcUpdater,
-                          CacheService cacheService, SessionService sessionService) {
+                          SessionService sessionService) {
         this.pcUpdater = pcUpdater;
-        this.cacheService = cacheService;
         this.sessionService = sessionService;
         setPadding(false);
         setSpacing(false);
@@ -70,9 +66,10 @@ public class CharacterSheet extends RegisteredVerticalLayout {
         this.pc = pc;
         color = "";
         if (pc != null && pc.getGameId() != null) {
-            NameValue nameValue = new NameValue("gameId", pc.getGameId());
+            //NameValue nameValue = new NameValue("gameId", pc.getGameId());
             //Loading the whole list so that the cache is not loaded with only a single item
-            List<TimeLineItem> items = cacheService.getTliCache().findManyByProperty(nameValue);
+            //List<TimeLineItem> items = cacheService.getTliCache().findManyByProperty(nameValue);
+            List<TimeLineItem> items = sessionService.getTliRepo().findByGameId(pc.getGameId());
             for (TimeLineItem item : items) {
                 if (pc.getId().equals(item.getPcId())) {
                     color = item.getColor();
@@ -248,7 +245,7 @@ public class CharacterSheet extends RegisteredVerticalLayout {
         if (EventType.PCUpdate.equals(entry.getType())) {
             if (pc != null && entry.getPcId().equals(pc.getId())) {
                 removeAll();
-                cacheService.getPcCache().findOneById(pc.getId()).ifPresent(playerCharacter -> {
+                sessionService.getPcRepo().findById(pc.getId()).ifPresent(playerCharacter -> {
                     pc = playerCharacter;
                 });
                 init();

@@ -2,7 +2,6 @@ package com.smaugslair.thitracker.ui.games;
 
 import com.smaugslair.thitracker.data.log.Entry;
 import com.smaugslair.thitracker.data.log.EventType;
-import com.smaugslair.thitracker.util.NameValue;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import org.slf4j.Logger;
@@ -20,12 +19,11 @@ public class TimeLineHistory extends VerticalLayout {
         setSpacing(false);
         setMargin(false);
 
-        NameValue nameValue = new NameValue("gameId", gmTimeLineView.getGameID());
-        if (nameValue.getValue() == null) {
+        if (gmTimeLineView.getGameID() == null) {
             add(new Label("No Game loaded"));
             return;
         }
-        List<Entry> entryList = gmTimeLineView.getEntryCache().findManyByProperty(nameValue)
+        List<Entry> entryList = gmTimeLineView.getEntryRepo().findByGameId(gmTimeLineView.getGameID())
                 .stream().sorted().collect(Collectors.toList());
         for (Entry entry : entryList) {
             if (EventType.GMAction.equals(entry.getType())) {

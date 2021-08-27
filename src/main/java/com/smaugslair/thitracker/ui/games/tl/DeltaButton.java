@@ -41,7 +41,7 @@ public class DeltaButton extends Button {
                 ActionTimeDelta delta = item.getDeltas().get(atd.getName());
                 delta.setDelta(fieldMap.get(delta.getName()).getValue());
             }
-            gmTimeLineView.getTliCache().save(item);
+            gmTimeLineView.getTliRepo().save(item);
             deltaDialog.close();
             gmTimeLineView.refreshAndBroadcast();
         });

@@ -26,7 +26,7 @@ public class ImportButton extends Button {
                 atd.setTimeLineItem(tli);
                 tli.getDeltas().put(delta.getName(), atd);
             }
-            gmTimeLineView.getTliCache().save(tli);
+            gmTimeLineView.getTliRepo().save(tli);
             gmTimeLineView.refreshAndBroadcast();
         });
     }

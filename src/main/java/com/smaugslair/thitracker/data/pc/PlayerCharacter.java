@@ -1,6 +1,5 @@
 package com.smaugslair.thitracker.data.pc;
 
-import com.smaugslair.thitracker.data.ThiEntity;
 import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.rules.Ability;
 
@@ -8,7 +7,7 @@ import javax.persistence.*;
 import java.util.*;
 
 @Entity
-public class PlayerCharacter implements ThiEntity, Comparable<PlayerCharacter> {
+public class PlayerCharacter implements Comparable<PlayerCharacter> {
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
@@ -104,7 +103,7 @@ public class PlayerCharacter implements ThiEntity, Comparable<PlayerCharacter> {
     public void setAbilityScores(Map<Ability, AbilityScore> abilityScores) {
         this.abilityScores = abilityScores;
     }
-
+/*
     @Override
     public PlayerCharacter createEmptyObject() {
         PlayerCharacter pc = new PlayerCharacter();
@@ -112,7 +111,7 @@ public class PlayerCharacter implements ThiEntity, Comparable<PlayerCharacter> {
         pc.setProgressionTokens(null);
         pc.setAbilityScores(null);
         return pc;
-    }
+    }*/
 
     @Transient
     String pcPlayerName = null;

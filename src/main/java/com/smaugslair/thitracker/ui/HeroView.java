@@ -3,7 +3,6 @@ package com.smaugslair.thitracker.ui;
 import com.smaugslair.thitracker.data.log.Entry;
 import com.smaugslair.thitracker.data.log.EventType;
 import com.smaugslair.thitracker.data.pc.PlayerCharacter;
-import com.smaugslair.thitracker.services.CacheService;
 import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.ui.players.PCManager;
 import com.smaugslair.thitracker.ui.sheet.CharacterSheet;
@@ -14,19 +13,19 @@ import com.vaadin.flow.router.Route;
 @Route(value = "", layout = MainView.class)
 public class HeroView extends HorizontalLayout {
 
-    private final CacheService cacheService;
+    private final SessionService sessionService;
 
-    public HeroView(SessionService sessionService, CacheService cacheService) {
-        this.cacheService = cacheService;
-        CharacterSheet characterSheet = new CharacterSheet(this::updatePC, cacheService, sessionService);
+    public HeroView(SessionService sessionService) {
+        this.sessionService = sessionService;
+        CharacterSheet characterSheet = new CharacterSheet(this::updatePC, sessionService);
 
-        add(new PCManager(sessionService, cacheService, characterSheet::setPc));
+        add(new PCManager(sessionService, characterSheet::setPc));
         add(characterSheet);
     }
 
     private PlayerCharacter updatePC(PlayerCharacter pc) {
 
-        pc = cacheService.getPcCache().save(pc);
+        pc = sessionService.getPcRepo().save(pc);
         Entry entry = new Entry();
         entry.setType(EventType.PCUpdate);
         entry.setPcId(pc.getId());
