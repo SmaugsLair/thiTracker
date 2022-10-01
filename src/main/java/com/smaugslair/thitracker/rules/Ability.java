@@ -13,7 +13,8 @@ public enum Ability {
     SelfControl(3,1, "Self-Control"),
     Initiative(4,0),
     Movement(4, 1),
-    TravelMult(5,1, "Travel Mult", true, 2);
+    TravelMult(5,1, "Travel Mult", true, 2),
+    Choice(-1);
 
     private final int x;
     private final int y;
@@ -25,8 +26,18 @@ public enum Ability {
 
     static {
         for (Ability ability : values()) {
-            abilityDim[ability.x][ability.y] = ability;
+            if (ability.isMapped()) {
+                abilityDim[ability.x][ability.y] = ability;
+            }
         }
+    }
+
+    public boolean isMapped() {
+        return x >=0;
+    }
+
+    Ability(int z) {
+        this(z,z);
     }
 
 
@@ -72,6 +83,7 @@ public enum Ability {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("Ability{");
+        sb.append(name()).append(", ");
         sb.append("x=").append(x);
         sb.append(", y=").append(y);
         sb.append(", displayName='").append(displayName).append('\'');

@@ -3,10 +3,12 @@ package com.smaugslair.thitracker.ui.sheet;
 import com.smaugslair.thitracker.data.pc.AbilityScore;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Span;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AbilityRow {
 
-    //private final Logger log = LoggerFactory.getLogger(AbilityRow.class);
+    private final Logger log = LoggerFactory.getLogger(AbilityRow.class);
 
     private final String label1, label2;
     private final Component component1, component2;
@@ -23,6 +25,8 @@ public class AbilityRow {
     }
 
     public AbilityRow(AbilityScore abilityScore1, AbilityScore abilityScore2, CharacterSheet sheet) {
+
+        //log.info("creating AbilityRow with " +abilityScore1+" and "+abilityScore2);
 
         header = false;
         color = "";

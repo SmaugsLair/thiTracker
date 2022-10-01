@@ -38,6 +38,9 @@ public class DiceHistory extends RegisteredVerticalLayout {
 
     @Override
     protected void handleMessage(Entry entry) {
+        if (entry == null || entry.getGameId() == null) {
+            return;
+        }
         if (entry.getGameId().equals(sessionService.getGameId())) {
             //log.info(entry.toString());
             switch (entry.getType()) {

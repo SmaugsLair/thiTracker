@@ -4,6 +4,7 @@ import com.smaugslair.thitracker.data.atd.ActionTimeDefault;
 import com.smaugslair.thitracker.data.game.ActionTimeDelta;
 import com.smaugslair.thitracker.data.game.TimeLineItem;
 import com.smaugslair.thitracker.ui.components.ConfirmDialog;
+import com.smaugslair.thitracker.ui.components.UserSafeButton;
 import com.smaugslair.thitracker.ui.games.GMTimeLineView;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -35,7 +36,7 @@ public class DeltaButton extends Button {
 
         ConfirmDialog deltaDialog = new ConfirmDialog(formLayout);
 
-        Button confirmButton = new Button("Save", event -> {
+        Button confirmButton = new UserSafeButton("Save", event -> {
 
             for (ActionTimeDefault atd : gmTimeLineView.getAtds()) {
                 ActionTimeDelta delta = item.getDeltas().get(atd.getName());

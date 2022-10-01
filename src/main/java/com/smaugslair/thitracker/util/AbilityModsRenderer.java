@@ -1,25 +1,16 @@
 package com.smaugslair.thitracker.util;
 
-import com.smaugslair.thitracker.rules.Ability;
-import org.apache.commons.beanutils.BeanUtils;
+import com.smaugslair.thitracker.data.powers.Mod;
+
+import java.util.Collection;
 
 public class AbilityModsRenderer {
 
-    public static String renderAmString(Object owner, Integer amChoice) {
+    public static String renderAmString(Collection<? extends Mod> mods) {
         StringBuilder sb = new StringBuilder();
-        for (Ability ability : Ability.values()) {
-            try {
-                String prop = BeanUtils.getProperty(owner, "am" + ability.name());
-                if (prop != null) {
-                    sb.append(ability.getRendered(Integer.parseInt(prop))).append("  ");
-                }
-            }
-            catch (Throwable e) {
-                e.printStackTrace();
-            }
-        }
-        if (amChoice != null) {
-            sb.append("Choice ").append(amChoice);
+        for (Mod mod : mods) {
+            sb.append(mod.getAbility().getRendered(mod.getValue())).append("  ");
+
         }
         return sb.toString();
     }

@@ -7,6 +7,7 @@ import com.smaugslair.thitracker.security.SecurityUtils;
 import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.ui.MainView;
 import com.smaugslair.thitracker.ui.components.ConfirmDialog;
+import com.smaugslair.thitracker.ui.components.UserSafeButton;
 import com.smaugslair.thitracker.ui.components.ValidTextField;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.button.Button;
@@ -60,7 +61,7 @@ public class GamesManager extends VerticalLayout {
         add(accordion);
 
 
-        Button button = new Button("Create new Game");
+        Button button = new UserSafeButton("Create new Game");
         add(button);
 
 
@@ -77,7 +78,7 @@ public class GamesManager extends VerticalLayout {
         ConfirmDialog dialog = new ConfirmDialog(new VerticalLayout(gameName, maxDice));
 
 
-        Button confirmButton = new Button("Save", event -> {
+        Button confirmButton = new UserSafeButton("Save", event -> {
             if (gameName.isValid()) {
                 Game game = new Game();
                 game.setName(gameName.getValue());
@@ -97,7 +98,7 @@ public class GamesManager extends VerticalLayout {
     private HorizontalLayout getGameRow(Game game) {
 
         ConfirmDialog deleteDialog = new ConfirmDialog("Are you sure you want to delete the game "+game.getName()+"?");
-        Button confirmButton = new Button("Delete", event -> {
+        Button confirmButton = new UserSafeButton("Delete", event -> {
             List<PlayerCharacter> pcs = sessionService.getPcRepo().findAllByGameId(game.getId());
             pcs.forEach(pc -> pc.setGameId(null));
             sessionService.getPcRepo().saveAll(pcs);
@@ -109,14 +110,14 @@ public class GamesManager extends VerticalLayout {
         deleteDialog.setConfirmButton(confirmButton);
 
         HorizontalLayout layout = new HorizontalLayout();
-        Button launch = new Button("Launch");
+        Button launch = new UserSafeButton("Launch");
         launch.addClickListener(e -> launch.getUI().ifPresent(ui -> {
             sessionService.setGameId(game.getId());
             ui.navigate("gmsession");
             //ui.navigate(GMTimeLineView.class, new RouteParameters("gameId", game.getId().toString())));
         }));
         layout.add(launch);
-        Button delete = new Button("Delete", event -> deleteDialog.open());
+        Button delete = new UserSafeButton("Delete", event -> deleteDialog.open());
         layout.add(delete);
         return layout;
     }

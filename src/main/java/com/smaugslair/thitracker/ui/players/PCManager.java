@@ -9,8 +9,8 @@ import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.security.SecurityUtils;
 import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.ui.components.ConfirmDialog;
+import com.smaugslair.thitracker.ui.components.UserSafeButton;
 import com.smaugslair.thitracker.ui.components.ValidTextField;
-import com.smaugslair.thitracker.util.NameValue;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
@@ -68,7 +68,7 @@ public class PCManager extends VerticalLayout {
         add(accordion);
 
 
-        Button button = new Button("Create new character");
+        Button button = new UserSafeButton("Create new character");
         add(button);
 
         //Dialog dialog = new Dialog();
@@ -79,7 +79,7 @@ public class PCManager extends VerticalLayout {
 
         ConfirmDialog confirmDialog = new ConfirmDialog(pcName);
 
-        Button confirmButton = new Button("Save", event -> {
+        Button confirmButton = new UserSafeButton("Save", event -> {
             if (pcName.isValid()) {
                 PlayerCharacter pc = new PlayerCharacter();
                 pc.setName(pcName.getValue());
@@ -108,14 +108,14 @@ public class PCManager extends VerticalLayout {
     private HorizontalLayout getPcRow(PlayerCharacter pc, Game game) {
 
         ConfirmDialog deleteDialog = new ConfirmDialog("Are you sure you want to delete the character "+pc.getName()+"?");
-        Button confirmButton = new Button("Delete", event -> {
-            NameValue example = new NameValue("pcId", pc.getId());
+        Button confirmButton = new UserSafeButton("Delete", event -> {
             List<TimeLineItem> items = sessionService.getTliRepo().findByPcId(pc.getId());
             items.forEach(item -> {
                 item.setPcId(null);
                 item.setName(pc.getName());
             });
             sessionService.getTliRepo().saveAll(items);
+            sessionService.getHpsRepo().deleteAll(sessionService.getHpsRepo().findAllByPlayerCharacter(pc));
             sessionService.getPcRepo().delete(pc);
             deleteDialog.close();
             refresh();
@@ -124,7 +124,7 @@ public class PCManager extends VerticalLayout {
 
         HorizontalLayout layout = new HorizontalLayout();
         if (pc.getGameId() != null) {
-            Button launch = new Button("Launch "+ game.getName());
+            Button launch = new UserSafeButton("Launch "+ game.getName());
             launch.addClickListener(e -> launch.getUI().ifPresent(ui -> {
                 sessionService.setGameId(pc.getGameId());
                 sessionService.setPc(pc);
@@ -138,10 +138,10 @@ public class PCManager extends VerticalLayout {
             layout.add(icon);
         }
 
-        Button delete = new Button("Delete", event -> deleteDialog.open());
+        Button delete = new UserSafeButton("Delete", event -> deleteDialog.open());
         layout.add(delete);
 
-        Button sheet = new Button("Sheet -->", event -> pcSelector.accept(pc));
+        Button sheet = new UserSafeButton("Sheet -->", event -> pcSelector.accept(pc));
         layout.add(sheet);
 
         return layout;

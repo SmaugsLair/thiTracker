@@ -5,6 +5,7 @@ import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.security.SecurityUtils;
 import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.ui.MainView;
+import com.smaugslair.thitracker.ui.components.UserSafeButton;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -41,7 +42,7 @@ public class UserDetailsView extends VerticalLayout {
         form.setWidth("500px");
         add(form);
 
-        Button updateButton = new Button("Apply changes", event -> {
+        Button updateButton = new UserSafeButton("Apply changes", event -> {
             sessionService.getUserRepository().save(user);
             refresh();
         });
@@ -51,7 +52,7 @@ public class UserDetailsView extends VerticalLayout {
         PasswordForm passwordForm = new PasswordForm();
         dialog.add(passwordForm);
         dialog.setWidth("500px");
-        Button savePassword = new Button("Save password", event -> {
+        Button savePassword = new UserSafeButton("Save password", event -> {
             String validPassword = passwordForm.getValidPassword();
             if (validPassword != null) {
                 Credentials credentials = sessionService.getCredRepo().findByUserId(user.getId());
@@ -64,7 +65,7 @@ public class UserDetailsView extends VerticalLayout {
         });
         dialog.add(savePassword);
 
-        Button updatePassword = new Button("Update password", event -> dialog.open());
+        Button updatePassword = new UserSafeButton("Update password", event -> dialog.open());
         add(updatePassword);
     }
 }

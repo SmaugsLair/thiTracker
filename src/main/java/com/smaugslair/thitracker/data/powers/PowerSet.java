@@ -1,11 +1,10 @@
 package com.smaugslair.thitracker.data.powers;
 
+import com.smaugslair.thitracker.rules.Ability;
 import com.smaugslair.thitracker.util.AbilityModsRenderer;
 
 import javax.persistence.*;
-import java.util.Date;
-import java.util.Objects;
-import java.util.StringJoiner;
+import java.util.*;
 
 @Entity
 public class PowerSet implements Sheetable, Comparable<PowerSet> {
@@ -30,18 +29,10 @@ public class PowerSet implements Sheetable, Comparable<PowerSet> {
     @Column(nullable = false, length = 5000)
     private String powersText;
 
-    private Integer amPerception;
-    private Integer amStealth;
-    private Integer amAim;
-    private Integer amDodge;
-    private Integer amStrength;
-    private Integer amToughness;
-    private Integer amInfluence;
-    private Integer amSelfControl;
-    private Integer amInitiative;
-    private Integer amMovement;
-    private Integer amTravelMult;
-    private Integer amChoice;
+    @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL)
+    @JoinColumn(name = "power_set_id" )
+    @MapKey(name = "ability")
+    Map<Ability, PowerSetMod> powerSetMods = new HashMap<>();
 
     public String getSsid() {
         return ssid;
@@ -91,100 +82,70 @@ public class PowerSet implements Sheetable, Comparable<PowerSet> {
         this.powersText = powersText;
     }
 
-    public Integer getAmPerception() {
-        return amPerception;
+    private void createMod(Ability ability, Integer value) {
+        if (value != null) {
+            PowerSetMod mod = new PowerSetMod();
+            mod.setPowerSet(this);
+            mod.setAbility(ability);
+            mod.setValue(value);
+            powerSetMods.put(ability, mod);
+        }
     }
 
-    public void setAmPerception(Integer amPerception) {
-        this.amPerception = amPerception;
+    public void setAmPerception(Integer value) {
+        createMod(Ability.Perception, value);
     }
 
-    public Integer getAmStealth() {
-        return amStealth;
+    public void setAmStealth(Integer value) {
+        createMod(Ability.Stealth, value);
     }
 
-    public void setAmStealth(Integer amStealth) {
-        this.amStealth = amStealth;
+    public void setAmAim(Integer value) {
+        createMod(Ability.Aim, value);
     }
 
-    public Integer getAmAim() {
-        return amAim;
+    public void setAmDodge(Integer value) {
+        createMod(Ability.Dodge, value);
     }
 
-    public void setAmAim(Integer amAim) {
-        this.amAim = amAim;
+    public void setAmStrength(Integer value) {
+        createMod(Ability.Strength, value);
     }
 
-    public Integer getAmDodge() {
-        return amDodge;
+    public void setAmToughness(Integer value) {
+        createMod(Ability.Toughness, value);
     }
 
-    public void setAmDodge(Integer amDodge) {
-        this.amDodge = amDodge;
+    public void setAmInfluence(Integer value) {
+        createMod(Ability.Influence, value);
     }
 
-    public Integer getAmStrength() {
-        return amStrength;
+    public void setAmSelfControl(Integer value) {
+        createMod(Ability.SelfControl, value);
     }
 
-    public void setAmStrength(Integer amStrength) {
-        this.amStrength = amStrength;
+    public void setAmInitiative(Integer value) {
+        createMod(Ability.Initiative, value);
     }
 
-    public Integer getAmToughness() {
-        return amToughness;
+    public void setAmMovement(Integer value) {
+        createMod(Ability.Movement, value);
     }
 
-    public void setAmToughness(Integer amToughness) {
-        this.amToughness = amToughness;
+    public void setAmTravelMult(Integer value) {
+        createMod(Ability.TravelMult, value);
     }
 
-    public Integer getAmInfluence() {
-        return amInfluence;
+    public void setAmChoice(Integer value) {
+        createMod(Ability.Choice, value);
     }
 
-    public void setAmInfluence(Integer amInfluence) {
-        this.amInfluence = amInfluence;
+    public Map<Ability, PowerSetMod> getPowerSetMods() {
+        return powerSetMods;
     }
 
-    public Integer getAmSelfControl() {
-        return amSelfControl;
-    }
-
-    public void setAmSelfControl(Integer amSelfControl) {
-        this.amSelfControl = amSelfControl;
-    }
-
-    public Integer getAmInitiative() {
-        return amInitiative;
-    }
-
-    public void setAmInitiative(Integer amInitiative) {
-        this.amInitiative = amInitiative;
-    }
-
-    public Integer getAmMovement() {
-        return amMovement;
-    }
-
-    public void setAmMovement(Integer amMovement) {
-        this.amMovement = amMovement;
-    }
-
-    public Integer getAmTravelMult() {
-        return amTravelMult;
-    }
-
-    public void setAmTravelMult(Integer amTravelMult) {
-        this.amTravelMult = amTravelMult;
-    }
-
-    public Integer getAmChoice() {
-        return amChoice;
-    }
-
-    public void setAmChoice(Integer choice) {
-        this.amChoice = choice;
+    public void setPowerSetMods(Map<Ability, PowerSetMod> powerSetMods) {
+        this.powerSetMods = powerSetMods;
     }
 
     @Override
@@ -196,7 +157,7 @@ public class PowerSet implements Sheetable, Comparable<PowerSet> {
                 .add("openText='" + openText + "'")
                 .add("abilityText='" + abilityText + "'")
                 .add("powersText='" + powersText + "'")
-                .add("abilityMods='" + getAbilityMods() + "'")
+                .add("abilityMods='" + getAbilityModsText() + "'")
                 .toString();
     }
 
@@ -204,22 +165,24 @@ public class PowerSet implements Sheetable, Comparable<PowerSet> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PowerSet powerSet = (PowerSet) o;
-        return Objects.equals(ssid, powerSet.ssid)
+        if( Objects.equals(ssid, powerSet.ssid)
                 && Objects.equals(name, powerSet.name)
                 && Objects.equals(updated, powerSet.updated)
                 && Objects.equals(openText, powerSet.openText)
                 && Objects.equals(abilityText, powerSet.abilityText)
-                && Objects.equals(powersText, powerSet.powersText)
-                && Objects.equals(amPerception, powerSet.amPerception)
-                && Objects.equals(amStealth, powerSet.amStealth)
-                && Objects.equals(amAim, powerSet.amAim)
-                && Objects.equals(amDodge, powerSet.amDodge)
-                && Objects.equals(amInfluence, powerSet.amInfluence)
-                && Objects.equals(amSelfControl, powerSet.amSelfControl)
-                && Objects.equals(amInitiative, powerSet.amInitiative)
-                && Objects.equals(amMovement, powerSet.amMovement)
-                && Objects.equals(amTravelMult, powerSet.amTravelMult)
-                && Objects.equals(amChoice, powerSet.amChoice);
+                && Objects.equals(powersText, powerSet.powersText)) {
+            //All else equal, compare mods
+            if (powerSetMods.size() != powerSet.powerSetMods.size()) {
+                return false;
+            }
+            for (PowerSetMod mod : powerSetMods.values()) {
+                if (!powerSet.powerSetMods.containsValue(mod)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -241,12 +204,12 @@ public class PowerSet implements Sheetable, Comparable<PowerSet> {
     }
 
     @Transient
-    private String abilityMods;
-    public String getAbilityMods() {
-        if (abilityMods == null) {
-            abilityMods = AbilityModsRenderer.renderAmString(this, amChoice);
+    private String abilityModsText;
+    public String getAbilityModsText() {
+        if (abilityModsText == null) {
+            abilityModsText = AbilityModsRenderer.renderAmString(powerSetMods.values());
         }
-        return abilityMods;
+        return abilityModsText;
     }
 
 }

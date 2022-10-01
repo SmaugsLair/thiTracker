@@ -2,6 +2,7 @@ package com.smaugslair.thitracker.ui.sheet;
 
 import com.smaugslair.thitracker.data.pc.Trait;
 import com.smaugslair.thitracker.data.pc.TraitType;
+import com.smaugslair.thitracker.ui.components.UserSafeButton;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -41,7 +42,7 @@ public class TraitField implements TraitRow {
         if (trait.isDeletable()) {
             hl = new HorizontalLayout();
             hl.add(pointField);
-            Button deleteButton = new Button("X", event -> {
+            Button deleteButton = new UserSafeButton("X", event -> {
                 sheet.removeTrait(trait);
             });
             hl.add(deleteButton);

@@ -11,12 +11,10 @@ import com.smaugslair.thitracker.ui.users.UserDetailsView;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.page.Push;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.router.RouterLink;
 
-@Push
 public class MainView extends AppLayout {
 
     public MainView() {
@@ -26,7 +24,7 @@ public class MainView extends AppLayout {
         H3 h1 = new H3("The Hero Instant   ");
 
         Tabs tabs = new Tabs(
-                new Tab( new RouterLink("Heros", HeroView.class)),
+                new Tab( new RouterLink("Heroes", HeroView.class)),
                 new Tab( new RouterLink("Games", GamesManager.class)),
                 new Tab(new RouterLink("Friends", FriendsSession.class)),
                 new Tab(new RouterLink("Collection", CollectionView.class)),

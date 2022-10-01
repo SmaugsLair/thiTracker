@@ -5,6 +5,7 @@ import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.security.SecurityUtils;
 import com.smaugslair.thitracker.services.PasswordResetService;
 import com.smaugslair.thitracker.services.SessionService;
+import com.smaugslair.thitracker.ui.components.UserSafeButton;
 import com.smaugslair.thitracker.ui.users.PasswordForm;
 import com.smaugslair.thitracker.ui.users.UserForm;
 import com.vaadin.flow.component.button.Button;
@@ -54,7 +55,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 		dialog.add(userForm);
 		PasswordForm passwordForm = new PasswordForm();
 		dialog.add(passwordForm);
-		Button saveNewUser = new Button("Save new user");
+		Button saveNewUser = new UserSafeButton("Save new user");
 		saveNewUser.addClickListener(event -> {
 			User user = userForm.getUser();
 			if (user != null) {
@@ -82,7 +83,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 		TextField email = new TextField();
 		email.setPlaceholder("email");
 		forgotPasswordDialog.add(email);
-		forgotPasswordDialog.add(new Button("Request reset", event -> {
+		forgotPasswordDialog.add(new UserSafeButton("Request reset", event -> {
 
 			Optional<User> user = sessionService.getUserRepository().findUserByEmail(email.getValue());
 			if (user.isPresent()) {
@@ -97,7 +98,7 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 
 		login.addForgotPasswordListener(event -> forgotPasswordDialog.open());
 
-		add(new Button("Create new account", event -> dialog.open()));
+		add(new UserSafeButton("Create new account", event -> dialog.open()));
 	}
 
 	@Override

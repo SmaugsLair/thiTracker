@@ -45,6 +45,7 @@ public class UserForm extends FormLayout {
         name.setMaxLength(20);
         name.setRequiredIndicatorVisible(true);
         name.addValueChangeListener(event -> user.setName(event.getValue()));
+        name.setPlaceholder("AKA login id");
         addFormItem(name, "Username");
         binder.forField(name)
                 .asRequired("Required")
@@ -57,17 +58,18 @@ public class UserForm extends FormLayout {
         binder.forField(email).withValidator(new EmailValidator("Invalid email")).bind("email");
 
         displayName.setRequired(true);
-        name.setMinLength(6);
-        name.setMaxLength(30);
+        displayName.setMinLength(2);
+        displayName.setMaxLength(30);
         displayName.setRequiredIndicatorVisible(true);
+        displayName.setPlaceholder("NOT hero name");
         displayName.addValueChangeListener(event -> user.setDisplayName(event.getValue()));
-        addFormItem(displayName, "Display Name");
+        addFormItem(displayName, "Player name");
         binder.forField(displayName)
                 .asRequired("Required")
-                .withValidator(value -> value.length() >= 6, "6 char min")
+                .withValidator(value -> value.length() >= 2, "2 char min")
                 .bind("displayName");
 
-        if (user != null) {
+        if (user != null && user.getFriendCode() != null) {
             addFormItem(new Span(user.getFriendCode()), "Friend Code");
         }
 

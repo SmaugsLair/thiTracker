@@ -4,6 +4,7 @@ import com.smaugslair.thitracker.data.user.Friendship;
 import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.security.SecurityUtils;
 import com.smaugslair.thitracker.services.SessionService;
+import com.smaugslair.thitracker.ui.components.UserSafeButton;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -38,7 +39,7 @@ public class FriendFinder extends VerticalLayout {
 
         Label message = new Label();
 
-        Button request = new Button("", event -> {
+        Button request = new UserSafeButton("", event -> {
             if (friend == null) {
                 return;
             }
@@ -52,7 +53,7 @@ public class FriendFinder extends VerticalLayout {
         });
         request.setVisible(false);
 
-        Button button = new Button("Find", event -> {
+        Button button = new UserSafeButton("Find", event -> {
             request.setVisible(false);
             User user = sessionService.getUserRepository().findUserByName(nameField.getValue());
             if (user != null) {

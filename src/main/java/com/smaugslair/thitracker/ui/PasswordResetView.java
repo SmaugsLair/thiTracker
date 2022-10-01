@@ -3,8 +3,9 @@ package com.smaugslair.thitracker.ui;
 import com.smaugslair.thitracker.data.user.Credentials;
 import com.smaugslair.thitracker.data.user.PasswordReset;
 import com.smaugslair.thitracker.security.SecurityUtils;
-import com.smaugslair.thitracker.ui.users.PasswordForm;
 import com.smaugslair.thitracker.services.SessionService;
+import com.smaugslair.thitracker.ui.components.UserSafeButton;
+import com.smaugslair.thitracker.ui.users.PasswordForm;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H1;
@@ -52,7 +53,7 @@ public class PasswordResetView extends VerticalLayout implements BeforeEnterObse
 					found.set(true);
 					PasswordForm passwordForm = new PasswordForm();
 					passwordForm.setWidth("400px");
-					Button saveButton = new Button("Save new password", event -> {
+					Button saveButton = new UserSafeButton("Save new password", event -> {
 						String validPassword = passwordForm.getValidPassword();
 						if (validPassword != null) {
 							Credentials credentials = sessionService.getCredRepo().findByUserId(passwordReset.getUserId());

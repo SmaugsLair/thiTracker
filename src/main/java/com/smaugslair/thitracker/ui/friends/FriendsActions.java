@@ -3,6 +3,7 @@ package com.smaugslair.thitracker.ui.friends;
 import com.smaugslair.thitracker.data.pc.PlayerCharacter;
 import com.smaugslair.thitracker.data.user.Friendship;
 import com.smaugslair.thitracker.security.SecurityUtils;
+import com.smaugslair.thitracker.ui.components.UserSafeButton;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.Icon;
@@ -20,8 +21,8 @@ public class FriendsActions extends VerticalLayout {
     public FriendsActions(Friendship friendship, List<PlayerCharacter> pcs, FriendsList parent) {
 
         if (friendship.getAccepted()) {
-            Button deleteButton = new Button("Remove");
-            add(new Button("Remove", event -> parent.delete(friendship)));
+            Button deleteButton = new UserSafeButton("Remove");
+            add(new UserSafeButton("Remove", event -> parent.delete(friendship)));
             pcs.forEach(playerCharacter -> {
                 HorizontalLayout pcRow = new HorizontalLayout();
                 Icon icon;
@@ -40,11 +41,11 @@ public class FriendsActions extends VerticalLayout {
             HorizontalLayout buttonRow = new HorizontalLayout();
             if (Objects.equals(SecurityUtils.getLoggedInUser(), friendship.getUser())) {
                 buttonRow.add(new Label("Waiting..."));
-                buttonRow.add(new Button("Cancel", event -> parent.delete(friendship)));
+                buttonRow.add(new UserSafeButton("Cancel", event -> parent.delete(friendship)));
             }
             else {
-                buttonRow.add(new Button("Confirm", event -> parent.accept(friendship)));
-                buttonRow.add(new Button("Reject", event -> parent.delete(friendship)));
+                buttonRow.add(new UserSafeButton("Confirm", event -> parent.accept(friendship)));
+                buttonRow.add(new UserSafeButton("Reject", event -> parent.delete(friendship)));
             }
             add(buttonRow);
 

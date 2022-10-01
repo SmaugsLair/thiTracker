@@ -7,10 +7,7 @@ import com.smaugslair.thitracker.data.powers.PowerSetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
 @Service
 public class PowersCache {
@@ -86,5 +83,8 @@ public class PowersCache {
                 }
             });
         });
+        List<String> powerNames = new ArrayList<>();
+        powers.forEach( power -> powerNames.add(power.getName()));
+        powers.forEach( power -> power.parsePrerequisite(powerNames));
     }
 }

@@ -4,6 +4,7 @@ import com.smaugslair.thitracker.data.powers.Power;
 import com.smaugslair.thitracker.data.powers.PowerSet;
 import com.smaugslair.thitracker.data.powers.Sheetable;
 import com.smaugslair.thitracker.services.SessionService;
+import com.smaugslair.thitracker.ui.components.UserSafeButton;
 import com.smaugslair.thitracker.ui.powers.PowerSetBrowserView;
 import com.smaugslair.thitracker.ui.powers.transformers.PowerSetTransformer;
 import com.smaugslair.thitracker.ui.powers.transformers.PowerTransformer;
@@ -51,6 +52,8 @@ public class PowersUpload extends VerticalLayout {
 
     public PowersUpload(SessionService sessionService) {
 
+        Dialog dialog = new Dialog();
+
         Map<String, PowerSet> cachedPowerSetMap = new HashMap<>();
         sessionService.getPowersCache().getPowerSetList().forEach(powerSet -> cachedPowerSetMap.put(powerSet.getSsid(), powerSet));
 
@@ -60,13 +63,14 @@ public class PowersUpload extends VerticalLayout {
         MemoryBuffer buffer = new MemoryBuffer();
         Upload upload = new Upload(buffer);
         VerticalLayout output = new VerticalLayout();
-        Button saveButton = new Button("Save changes", event -> {
+        Button saveButton = new UserSafeButton("Save changes", event -> {
             sessionService.getPowerRepo().saveAll(newPowers);
             sessionService.getPowerRepo().saveAll(updatedPowers);
             sessionService.getPowerSetRepo().saveAll(newPowerSets);
             sessionService.getPowerSetRepo().saveAll(updatedPowerSets);
             sessionService.getPowersCache().load();
             event.getSource().getUI().ifPresent(ui -> ui.navigate(PowerSetBrowserView.class));
+            dialog.close();
         });
         saveButton.setEnabled(false);
         HorizontalLayout results = new HorizontalLayout();
@@ -192,7 +196,6 @@ public class PowersUpload extends VerticalLayout {
         });
         upload.getElement().addEventListener("file-remove", event -> output.removeAll());
 
-        Dialog dialog = new Dialog();
         dialog.add(output, saveButton, results);
 
         upload.addStartedListener(event -> {dialog.open();});

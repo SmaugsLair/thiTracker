@@ -20,7 +20,7 @@ public class ConfirmDialog extends Dialog {
         verticalLayout.add(component);
         buttonRow = new HorizontalLayout();
         verticalLayout.add(buttonRow);
-        buttonRow.add(new Button("Cancel", event -> close()));
+        buttonRow.add(new UserSafeButton("Cancel", event -> close()));
     }
 
     public void setConfirmButton(Button confirm) {

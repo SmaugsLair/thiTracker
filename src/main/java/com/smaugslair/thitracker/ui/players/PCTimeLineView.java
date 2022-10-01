@@ -11,14 +11,17 @@ import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.router.Route;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+//@Push
 @CssImport(value = "./styles/color.css", themeFor = "vaadin-grid")
 @CssImport(value = "./styles/minPadding.css", themeFor = "vaadin-grid")
+@Route(value = "pcTimeLineView")
 public class PCTimeLineView extends RegisteredVerticalLayout {
 
     private static final Logger log = LoggerFactory.getLogger(PCTimeLineView.class);
@@ -65,7 +68,7 @@ public class PCTimeLineView extends RegisteredVerticalLayout {
         }
 
         Grid<TimeLineItem> grid = new Grid<>();
-        grid.setHeightByRows(true);
+        grid.setAllRowsVisible(true);
         grid.setItems(items);
 
         grid.addColumn(TimeLineItem::getName).setHeader("Character/NPC/Event");

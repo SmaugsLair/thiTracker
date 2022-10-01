@@ -1,6 +1,8 @@
 node_modules
 HELP.md
 target/
+frontend/generated/
+frontend/index.html
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
@@ -32,3 +34,11 @@ build/
 
 ### VS Code ###
 .vscode/
+/tsconfig.json
+*.ts
+*.bat
+/logs
+package-lock.json
+package.json
+/webpack.config.js
+/webpack.generated.js

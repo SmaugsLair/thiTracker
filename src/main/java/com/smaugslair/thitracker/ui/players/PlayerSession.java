@@ -11,17 +11,21 @@ import com.smaugslair.thitracker.websockets.Broadcaster;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @PageTitle("Player Session")
 @Route(value = "playersession", layout = MainView.class)
 public class PlayerSession extends SplitLayout {
+
+    private static final Logger log = LoggerFactory.getLogger(PlayerSession.class);
 
     private final SessionService sessionService;
 
     public PlayerSession(SessionService sessionService) {
         this.sessionService = sessionService;
         SplitLayout pcLayout = new SplitLayout();
-        CharacterSheet characterSheet = new CharacterSheet(this::updatePc, sessionService);
+        CharacterSheet characterSheet = new CharacterSheet(this::updatePc, false, sessionService);
         characterSheet.setPc(sessionService.getPc());
         pcLayout.addToPrimary(characterSheet);
         pcLayout.addToSecondary(new DiceRoller(sessionService));
@@ -39,7 +43,7 @@ public class PlayerSession extends SplitLayout {
     }
 
     public PlayerCharacter updatePc(PlayerCharacter pc) {
-        //log.info("updatePc");
+        log.info("updatePc");
         pc = sessionService.getPcRepo().save(pc);
         Entry entry = new Entry();
         entry.setType(EventType.PCUpdate);

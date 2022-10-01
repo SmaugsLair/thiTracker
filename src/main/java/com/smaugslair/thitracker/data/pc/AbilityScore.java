@@ -1,13 +1,15 @@
 package com.smaugslair.thitracker.data.pc;
 
 import com.smaugslair.thitracker.rules.Ability;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.persistence.*;
 
 @Entity
 public class AbilityScore {
 
-    //private static final Logger log = LoggerFactory.getLogger(AbilityScore.class);
+    private static final Logger log = LoggerFactory.getLogger(AbilityScore.class);
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
@@ -18,10 +20,24 @@ public class AbilityScore {
     private PlayerCharacter playerCharacter;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private Ability ability;
 
     @Column(nullable = false)
-    private Integer points;
+    private Integer base;
+
+    @Column(nullable = false)
+    private Integer mods;
+
+    public AbilityScore() {
+    }
+
+    public AbilityScore(Ability ability, PlayerCharacter pc) {
+        this.ability = ability;
+        this.base = ability.getBaseValue();
+        mods = 0;
+        playerCharacter = pc;
+    }
 
     public Long getId() {
         return id;
@@ -47,21 +63,41 @@ public class AbilityScore {
         this.ability = ability;
     }
 
-    public Integer getPoints() {
-        return points;
+    public Integer getBase() {
+        return base;
     }
 
-    public void setPoints(Integer points) {
-        this.points = points;
+    public void setBase(Integer base) {
+        this.base = base;
+    }
+
+    public Integer getMods() {
+        return mods;
+    }
+
+   public void reset() {
+        mods = 0;
+   }
+
+    public void adjustMods(int delta) {
+        //log.info("adjustMods: " + this + " by " + delta);
+        mods = mods+delta;
+    }
+
+    public int getPoints() {
+        return getBase() + getMods();
+
     }
 
     @Override
     public String toString() {
-        return "AbilityScore{" +
-                "id=" + id +
-                ", playerCharacter=" + playerCharacter +
-                ", ability='" + ability + '\'' +
-                ", points=" + points +
-                '}';
+        final StringBuilder sb = new StringBuilder("AbilityScore{");
+        sb.append("id=").append(id);
+        sb.append(", playerCharacter=").append(playerCharacter.getName());
+        sb.append(", ability=").append(ability.name());
+        sb.append(", base=").append(base);
+        sb.append(", mods=").append(mods);
+        sb.append('}');
+        return sb.toString();
     }
 }

@@ -21,7 +21,7 @@ public class GMSession extends SplitLayout {
     public GMSession(SessionService sessionService) {
 
         GMTimeLineView gmTimeLineView = new GMTimeLineView(this, sessionService);
-        characterSheet = new CharacterSheet(gmTimeLineView::updatePc, sessionService);
+        characterSheet = new CharacterSheet(gmTimeLineView::updatePc, false, sessionService);
         diceHistory = new DiceHistory(sessionService);
         timeLineHistory = new TimeLineHistory(gmTimeLineView);
 

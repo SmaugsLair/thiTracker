@@ -4,6 +4,7 @@ import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.data.user.UserFilter;
 import com.smaugslair.thitracker.data.user.UserRepository;
 import com.smaugslair.thitracker.ui.components.FilterField;
+import com.smaugslair.thitracker.ui.components.UserSafeButton;
 import com.smaugslair.thitracker.ui.users.UserForm;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -34,8 +35,7 @@ public class UserAdmin extends VerticalLayout {
         editUserDialog.setWidth("500px");
         userForm = new UserForm();
         editUserDialog.add(userForm);
-        Button saveNewUser = new Button("Apply");
-        saveNewUser.addClickListener(event -> {
+        Button saveNewUser = new UserSafeButton("Apply", event -> {
             User user = userForm.getUser();
             if (user != null) {
                 userRepository.save(user);

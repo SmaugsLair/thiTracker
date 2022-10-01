@@ -6,11 +6,8 @@ import com.smaugslair.thitracker.services.PowersCache;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.data.renderer.NativeButtonRenderer;
 
 import java.util.Map;
 import java.util.SortedSet;
@@ -27,7 +24,7 @@ public class PowerSetDetail extends VerticalLayout {
         );
         formLayout.addFormItem(new Paragraph(powerSet.getOpenText()), powerSet.getName());
         formLayout.addFormItem(new Paragraph(powerSet.getAbilityText()), "Abilities");
-        formLayout.addFormItem(new Paragraph(powerSet.getAbilityMods()), "");
+        formLayout.addFormItem(new Paragraph(powerSet.getAbilityModsText()), "");
         formLayout.addFormItem(new Details("", new Paragraph(powerSet.getPowersText())), "Details");
 
         VerticalLayout powersLayout = new VerticalLayout();
@@ -36,25 +33,7 @@ public class PowerSetDetail extends VerticalLayout {
         Map<Integer, SortedSet<Power>> powerMap = powersCache.getPowersMap().get(powerSet.getName());
 
         powerMap.forEach((tier, powers) -> {
-            Grid<Power> grid = new Grid<>();
-            grid.setThemeName("min-padding");
-            grid.setItems(powers);
-
-
-            grid.addColumn(new NativeButtonRenderer<>(
-                    item -> grid.isDetailsVisible(item) ? "-" : "+",
-                    item -> grid.setDetailsVisible(item, !grid.isDetailsVisible(item))));
-            grid.addColumn(Power::getName).setHeader("Name");
-            grid.addColumn(Power::getShortDescr).setHeader("Short Description");
-            grid.addColumn(Power::getPrerequisite).setHeader("Prerequisites");
-            grid.addColumn(Power::getMaxTaken).setHeader("Limit");
-
-            grid.setItemDetailsRenderer(new ComponentRenderer<>(power -> new Paragraph(power.getFullDescr())));
-
-            grid.getColumns().forEach(powerColumn -> powerColumn.setAutoWidth(true));
-            grid.setWidthFull();
-            grid.setHeightByRows(true);
-
+            PowersGrid grid = new PowersGrid(powers);
             Details details = new Details("Tier " + tier.toString() + " - "+powers.size()+ " powers", grid);
             powersLayout.add(details);
         });

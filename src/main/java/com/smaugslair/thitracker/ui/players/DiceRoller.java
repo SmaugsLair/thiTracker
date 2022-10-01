@@ -7,6 +7,7 @@ import com.smaugslair.thitracker.data.pc.PlayerCharacter;
 import com.smaugslair.thitracker.data.pc.Trait;
 import com.smaugslair.thitracker.data.pc.TraitType;
 import com.smaugslair.thitracker.services.SessionService;
+import com.smaugslair.thitracker.ui.components.UserSafeButton;
 import com.smaugslair.thitracker.websockets.Broadcaster;
 import com.smaugslair.thitracker.websockets.RegisteredVerticalLayout;
 import com.vaadin.flow.component.button.Button;
@@ -49,11 +50,11 @@ public class DiceRoller extends RegisteredVerticalLayout {
     private final TextField droppedText = new TextField();
     private final Label droppedLabel = new Label("Dropped");
 
-    private final Button preHeroRollButton = new Button("Hero roll 4");
+    private final Button preHeroRollButton = new UserSafeButton("Hero roll 4");
 
     private final Dialog traitRollDialog = new Dialog();
 
-    final Button postHeroRollButton = new Button("Roll 1 more, drop lowest",
+    final Button postHeroRollButton = new UserSafeButton("Roll 1 more, drop lowest",
             event -> showTraitRollDialog(TraitType.Hero, false)); //rollAgain(TokenType.HERO));
 
 
@@ -102,7 +103,7 @@ public class DiceRoller extends RegisteredVerticalLayout {
 
         rollLayout.add(topLine);
 
-        Button rollButton = new Button("Roll 3");
+        Button rollButton = new UserSafeButton("Roll 3");
         preHeroRollButton.setEnabled(pc.isHeroPointsAvailable());
 
 
@@ -152,7 +153,7 @@ public class DiceRoller extends RegisteredVerticalLayout {
         droppedText.setReadOnly(true);
         resultLayout.addFormItem(droppedText, droppedLabel);
 
-        Button dramaRoll = new Button("Roll 2 more, drop lowest",
+        Button dramaRoll = new UserSafeButton("Roll 2 more, drop lowest",
                 event -> showTraitRollDialog(TraitType.Drama, false));
         resultLayout.addFormItem(postHeroRollButton, "Spend Hero Token");
         postHeroRollButton.setEnabled(pc.isHeroPointsAvailable());
@@ -322,7 +323,7 @@ public class DiceRoller extends RegisteredVerticalLayout {
         pc.getTraits().stream().filter(trait -> trait.getType().equals(type)).forEach(trait -> {
             //Drama always, Hero if points available
             if (TraitType.Drama.equals(trait.getType()) || trait.getPoints() > 0) {
-                buttonColumn.add(new Button("Spend " + trait.getName() + " point", event -> {
+                buttonColumn.add(new UserSafeButton("Spend " + trait.getName() + " point", event -> {
                     if (initial) {
                         initialRoll(trait);
                     }

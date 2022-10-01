@@ -39,13 +39,13 @@ public class PasswordResetService {
         cleanExpiredResets();
 
         UUID uuid = UUID.randomUUID();
-        log.info("uuid:"+uuid);
+        //log.info("uuid:"+uuid);
         PasswordReset passwordReset = new PasswordReset();
         passwordReset.setCreated(new Date());
         passwordReset.setUserId(user.getId());
         passwordReset.setHash(SecurityUtils.encode(uuid.toString()));
 
-        log.info("hash:"+passwordReset.getHash());
+        //log.info("hash:"+passwordReset.getHash());
 
         passwordResetRepository.save(passwordReset);
 
@@ -71,6 +71,8 @@ public class PasswordResetService {
         msg.setSubject("Password reset for The Hero Instant app");
 
         String sb = "The Hero Instant application received a password reset request for this email address.\n" +
+                "Email: "+user.getEmail()+"\n"+
+                "Login id: "+user.getName()+"\n"+
                 "Follow the link below to complete this reset. This request will expire in 5 minutes. \n\n" +
                 thiProperties.getAppUrl() + '/' + thiProperties.getResetEndpoint() +
                 "?resetToken=" + uuid;

@@ -1,19 +1,18 @@
 package com.smaugslair.thitracker.data.powers;
 
+import com.smaugslair.thitracker.rules.Ability;
 import com.smaugslair.thitracker.util.AbilityModsRenderer;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Transient;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.StringTokenizer;
+import javax.persistence.*;
+import java.util.*;
 
 @Entity
-public class Power implements Sheetable, Comparable<Power> {
+public class  Power implements Sheetable, Comparable<Power> {
+
+    private static final Logger log = LoggerFactory.getLogger(Power.class);
 
     @Id
     private String ssid;
@@ -35,19 +34,10 @@ public class Power implements Sheetable, Comparable<Power> {
 
     private String prerequisite;
 
-    private String amPerception;
-    private String amStealth;
-    private String amAim;
-    private String amDodge;
-    private Integer amStrength;
-    private Integer amToughness;
-    private String amInfluence;
-    private String amSelfControl;
-    private String amInitiative;
-    private String amMovement;
-    private String amTravelMult;
-
-    private Integer amChoice;
+    @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL)
+    @JoinColumn(name = "power_id" )
+    @MapKey(name = "ability")
+    Map<Ability, PowerMod> powerMods = new HashMap<>();
 
     @Column(nullable = false)
     private Boolean metaPower = false;
@@ -60,6 +50,15 @@ public class Power implements Sheetable, Comparable<Power> {
 
     @Transient
     private Map<String, Integer> powerSetMap = new HashMap<>();
+
+    @Transient
+    private boolean badPrerequisite = false;
+
+    @Transient
+    private boolean hasPrerequisite = false;
+
+    @Transient
+    private List<String> orPrereqs, andPrereqs;
 
 
     public String getSsid() {
@@ -126,100 +125,131 @@ public class Power implements Sheetable, Comparable<Power> {
         this.prerequisite = prerequisite;
     }
 
-    public String getAmPerception() {
-        return amPerception;
+    public boolean isBadPrerequisite() {
+        return badPrerequisite;
     }
 
-    public void setAmPerception(String amPerception) {
-        this.amPerception = amPerception;
+    public void setBadPrerequisite(boolean badPrerequisite) {
+        this.badPrerequisite = badPrerequisite;
     }
 
-    public String getAmStealth() {
-        return amStealth;
+    public boolean isHasPrerequisite() {
+        return hasPrerequisite;
     }
 
-    public void setAmStealth(String amStealth) {
-        this.amStealth = amStealth;
+    public void setHasPrerequisite(boolean hasPrerequisite) {
+        this.hasPrerequisite = hasPrerequisite;
     }
 
-    public String getAmAim() {
-        return amAim;
+    public void parsePrerequisite(List<String> powerNames) {
+        if (prerequisite.isEmpty() || prerequisite.toLowerCase().startsWith("none")) {
+            hasPrerequisite = false;
+            badPrerequisite = false;
+            return;
+        }
+        hasPrerequisite = true;
+        if (prerequisite.contains("OR")) {
+            orPrereqs = Arrays.asList(prerequisite.split("OR"));
+            orPrereqs.replaceAll(String::trim);
+            log.info("OR prereqs: "+ orPrereqs + " for " + getName());
+            if (!powerNames.containsAll(orPrereqs)) {
+                badPrerequisite = true;
+            }
+        }
+        else if (prerequisite.contains("AND")) {
+            andPrereqs =Arrays.asList(prerequisite.split("AND"));
+            andPrereqs.replaceAll(String::trim);
+            log.info("AND prereqs: "+ andPrereqs+ " for " + getName());
+
+            if (!powerNames.containsAll(andPrereqs)) {
+                badPrerequisite = true;
+            }
+        }
+        else if (!powerNames.contains(prerequisite)) {
+            badPrerequisite = true;
+        }
     }
 
-    public void setAmAim(String amAim) {
-        this.amAim = amAim;
+    public boolean prerequsitesMet(List<String> powerNames) {
+        if (!hasPrerequisite) {
+            return true;
+        }
+        if (badPrerequisite) {
+            return false;
+        }
+        //ORs == at least one
+        if (orPrereqs != null) {
+            for (String powerName : orPrereqs) {
+                if (powerNames.contains(powerName)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        //ANDS == all
+        if (andPrereqs != null) {
+            return powerNames.containsAll(andPrereqs);
+        }
+        //Single power
+        return powerNames.contains(prerequisite);
     }
 
-    public String getAmDodge() {
-        return amDodge;
+    private void createMod(Ability ability, Integer value) {
+        if (value != null && value != 0) {
+            PowerMod powerMod = new PowerMod();
+            powerMod.setPower(this);
+            powerMod.setAbility(ability);
+            powerMod.setValue(value);
+            powerMods.put(ability, powerMod);
+        }
     }
 
-    public void setAmDodge(String amDodge) {
-        this.amDodge = amDodge;
+    public void setAmPerception(Integer value) {
+        createMod(Ability.Perception, value);
     }
 
-    public Integer getAmStrength() {
-        return amStrength;
+    public void setAmStealth(Integer value) {
+        createMod(Ability.Stealth, value);
     }
 
-    public void setAmStrength(Integer amStrength) {
-        this.amStrength = amStrength;
+    public void setAmAim(Integer value) {
+        createMod(Ability.Aim, value);
     }
 
-    public Integer getAmToughness() {
-        return amToughness;
+    public void setAmDodge(Integer value) {
+        createMod(Ability.Dodge, value);
     }
 
-    public void setAmToughness(Integer amToughness) {
-        this.amToughness = amToughness;
+    public void setAmStrength(Integer value) {
+        createMod(Ability.Strength, value);
     }
 
-    public String getAmInfluence() {
-        return amInfluence;
+    public void setAmToughness(Integer value) {
+        createMod(Ability.Toughness, value);
     }
 
-    public void setAmInfluence(String amInfluence) {
-        this.amInfluence = amInfluence;
+    public void setAmInfluence(Integer value) {
+        createMod(Ability.Influence, value);
     }
 
-    public String getAmSelfControl() {
-        return amSelfControl;
+    public void setAmSelfControl(Integer value) {
+        createMod(Ability.SelfControl, value);
     }
 
-    public void setAmSelfControl(String amSelfControl) {
-        this.amSelfControl = amSelfControl;
+    public void setAmInitiative(Integer value) {
+        createMod(Ability.Initiative, value);
     }
 
-    public String getAmInitiative() {
-        return amInitiative;
+    public void setAmMovement(Integer value) {
+        createMod(Ability.Movement, value);
     }
 
-    public void setAmInitiative(String amInitiative) {
-        this.amInitiative = amInitiative;
+    public void setAmTravelMult(Integer value) {
+        createMod(Ability.TravelMult, value);
     }
 
-    public String getAmMovement() {
-        return amMovement;
-    }
-
-    public void setAmMovement(String amMovement) {
-        this.amMovement = amMovement;
-    }
-
-    public String getAmTravelMult() {
-        return amTravelMult;
-    }
-
-    public void setAmTravelMult(String amTravelMult) {
-        this.amTravelMult = amTravelMult;
-    }
-
-    public Integer getAmChoice() {
-        return amChoice;
-    }
-
-    public void setAmChoice(Integer amChoice) {
-        this.amChoice = amChoice;
+    public void setAmChoice(Integer value) {
+        createMod(Ability.Choice, value);
     }
 
     public Boolean getMetaPower() {
@@ -289,7 +319,7 @@ public class Power implements Sheetable, Comparable<Power> {
             return false;
         }
         Power power = (Power) o;
-        return Objects.equals(ssid, power.ssid)
+        if ( Objects.equals(ssid, power.ssid)
                 && Objects.equals(name, power.name)
                 && Objects.equals(shortDescr, power.shortDescr)
                 && Objects.equals(fullDescr, power.fullDescr)
@@ -297,19 +327,23 @@ public class Power implements Sheetable, Comparable<Power> {
                 && Objects.equals(assRules, power.assRules)
                 && Objects.equals(maxTaken, power.maxTaken)
                 && Objects.equals(prerequisite, power.prerequisite)
-                && Objects.equals(amPerception, power.amPerception)
-                && Objects.equals(amStealth, power.amStealth)
-                && Objects.equals(amAim, power.amAim)
-                && Objects.equals(amDodge, power.amDodge)
-                && Objects.equals(amInfluence, power.amInfluence)
-                && Objects.equals(amSelfControl, power.amSelfControl)
-                && Objects.equals(amInitiative, power.amInitiative)
-                && Objects.equals(amMovement, power.amMovement)
-                && Objects.equals(amTravelMult, power.amTravelMult)
-                && Objects.equals(amChoice, power.amChoice)
                 && Objects.equals(metaPower, power.metaPower)
                 && Objects.equals(subPowers, power.subPowers)
-                && Objects.equals(powerSets, power.powerSets);
+                && Objects.equals(powerSets, power.powerSets)) {
+            //All else equal, compare mods
+            if (powerMods.size() != power.powerMods.size()) {
+                return false;
+            }
+            for (PowerMod powerMod : powerMods.values()) {
+                if (!power.powerMods.containsValue(powerMod)) {
+                    return false;
+                }
+            }
+            return true;
+
+        }
+        return false;
+
     }
 
     @Override
@@ -335,8 +369,17 @@ public class Power implements Sheetable, Comparable<Power> {
     private String abilityMods;
     public String getAbilityMods() {
         if (abilityMods == null) {
-            abilityMods = AbilityModsRenderer.renderAmString(this, amChoice);
+            //abilityMods  = "TODO";
+            abilityMods = AbilityModsRenderer.renderAmString(powerMods.values());
         }
         return abilityMods;
+    }
+
+    public Map<Ability, PowerMod> getPowerMods() {
+        return powerMods;
+    }
+
+    public void setPowerMods(Map<Ability, PowerMod> powerMods) {
+        this.powerMods = powerMods;
     }
 }

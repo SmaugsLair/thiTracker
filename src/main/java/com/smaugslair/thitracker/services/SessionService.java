@@ -4,6 +4,8 @@ import com.smaugslair.thitracker.data.atd.AtdRepository;
 import com.smaugslair.thitracker.data.game.GameRepository;
 import com.smaugslair.thitracker.data.game.TimeLineItemRepository;
 import com.smaugslair.thitracker.data.log.EntryRepository;
+import com.smaugslair.thitracker.data.pc.HeroPowerRepository;
+import com.smaugslair.thitracker.data.pc.HeroPowerSetRepository;
 import com.smaugslair.thitracker.data.pc.PlayerCharacter;
 import com.smaugslair.thitracker.data.pc.PlayerCharacterRepository;
 import com.smaugslair.thitracker.data.powers.PowerRepository;
@@ -38,6 +40,9 @@ public class SessionService {
     private GameRepository gameRepo;
     private PlayerCharacterRepository pcRepo;
     private EntryRepository entryRepo;
+    private HeroPowerSetRepository hpsRepo;
+
+    private HeroPowerRepository hpRepo;
 
 
     public SessionService(/*CacheService cacheService*/) {
@@ -197,5 +202,23 @@ public class SessionService {
     @Autowired
     public void setEntryRepo(EntryRepository entryRepo) {
         this.entryRepo = entryRepo;
+    }
+
+    public HeroPowerSetRepository getHpsRepo() {
+        return hpsRepo;
+    }
+
+    @Autowired
+    public void setHpsRepo(HeroPowerSetRepository hpsRepo) {
+        this.hpsRepo = hpsRepo;
+    }
+
+    public HeroPowerRepository getHpRepo() {
+        return hpRepo;
+    }
+
+    @Autowired
+    public void setHpRepo(HeroPowerRepository hpRepo) {
+        this.hpRepo = hpRepo;
     }
 }

@@ -17,8 +17,8 @@ import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.security.SecurityUtils;
 import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.ui.components.ConfirmDialog;
+import com.smaugslair.thitracker.ui.components.UserSafeButton;
 import com.smaugslair.thitracker.ui.games.tl.*;
-import com.smaugslair.thitracker.util.NameValue;
 import com.smaugslair.thitracker.websockets.Broadcaster;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.accordion.Accordion;
@@ -55,7 +55,6 @@ public class GMTimeLineView extends VerticalLayout {
     private final SessionService sessionService;
     private final GMSession gmSession;
 
-    private NameValue gameIdProp = null;
     private Game game = null;
     private Accordion gameAccordion;
     private boolean accordionOpen = false;
@@ -134,6 +133,7 @@ public class GMTimeLineView extends VerticalLayout {
         gameActions.setPadding(false);
         gameActions.add(createMaxDiceField());
         gameActions.add(buttonZone);
+        buttonBarTop.add(createPCTimeLineButton());
         buttonBarTop.add(createAddEventButton());
         buttonBarTop.add(createImportButton());
         buttonBarTop.add(createInviteButton());
@@ -350,7 +350,7 @@ public class GMTimeLineView extends VerticalLayout {
         }
     }
     private Button createClearRollsButton() {
-        return new Button("Clear rolls", event -> {
+        return new UserSafeButton("Clear rolls", event -> {
             clearLogs(EventType.DiceRoll);
             gmSession.clearRolls();
             Entry entry = new Entry();
@@ -361,14 +361,21 @@ public class GMTimeLineView extends VerticalLayout {
     }
 
     private Button createClearActionsButton() {
-        return new Button("Clear actions", event -> {
+        return new UserSafeButton("Clear actions", event -> {
             clearLogs(EventType.GMAction);
             gmSession.clearActions();
         });
     }
+    private Button createPCTimeLineButton() {
+        return new UserSafeButton("PC Timeline", event -> {
+            getUI().ifPresent(ui -> {
+                ui.getPage().open("pcTimeLineView", "PC Timeline");
+            });
+        });
+    }
 
     private Button createResetTimeButton() {
-        return new Button("Reset time", event -> {
+        return new UserSafeButton("Reset time", event -> {
             Iterable<TimeLineItem> timeLineItems = getTliRepo().findByGameId(getGameId());
             timeLineItems.forEach(item -> {
                 item.setTime(0);
@@ -382,7 +389,7 @@ public class GMTimeLineView extends VerticalLayout {
 
     private Button createResetStunButton() {
 
-        Button resetStun = new Button("Reset stun");
+        Button resetStun = new UserSafeButton("Reset stun");
         resetStun.addClickListener(event -> {
             Iterable<TimeLineItem> timeLineItems = getTliRepo().findByGameId(getGameId());
             timeLineItems.forEach(item -> {
@@ -397,7 +404,7 @@ public class GMTimeLineView extends VerticalLayout {
     private Button createAddEventButton() {
         User user = SecurityUtils.getLoggedInUser();
         if (user == null) {
-            return new Button();
+            return new UserSafeButton();
         }
 
         List<Friendship> friendships = sessionService.getFriendsRepo().findAllByUserOrFriend(user, user);
@@ -411,7 +418,6 @@ public class GMTimeLineView extends VerticalLayout {
 
         List<PlayerCharacter> pcs = new ArrayList<>();
         userIds.forEach(id -> {
-            NameValue nameValue = new NameValue("userId", id);
             pcs.addAll(sessionService.getPcRepo().findAllByUserId(id).stream()
                     .filter(pc -> pc.getGameId() == null ).collect(Collectors.toList()));
         });
@@ -419,7 +425,7 @@ public class GMTimeLineView extends VerticalLayout {
         NewItemForm newItemForm = new NewItemForm(pcs, sessionService);
         ConfirmDialog addItemDialog = new ConfirmDialog(newItemForm);
 
-        Button confirmButton = new Button("Add event to "+game.getName(), event -> {
+        Button confirmButton = new UserSafeButton("Add event to "+game.getName(), event -> {
             TimeLineItem item = new TimeLineItem();
             if (newItemForm.isPC()) {
                 PlayerCharacter pc = newItemForm.getPC();
@@ -444,13 +450,13 @@ public class GMTimeLineView extends VerticalLayout {
         addItemDialog.setConfirmButton(confirmButton);
         addItemDialog.setWidth("500px");
 
-        Button addButton = new Button("Add event");
+        Button addButton = new UserSafeButton("Add event");
         addButton.addClickListener(event -> addItemDialog.open());
         return addButton;
     }
 
     private Button createImportButton() {
-        Button importButton = new Button("Import");
+        Button importButton = new UserSafeButton("Import");
         List<CollectedItem> collectedItems =
             sessionService.getCiRepo().findAllByGmId(SecurityUtils.getLoggedInUser().getId());
         if (!collectedItems.isEmpty()) {
@@ -482,12 +488,12 @@ public class GMTimeLineView extends VerticalLayout {
         inviteEmail.setPlaceholder("email");
 
         ConfirmDialog inviteDialog = new ConfirmDialog(new VerticalLayout(inviteName, inviteEmail));
-        Button inviteButton = new Button("Invite player", event -> {
+        Button inviteButton = new UserSafeButton("Invite player", event -> {
             sendPlayerInvitation(inviteName.getValue(), inviteEmail.getValue());
             inviteDialog.close();
         });
         inviteDialog.setConfirmButton(inviteButton);
-        return new Button("Invite", event -> inviteDialog.open());
+        return new UserSafeButton("Invite", event -> inviteDialog.open());
     }
 
     private IntegerField createMaxDiceField() {
