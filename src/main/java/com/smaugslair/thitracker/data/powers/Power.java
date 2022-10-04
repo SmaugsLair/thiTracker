@@ -3,6 +3,7 @@ package com.smaugslair.thitracker.data.powers;
 import com.smaugslair.thitracker.rules.Ability;
 import com.smaugslair.thitracker.util.AbilityModsRenderer;
 import org.apache.commons.lang3.StringUtils;
+import org.mariuszgromada.math.mxparser.Expression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +59,8 @@ public class  Power implements Sheetable, Comparable<Power> {
     private boolean hasPrerequisite = false;
 
     @Transient
-    private List<String> orPrereqs, andPrereqs;
+    private List<String> orPrereqs, andPrereqs, andOrPrereqs;
+
 
 
     public String getSsid() {
@@ -113,8 +115,11 @@ public class  Power implements Sheetable, Comparable<Power> {
         return maxTaken;
     }
 
-    public void setMaxTaken(String makTaken) {
-        this.maxTaken = makTaken;
+    public void setMaxTaken(String maxTaken) {
+        if (maxTaken == null && !ssid.isEmpty()) {
+            log.error("setting maxtaken to null:" +this, new Exception());
+        }
+        this.maxTaken = maxTaken;
     }
 
     public String getPrerequisite() {
@@ -142,16 +147,28 @@ public class  Power implements Sheetable, Comparable<Power> {
     }
 
     public void parsePrerequisite(List<String> powerNames) {
-        if (prerequisite.isEmpty() || prerequisite.toLowerCase().startsWith("none")) {
+        if (prerequisite.isEmpty() || prerequisite.toLowerCase().startsWith("see text")) {
             hasPrerequisite = false;
             badPrerequisite = false;
             return;
         }
         hasPrerequisite = true;
-        if (prerequisite.contains("OR")) {
+        if (prerequisite.contains("OR") && prerequisite.contains("AND")) {
+            List<String> split = Arrays.asList(prerequisite.split("OR|AND|[()]"));
+            split.replaceAll(String::trim);
+            andOrPrereqs = new ArrayList<>();
+            split.forEach(s -> {
+                if (!s.isEmpty()) {
+                    andOrPrereqs.add(s);
+                }
+            });
+            if (!powerNames.containsAll(andOrPrereqs)) {
+                badPrerequisite = true;
+            }
+        }
+        else if (prerequisite.contains("OR")) {
             orPrereqs = Arrays.asList(prerequisite.split("OR"));
             orPrereqs.replaceAll(String::trim);
-            log.info("OR prereqs: "+ orPrereqs + " for " + getName());
             if (!powerNames.containsAll(orPrereqs)) {
                 badPrerequisite = true;
             }
@@ -159,7 +176,6 @@ public class  Power implements Sheetable, Comparable<Power> {
         else if (prerequisite.contains("AND")) {
             andPrereqs =Arrays.asList(prerequisite.split("AND"));
             andPrereqs.replaceAll(String::trim);
-            log.info("AND prereqs: "+ andPrereqs+ " for " + getName());
 
             if (!powerNames.containsAll(andPrereqs)) {
                 badPrerequisite = true;
@@ -170,12 +186,24 @@ public class  Power implements Sheetable, Comparable<Power> {
         }
     }
 
+
     public boolean prerequsitesMet(List<String> powerNames) {
         if (!hasPrerequisite) {
             return true;
         }
         if (badPrerequisite) {
             return false;
+        }
+        if (andOrPrereqs != null) {
+            String temp = prerequisite;
+            for (String s : andOrPrereqs) {
+                temp = temp.replace(s, powerNames.contains(s) ? "1" : "0");
+            }
+            temp = temp.replaceAll("OR", "||");
+            temp = temp.replaceAll("AND", "&&");
+            Expression expression = new Expression(temp);
+            return expression.calculate() == 1.0;
+
         }
         //ORs == at least one
         if (orPrereqs != null) {
@@ -298,16 +326,16 @@ public class  Power implements Sheetable, Comparable<Power> {
         powerSets = StringUtils.removeEnd(sb.toString(), ", ");
     }
 
-    @Transient Integer tier;
-    public Integer getTier() {
-        if (tier == null) {
+    @Transient Integer lowestTier;
+    public Integer getLowestTier() {
+        if (lowestTier == null) {
             int working = 11;
             for (Integer i: powerSetMap.values()) {
                 working = Math.min(working, i);
             }
-            tier = working;
+            lowestTier = working;
         }
-        return tier;
+        return lowestTier;
     }
 
 
@@ -361,7 +389,7 @@ public class  Power implements Sheetable, Comparable<Power> {
 
     @Override
     public int compareTo(Power o) {
-        return name.compareTo(o.name);
+        return Comparator.comparing(Power::getName).compare(this, o);
     }
 
 
@@ -381,5 +409,31 @@ public class  Power implements Sheetable, Comparable<Power> {
 
     public void setPowerMods(Map<Ability, PowerMod> powerMods) {
         this.powerMods = powerMods;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Power{");
+        sb.append("ssid='").append(ssid).append('\'');
+        sb.append(", name='").append(name).append('\'');
+        sb.append(", shortDescr='").append(shortDescr).append('\'');
+        sb.append(", fullDescr='").append(fullDescr).append('\'');
+        sb.append(", powerTag='").append(powerTag).append('\'');
+        sb.append(", assRules='").append(assRules).append('\'');
+        sb.append(", maxTaken='").append(maxTaken).append('\'');
+        sb.append(", prerequisite='").append(prerequisite).append('\'');
+        sb.append(", powerMods=").append(powerMods);
+        sb.append(", metaPower=").append(metaPower);
+        sb.append(", subPowers='").append(subPowers).append('\'');
+        sb.append(", powerSets='").append(powerSets).append('\'');
+        sb.append(", powerSetMap=").append(powerSetMap);
+        sb.append(", badPrerequisite=").append(badPrerequisite);
+        sb.append(", hasPrerequisite=").append(hasPrerequisite);
+        sb.append(", orPrereqs=").append(orPrereqs);
+        sb.append(", andPrereqs=").append(andPrereqs);
+        sb.append(", tier=").append(lowestTier);
+        sb.append(", abilityMods='").append(abilityMods).append('\'');
+        sb.append('}');
+        return sb.toString();
     }
 }

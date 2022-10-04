@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.stream.Collectors;
 
-//@Push
 @CssImport(value = "./styles/color.css", themeFor = "vaadin-grid")
 @CssImport(value = "./styles/minPadding.css", themeFor = "vaadin-grid")
 @Route(value = "pcTimeLineView")

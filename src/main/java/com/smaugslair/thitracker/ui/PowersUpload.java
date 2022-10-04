@@ -180,12 +180,9 @@ public class PowersUpload extends VerticalLayout {
                         || !updatedPowers.isEmpty() || !updatedPowerSets.isEmpty());
 
 
-            } catch (Throwable t) {
-                t.printStackTrace();
+            }
+            catch (Throwable t) {
                 output.add(new Span(t.getMessage()));
-                for (StackTraceElement line: t.getStackTrace()) {
-                    output.add(new Span(line.toString()));
-                }
             }
             progressBar.setIndeterminate(false);
         });
@@ -228,9 +225,12 @@ public class PowersUpload extends VerticalLayout {
         log.info("sheet size: "+sheet.getPhysicalNumberOfRows());
         for (int i = 0; i < sheet.getPhysicalNumberOfRows(); ++i) {
             if (i > transformer.getLabelRowIndex()) {
+                if (sheet.getRow(i).getCell(0).toString().equals("ZZSTOP")) {
+                    //looking at the last row;
+                    break;
+                }
                 Sheetable sheetable = transformer.transformRow(sheet.getRow(i));
                 if (sheetable.getSsid() != null && sheetable.getSsid().length() > 0) {
-                    //log.info(sheetable.toString());
                     map.put(sheetable.getName(), sheetable);
                 }
             }

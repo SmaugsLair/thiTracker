@@ -5,11 +5,12 @@ import com.smaugslair.thitracker.rules.Ability;
 import com.smaugslair.thitracker.util.AbilityModsRenderer;
 
 import javax.persistence.*;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
 @Entity
-public class HeroPower implements Moddable {
+public class HeroPower implements Moddable, Comparable<HeroPower> {
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
@@ -26,6 +27,9 @@ public class HeroPower implements Moddable {
     @ManyToOne
     @JoinColumn(name = "hps_id")
     private HeroPowerSet heroPowerSet;
+
+    @Column(nullable = false)
+    private Integer tier;
 
     @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL)
     @JoinColumn(name = "hero_power_id" )
@@ -109,4 +113,21 @@ public class HeroPower implements Moddable {
         sb.append('}');
         return sb.toString();
     }
+
+    public Integer getTier() {
+        return tier;
+    }
+
+    public void setTier(Integer tier) {
+        this.tier = tier;
+    }
+
+    @Override
+    public int compareTo(HeroPower o) {
+        return Comparator.comparing(HeroPower::getTier)
+                .thenComparing(HeroPower::getPower)
+                .thenComparing(HeroPower::getId)
+                .compare(this, o);
+    }
+
 }

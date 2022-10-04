@@ -6,12 +6,14 @@ import com.smaugslair.thitracker.data.powers.Power;
 public class PowerTarget implements Comparable<PowerTarget> {
 
     private final Power power;
+    private final Integer tier;
     private final boolean available;
     private final int taken;
     private final HeroPowerSet heroPowerSet;
 
-    public PowerTarget(Power power, boolean available, int taken, HeroPowerSet heroPowerSet) {
+    public PowerTarget(Power power, Integer tier, boolean available, int taken, HeroPowerSet heroPowerSet) {
         this.power = power;
+        this.tier = tier;
         this.available = available;
         this.taken = taken;
         this.heroPowerSet = heroPowerSet;
@@ -70,5 +72,9 @@ public class PowerTarget implements Comparable<PowerTarget> {
         sb.append(", heroPowerSet=").append(heroPowerSet);
         sb.append('}');
         return sb.toString();
+    }
+
+    public Integer getTier() {
+        return tier;
     }
 }

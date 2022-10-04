@@ -63,7 +63,7 @@ public class PowerSetEditor extends VerticalLayout {
             powerTargetMap.put(tier, new TreeSet<>());
             powers.forEach(power -> {
                 AvailableTaken at = determineAvailabilty(heroPowerSet, power, heroPowers, tier);
-                powerTargetMap.get(tier).add(new PowerTarget(power, at.isAvailable(), at.getTimesTaken(), heroPowerSet));
+                powerTargetMap.get(tier).add(new PowerTarget(power, tier, at.isAvailable(), at.getTimesTaken(), heroPowerSet));
             });
 
         });
@@ -167,6 +167,7 @@ public class PowerSetEditor extends VerticalLayout {
         heroPower.setPower(power);
         heroPower.setHeroPowerSet(powerTarget.getHeroPowerSet());
         heroPower.setPlayerCharacter(pc);
+        heroPower.setTier(powerTarget.getTier());
         heroPowers.add(heroPower);
 
         if (!power.getPowerMods().isEmpty()) {

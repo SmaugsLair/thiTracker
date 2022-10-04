@@ -10,19 +10,19 @@ import com.vaadin.flow.component.html.UnorderedList;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class PowerSetLayout extends VerticalLayout {
     public PowerSetLayout(HeroPowerSet powerSet, Collection<HeroPower> powers, CharacterSheet characterSheet) {
 
         setSpacing(false);
 
-        List<HeroPower> list = new ArrayList<>();
+        SortedSet<HeroPower> set = new TreeSet<>();
         for (HeroPower heroPower : powers) {
             if (heroPower.getHeroPowerSet().equals(powerSet)) {
-                list.add(heroPower);
+                set.add(heroPower);
             }
         }
 
@@ -30,9 +30,9 @@ public class PowerSetLayout extends VerticalLayout {
         top.setWidthFull();
         top.setJustifyContentMode(JustifyContentMode.BETWEEN);
         top.add(new Span(powerSet.getPowerSet().getName()));
-        top.add(new Span(String.valueOf(list.size())));
+        top.add(new Span(String.valueOf(set.size())));
         add(top);
-        for (HeroPower heroPower : list) {
+        for (HeroPower heroPower : set) {
             UnorderedList content = new UnorderedList();
             //content.add(new ListItem(heroPower.getPower().getShortDescr()));
             content.add(new ListItem(heroPower.getPower().getFullDescr()));

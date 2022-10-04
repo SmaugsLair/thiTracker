@@ -20,7 +20,7 @@ public abstract class Transformer<K extends Sheetable> {
                 .append(", columnLabel:").append(columnLabel)
                 .append(", at row:").append(row.getRowNum()+1).append(", ");
         if (cell == null) {
-            sb.append("null cell at column: ").append(columnIndex).append(1);
+            sb.append("null cell at column: ").append(columnIndex).append(" ");
         }
         else {
             sb.append("column:").append(cell.getColumnIndex()+1);

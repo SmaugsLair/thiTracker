@@ -25,6 +25,16 @@ public class PowerBrowserView extends Grid<Power> {
 
         setHeightFull();
 
+        boolean showBugs = false;
+
+        for (Power power : powersCache.getPowers()) {
+            if (power.isBadPrerequisite()) {
+                showBugs = true;
+            }
+        }
+
+
+
         ListDataProvider<Power> dataProvider = new ListDataProvider<>(powersCache.getPowers());
         setDataProvider(dataProvider);
 
@@ -36,8 +46,10 @@ public class PowerBrowserView extends Grid<Power> {
                 item -> setDetailsVisible(item, !isDetailsVisible(item))));
 
         Grid.Column<Power> nameColumn =  addColumn(Power::getName).setHeader("Name").setSortable(true);
-        Grid.Column<Power> bugColumn =  addColumn(Power::isBadPrerequisite).setHeader("BUG?").setSortable(true);
-        Grid.Column<Power> tierColumn = addColumn(Power::getTier).setHeader("Tier").setSortable(true);
+        if (showBugs) {
+            addColumn(Power::isBadPrerequisite).setHeader("BUG?").setSortable(true);
+        }
+        Grid.Column<Power> tierColumn = addColumn(Power::getLowestTier).setHeader("Tier").setSortable(true);
         Grid.Column<Power> metaColumn = addColumn(Power::getMetaPower).setHeader("Meta").setSortable(true);
         Grid.Column<Power> tagColumn = addColumn(Power::getPowerTag).setHeader("Tag").setSortable(true);
         Grid.Column<Power> maxColumn = addColumn(Power::getMaxTaken).setHeader("Max Taken").setSortable(true);

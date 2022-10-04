@@ -2,6 +2,7 @@ package com.smaugslair.thitracker.ui.powers.transformers;
 
 import com.smaugslair.thitracker.data.powers.Power;
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.slf4j.Logger;
@@ -19,18 +20,21 @@ public class PowerTransformer extends Transformer<Power>{
 
     public static final String sheetName = "PowersList";
 
+    private final DataFormatter dataFormatter = new DataFormatter();
+
 
     @Override
     public Power transformRow(XSSFRow row) throws TransformerException {
         Power power = new Power();
         int i;
+        boolean track = "Read Animal Memory".equals(row.getCell(0).toString());
         for (i = 0; i < labels.length; ++i) {
             String label = labels[i];
             XSSFCell cell = row.getCell(i);
-            if (cell == null) {
-                break;
-            }
             try {
+                if (cell == null) {
+                    throw new Exception(power.getName() + " has a Null cell! Editing the contents of this cell in Sheets should resolve this issue.");
+                }
                 if ("amChoice".equals(label)) {
                     String value = cell.toString();
                     if (value != null && !value.isEmpty()) {
@@ -52,20 +56,12 @@ public class PowerTransformer extends Transformer<Power>{
                 }
                 else if (label.equals("maxTaken")) {
                     if (cell.toString().isEmpty()) {
-                        power.setMaxTaken("1");
+                        throw new Exception(power.getName() + " has an empty maxTaken value");
                     }
-                    else {
-                        //log.info("row:" + row.getRowNum() + ", maxTaken cell:" + cell);
-                        String value = cell.toString();
-                        try {
-                            value = Integer.valueOf(Double.valueOf(value).intValue()).toString();
-                        }
-                        catch (NumberFormatException nfe) {}
-                        BeanUtils.setProperty(power, label, value);
-                    }
+                    power.setMaxTaken(dataFormatter.formatCellValue(cell));
                 }
                 else {
-                    BeanUtils.setProperty(power, label, cell.toString());
+                    BeanUtils.setProperty(power, label, dataFormatter.formatCellValue(cell));
                 }
             }
             catch (Throwable t) {
