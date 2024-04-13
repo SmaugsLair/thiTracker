@@ -2,7 +2,7 @@ package com.smaugslair.thitracker.data.powers;
 
 import com.smaugslair.thitracker.rules.Ability;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Objects;
 
 @Entity

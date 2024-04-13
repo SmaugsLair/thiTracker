@@ -4,7 +4,7 @@ import com.smaugslair.thitracker.data.log.Entry;
 import com.smaugslair.thitracker.data.log.EventType;
 import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.websockets.RegisteredVerticalLayout;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +23,7 @@ public class DiceHistory extends RegisteredVerticalLayout {
         this.sessionService = sessionService;
       /*  NameValue nameValue = new NameValue("gameId", sessionService.getGameId());
         if (nameValue.getValue() == null) {
-            add(new Label("No Game loaded"));
+            add(new Span("No Game loaded"));
             return;
         }
         List<Entry> entryList = cacheService.getEntryCache().findManyByProperty(nameValue)*/
@@ -31,7 +31,7 @@ public class DiceHistory extends RegisteredVerticalLayout {
                 .stream().sorted().collect(Collectors.toList());
         for (Entry entry : entryList) {
             if (entry.getType().equals(EventType.DiceRoll)) {
-                add(new Label(entry.getText()));
+                add(new Span(entry.getText()));
             }
         }
     }
@@ -45,7 +45,7 @@ public class DiceHistory extends RegisteredVerticalLayout {
             //log.info(entry.toString());
             switch (entry.getType()) {
                 case DiceRoll:
-                    addComponentAsFirst(new Label(entry.getText()));
+                    addComponentAsFirst(new Span(entry.getText()));
                     break;
                 case ClearRolls:
                     removeAll();

@@ -7,7 +7,7 @@ import org.mariuszgromada.math.mxparser.Expression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.*;
 
 @Entity
@@ -31,7 +31,7 @@ public class  Power implements Sheetable, Comparable<Power> {
     private String assRules;
 
     @Column(nullable = false)
-    private String maxTaken;
+    private Integer maxTaken;
 
     private String prerequisite;
 
@@ -111,11 +111,11 @@ public class  Power implements Sheetable, Comparable<Power> {
         this.assRules = assRules;
     }
 
-    public String getMaxTaken() {
+    public Integer getMaxTaken() {
         return maxTaken;
     }
 
-    public void setMaxTaken(String maxTaken) {
+    public void setMaxTaken(Integer maxTaken) {
         if (maxTaken == null && !ssid.isEmpty()) {
             log.error("setting maxtaken to null:" +this, new Exception());
         }
@@ -220,6 +220,22 @@ public class  Power implements Sheetable, Comparable<Power> {
         }
         //Single power
         return powerNames.contains(prerequisite);
+    }
+
+    public List<String> getPrereqList() {
+        if (orPrereqs != null) {
+            return orPrereqs;
+        }
+        if (andOrPrereqs != null) {
+            return andOrPrereqs;
+        }
+        if (andPrereqs != null) {
+            return andPrereqs;
+        }
+        if (prerequisite != null) {
+            return Arrays.asList(prerequisite);
+        }
+        return new ArrayList<>();
     }
 
     private void createMod(Ability ability, Integer value) {

@@ -9,14 +9,14 @@ import com.smaugslair.thitracker.ui.components.UserSafeButton;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
+import jakarta.annotation.security.PermitAll;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
+@PermitAll
 @Route(value = "userDetails", layout = MainView.class)
 public class UserDetailsView extends VerticalLayout {
 
@@ -26,6 +26,7 @@ public class UserDetailsView extends VerticalLayout {
     public UserDetailsView(SessionService sessionService) {
         this.sessionService = sessionService;
         init();
+        sessionService.getTitleBar().setTitle("User Details");
     }
 
     private void refresh() {
@@ -35,7 +36,6 @@ public class UserDetailsView extends VerticalLayout {
 
     public void init() {
 
-        add(new H3("User Details"));
         User user = SecurityUtils.getLoggedInUser();
 
         UserForm form = new UserForm(user);

@@ -96,4 +96,8 @@ public enum Ability {
     public String getRendered(int value) {
         return getDisplayName() + " " + (multiplier?"*":(value<1?"":"+")) + value;
     }
+
+    public boolean isMultiplier () {
+        return multiplier;
+    }
 }

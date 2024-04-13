@@ -25,7 +25,7 @@ public class PowersGrid extends Grid<Power> {
 
         getColumns().forEach(powerColumn -> powerColumn.setAutoWidth(true));
         setWidthFull();
-        setHeightByRows(true);
+        setAllRowsVisible(true);
 
     }
 }

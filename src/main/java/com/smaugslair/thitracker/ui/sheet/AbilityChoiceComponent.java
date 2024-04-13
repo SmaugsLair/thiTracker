@@ -1,7 +1,7 @@
 package com.smaugslair.thitracker.ui.sheet;
 
 import com.smaugslair.thitracker.rules.Ability;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 
@@ -14,9 +14,9 @@ public class AbilityChoiceComponent extends HorizontalLayout {
     public AbilityChoiceComponent(Ability ability) {
         setJustifyContentMode(JustifyContentMode.BETWEEN);
         this.ability = ability;
-        add(new Label(ability.getDisplayName()), integerField);
+        add(new Span(ability.getDisplayName()), integerField);
         integerField.setMin(0);
-        integerField.setHasControls(true);
+        integerField.setStepButtonsVisible(true);
         integerField.setValue(0);
     }
 

@@ -9,9 +9,11 @@ import com.smaugslair.thitracker.ui.sheet.CharacterSheet;
 import com.smaugslair.thitracker.websockets.Broadcaster;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.Route;
+import jakarta.annotation.security.PermitAll;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@PermitAll()
 @Route(value = "", layout = MainView.class)
 public class HeroView extends HorizontalLayout {
 
@@ -23,8 +25,9 @@ public class HeroView extends HorizontalLayout {
         this.sessionService = sessionService;
         CharacterSheet characterSheet = new CharacterSheet(this::updatePC, true, sessionService);
 
-        add(new PCManager(sessionService, characterSheet::setPc));
+        add(new HorizontalLayout(new PCManager(sessionService, characterSheet::setPc)));
         add(characterSheet);
+        sessionService.getTitleBar().setTitle("Heroes");
     }
 
     private PlayerCharacter updatePC(PlayerCharacter pc) {

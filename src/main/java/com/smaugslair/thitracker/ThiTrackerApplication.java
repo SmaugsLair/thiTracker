@@ -27,6 +27,7 @@ public class ThiTrackerApplication {
     private static final Logger log = LoggerFactory.getLogger(ThiTrackerApplication.class);
 
     public static void main(String[] args) {
+        log.info("STARTING THITRACKER");
         SpringApplication.run(ThiTrackerApplication.class, args);
     }
 
@@ -48,10 +49,12 @@ public class ThiTrackerApplication {
                 repository.save(new ActionTimeDefault("Recovery", 10, false));
                 repository.save(new ActionTimeDefault("Repair", 10, true));
             }
+            else {
+                log.info("Database has already been loaded");
+            }
             //log.info(thiProperties.toString());
             if (userRepository.findAll().isEmpty()) {
                 User user = new User();
-                user.setName("naganalf");
                 user.setDisplayName("Kevin F");
                 user.setEmail("naganalf@gmail.com");
                 user.setAdmin(true);
@@ -64,7 +67,6 @@ public class ThiTrackerApplication {
                 credentialsRepository.save(credentials);
 
                 user = new User();
-                user.setName("deadandy");
                 user.setDisplayName("Andy A");
                 user.setEmail("andya@giantsdancegames.com");
                 user.setAdmin(true);

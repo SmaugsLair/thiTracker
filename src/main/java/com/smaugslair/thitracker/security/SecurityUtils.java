@@ -10,7 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.stream.Stream;
 
 public final class SecurityUtils {
@@ -42,6 +42,10 @@ public final class SecurityUtils {
             return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         }
         return null;
+    }
+
+    public static void logout() {
+        SecurityContextHolder.getContext().setAuthentication(null);
     }
 
     public static boolean matches(CharSequence rawPassword, String encodedPassword) {

@@ -1,5 +1,6 @@
 package com.smaugslair.thitracker.ui.players;
 
+import com.smaugslair.thitracker.data.game.Game;
 import com.smaugslair.thitracker.data.log.Entry;
 import com.smaugslair.thitracker.data.log.EventType;
 import com.smaugslair.thitracker.data.pc.PlayerCharacter;
@@ -8,15 +9,19 @@ import com.smaugslair.thitracker.ui.MainView;
 import com.smaugslair.thitracker.ui.components.DiceHistory;
 import com.smaugslair.thitracker.ui.sheet.CharacterSheet;
 import com.smaugslair.thitracker.websockets.Broadcaster;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
+import com.vaadin.flow.component.tabs.TabSheet;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import jakarta.annotation.security.PermitAll;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@PermitAll
 @PageTitle("Player Session")
 @Route(value = "playersession", layout = MainView.class)
-public class PlayerSession extends SplitLayout {
+public class PlayerSession extends TabSheet {
 
     private static final Logger log = LoggerFactory.getLogger(PlayerSession.class);
 
@@ -24,22 +29,36 @@ public class PlayerSession extends SplitLayout {
 
     public PlayerSession(SessionService sessionService) {
         this.sessionService = sessionService;
-        SplitLayout pcLayout = new SplitLayout();
+        PlayerCharacter pc = sessionService.getPc();
+        if (pc == null) {
+            setPrefixComponent(new Span("PC not chosen"));
+            return;
+        }
+        Game game = sessionService.getGameRepo().findById(pc.getGameId()).orElse(null);
+        if (game == null) {
+            setPrefixComponent(new Span("This pc is not in a game"));
+            return;
+        }
+
+        sessionService.getTitleBar().setTitle(sessionService.getPc().getName()+ " in " + game.getName());
+
+
         CharacterSheet characterSheet = new CharacterSheet(this::updatePc, false, sessionService);
         characterSheet.setPc(sessionService.getPc());
-        pcLayout.addToPrimary(characterSheet);
-        pcLayout.addToSecondary(new DiceRoller(sessionService));
-        pcLayout.setSplitterPosition(50);
-        addToPrimary(pcLayout);
+        characterSheet.setWidthFull();
+
 
         SplitLayout gameLayout = new SplitLayout();
         gameLayout.addToPrimary(new PCTimeLineView(sessionService));
         gameLayout.addToSecondary(new DiceHistory(sessionService));
-        gameLayout.setOrientation(Orientation.VERTICAL);
+        gameLayout.setOrientation(SplitLayout.Orientation.VERTICAL);
         gameLayout.setSplitterPosition(50);
-        addToSecondary(gameLayout);
+
+        add("Timeline", gameLayout);
+        add("Dice Roller", new DiceRollView(sessionService));
+        add("Character Sheet", characterSheet);
         setHeightFull();
-        setSplitterPosition(66);
+        setWidthFull();
     }
 
     public PlayerCharacter updatePc(PlayerCharacter pc) {

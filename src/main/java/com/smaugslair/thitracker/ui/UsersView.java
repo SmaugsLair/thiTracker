@@ -3,6 +3,7 @@ package com.smaugslair.thitracker.ui;
 import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.data.user.UserFilter;
 import com.smaugslair.thitracker.data.user.UserRepository;
+import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.ui.components.FilterField;
 import com.smaugslair.thitracker.ui.components.UserSafeButton;
 import com.smaugslair.thitracker.ui.users.UserForm;
@@ -17,18 +18,22 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import jakarta.annotation.security.PermitAll;
 
+@PermitAll
 @PageTitle("Admin Page")
 @Route(value = "useradmin", layout = MainView.class)
 @CssImport(value = "./styles/minPadding.css", themeFor = "vaadin-grid")
-public class UserAdmin extends VerticalLayout {
+public class UsersView extends VerticalLayout {
 
     private final UserRepository userRepository;
     private final Dialog editUserDialog;
     private final UserForm userForm;
 
 
-    public UserAdmin(UserRepository userRepository) {
+    public UsersView(SessionService sessionService, UserRepository userRepository) {
+
+        sessionService.getTitleBar().setTitle("Manage Users");
         this.userRepository = userRepository;
 
         editUserDialog = new Dialog();
@@ -59,13 +64,13 @@ public class UserAdmin extends VerticalLayout {
         dataProvider.setFilter(filterObject::test);
 
 
-        Grid.Column<User> nameColumn = userGrid.addColumn(User::getName).setHeader("Name");
+        //Grid.Column<User> nameColumn = userGrid.addColumn(User::getName).setHeader("Name");
         Grid.Column<User> dnColumn = userGrid.addColumn(User::getDisplayName).setHeader("Display Name");
         Grid.Column<User> emailColumn = userGrid.addColumn(User::getEmail).setHeader("Email");
         Grid.Column<User> adminColumn = userGrid.addColumn(User::isAdmin).setHeader("Admin");
 
         HeaderRow filterRow = userGrid.appendHeaderRow();
-        filterRow.getCell(nameColumn).setComponent(new FilterField(filterObject::setName));
+        //filterRow.getCell(nameColumn).setComponent(new FilterField(filterObject::setName));
         filterRow.getCell(dnColumn).setComponent(new FilterField(filterObject::setDisplayName));
         filterRow.getCell(emailColumn).setComponent(new FilterField(filterObject::setEmail));
         filterRow.getCell(adminColumn).setComponent(new FilterField(filterObject::setAdmin, "50px"));

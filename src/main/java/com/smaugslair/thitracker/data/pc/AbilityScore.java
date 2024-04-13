@@ -4,7 +4,7 @@ import com.smaugslair.thitracker.rules.Ability;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 public class AbilityScore {

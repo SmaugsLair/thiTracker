@@ -7,12 +7,13 @@ import com.smaugslair.thitracker.ui.MainView;
 import com.smaugslair.thitracker.ui.components.ci.DeleteButton;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
+import jakarta.annotation.security.PermitAll;
 
 import java.util.List;
 
+@PermitAll
 @Route(value = "collection", layout = MainView.class)
 @CssImport(value = "./styles/minPadding.css", themeFor = "vaadin-grid")
 public class CollectionView extends VerticalLayout {
@@ -22,6 +23,7 @@ public class CollectionView extends VerticalLayout {
     public CollectionView(SessionService sessionService) {
         this.sessionService = sessionService;
         init();
+        sessionService.getTitleBar().setTitle("Collection");
     }
 
     private void refresh() {
@@ -31,7 +33,6 @@ public class CollectionView extends VerticalLayout {
 
     public void init() {
 
-        add(new H3("Collection"));
         List<CollectedItem> items = sessionService.getCiRepo()
                 .findAllByGmId(SecurityUtils.getLoggedInUser().getId());
 
@@ -43,7 +44,7 @@ public class CollectionView extends VerticalLayout {
         Grid<CollectedItem> grid = new Grid<>();
         grid.setThemeName("min-padding");
         grid.setItems(items);
-        grid.setHeightByRows(true);
+        grid.setAllRowsVisible(true);
         grid.setClassNameGenerator(item -> item.getColor());
         grid.getColumns().forEach(itemColumn -> itemColumn.setAutoWidth(true));
         grid.addColumn(CollectedItem::getName);

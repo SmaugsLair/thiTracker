@@ -6,10 +6,9 @@ import com.smaugslair.thitracker.security.SecurityUtils;
 import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.ui.components.UserSafeButton;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
-import org.springframework.mail.SimpleMailMessage;
 
 import java.util.Optional;
 
@@ -17,27 +16,27 @@ import java.util.Optional;
 public class FriendFinder extends VerticalLayout {
 
     private final SessionService sessionService;
-    private final FriendsSession friendsSession;
+    private final FriendsView friendsView;
     private final User self = SecurityUtils.getLoggedInUser();
     private User friend = null;
 
-    public FriendFinder(FriendsSession friendsSession, SessionService sessionService) {
+    public FriendFinder(FriendsView friendsView, SessionService sessionService) {
         this.sessionService = sessionService;
-        this.friendsSession = friendsSession;
+        this.friendsView = friendsView;
         init();
     }
 
     private void init() {
         add("Friend Finder");
         TextField nameField = new TextField();
-        nameField.setPlaceholder("Username");
+        nameField.setPlaceholder("Email");
         add(nameField);
 
         TextField friendCode = new TextField();
         friendCode.setPlaceholder("Friend code");
         add(friendCode);
 
-        Label message = new Label();
+        Span message = new Span();
 
         Button request = new UserSafeButton("", event -> {
             if (friend == null) {
@@ -49,14 +48,15 @@ public class FriendFinder extends VerticalLayout {
             friendship.setFriend(friend);
             sessionService.getFriendsRepo().save(friendship);
             //sendEmail(friend);
-            friendsSession.refresh();
+            friendsView.refresh();
         });
         request.setVisible(false);
 
         Button button = new UserSafeButton("Find", event -> {
             request.setVisible(false);
-            User user = sessionService.getUserRepository().findUserByName(nameField.getValue());
-            if (user != null) {
+            Optional<User> optionalUser = sessionService.getUserRepository().findUserByDisplayName(nameField.getValue());
+            if (optionalUser.isPresent()) {
+                User user = optionalUser.get();
                 if (user.equals(self)) {
                     message.setText("That's you, fool!");
                     return;
@@ -99,15 +99,4 @@ public class FriendFinder extends VerticalLayout {
 
     }
 
-    private void sendEmail(User friend) {
-
-        SimpleMailMessage msg = new SimpleMailMessage();
-        msg.setTo("naganalf@gmail.com");
-        msg.setFrom("naganalf@gmail.com");
-
-        msg.setSubject("Testing from Spring Boot");
-        msg.setText("Hello World \n Spring Boot Email");
-
-        sessionService.getJavaMailSender().send(msg);
-    }
 }

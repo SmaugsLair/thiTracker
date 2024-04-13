@@ -16,7 +16,7 @@ public class ProgressionPoint implements TraitRow {
     public ProgressionPoint(PlayerCharacter pc, CharacterSheet sheet) {
         pointField.setValue(pc.getProgressionTokens());
         pointField.setMin(0);
-        pointField.setHasControls(true);
+        pointField.setStepButtonsVisible(true);
         pointField. addValueChangeListener(event -> {
             pc.setProgressionTokens(event.getValue());
             sheet.updatePC();

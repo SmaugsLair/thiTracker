@@ -11,6 +11,7 @@ import com.smaugslair.thitracker.data.pc.PlayerCharacterRepository;
 import com.smaugslair.thitracker.data.powers.PowerRepository;
 import com.smaugslair.thitracker.data.powers.PowerSetRepository;
 import com.smaugslair.thitracker.data.user.*;
+import com.smaugslair.thitracker.ui.components.TitleBar;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -43,6 +44,9 @@ public class SessionService {
     private HeroPowerSetRepository hpsRepo;
 
     private HeroPowerRepository hpRepo;
+
+
+    private TitleBar titleBar;
 
 
     public SessionService(/*CacheService cacheService*/) {
@@ -220,5 +224,13 @@ public class SessionService {
     @Autowired
     public void setHpRepo(HeroPowerRepository hpRepo) {
         this.hpRepo = hpRepo;
+    }
+
+    public TitleBar getTitleBar() {
+        return titleBar;
+    }
+
+    public void setTitleBar(TitleBar titleBar) {
+        this.titleBar = titleBar;
     }
 }

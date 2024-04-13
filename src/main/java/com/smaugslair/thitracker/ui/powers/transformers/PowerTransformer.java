@@ -58,7 +58,8 @@ public class PowerTransformer extends Transformer<Power>{
                     if (cell.toString().isEmpty()) {
                         throw new Exception(power.getName() + " has an empty maxTaken value");
                     }
-                    power.setMaxTaken(dataFormatter.formatCellValue(cell));
+                    //power.setMaxTaken(dataFormatter.formatCellValue(cell));
+                    power.setMaxTaken(Double.valueOf(cell.toString()).intValue());
                 }
                 else {
                     BeanUtils.setProperty(power, label, dataFormatter.formatCellValue(cell));

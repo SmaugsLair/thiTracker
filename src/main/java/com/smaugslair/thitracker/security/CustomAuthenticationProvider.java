@@ -15,6 +15,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
+import java.util.Optional;
 
 @Component
 public class CustomAuthenticationProvider implements AuthenticationProvider {
@@ -29,12 +30,12 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         //String username = ;
         String password = authentication.getCredentials().toString();
 
-        User user = userRepository.findUserByName(authentication.getName());
-        if (user != null) {
-            Credentials credentials = credentialsRepository.findByUserId(user.getId());
+        Optional<User> user = userRepository.findUserByEmail(authentication.getName());
+        if (user.isPresent()) {
+            Credentials credentials = credentialsRepository.findByUserId(user.get().getId());
             if (SecurityUtils.matches(authentication.getCredentials().toString(), credentials.getEncodedPassword())) {
-                log.info(user.getName() + " logged in");
-                return new UsernamePasswordAuthenticationToken(user, password, Collections.emptyList());
+                log.info(user.get().getEmail() + " logged in");
+                return new UsernamePasswordAuthenticationToken(user.get(), password, Collections.emptyList());
             }
         }
         throw new BadCredentialsException("NOPE");

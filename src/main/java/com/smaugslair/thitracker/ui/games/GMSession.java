@@ -9,7 +9,9 @@ import com.smaugslair.thitracker.ui.sheet.CharacterSheet;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import jakarta.annotation.security.PermitAll;
 
+@PermitAll
 @PageTitle("GameMaster Session")
 @Route(value = "gmsession", layout = MainView.class)
 public class GMSession extends SplitLayout {
@@ -36,11 +38,13 @@ public class GMSession extends SplitLayout {
         timelineLayout.setSplitterPosition(75);
         timelineLayout.addToPrimary(gmTimeLineView);
         timelineLayout.addToSecondary(historyLayout);
-        addToPrimary(characterSheet);
 
-        addToSecondary(timelineLayout);
+        addToPrimary(timelineLayout);
+        addToSecondary(characterSheet);
         setHeightFull();
-        setSplitterPosition(33);
+        setSplitterPosition(80);
+        sessionService.getTitleBar().removeAll();
+        sessionService.getTitleBar().add(new GMActionBar(sessionService, this));
     }
 
     public void logAction(Entry entry) {

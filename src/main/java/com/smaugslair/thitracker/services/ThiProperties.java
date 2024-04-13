@@ -4,6 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.StringJoiner;
 
+//As is Spring will look for thi.properties on the classpath
 @ConfigurationProperties("thi")
 public class ThiProperties {
 

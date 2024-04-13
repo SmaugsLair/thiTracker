@@ -72,7 +72,7 @@ public class PasswordResetService {
 
         String sb = "The Hero Instant application received a password reset request for this email address.\n" +
                 "Email: "+user.getEmail()+"\n"+
-                "Login id: "+user.getName()+"\n"+
+               /* "Login id: "+user.getName()+"\n"+*/
                 "Follow the link below to complete this reset. This request will expire in 5 minutes. \n\n" +
                 thiProperties.getAppUrl() + '/' + thiProperties.getResetEndpoint() +
                 "?resetToken=" + uuid;

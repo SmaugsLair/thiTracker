@@ -3,6 +3,7 @@ package com.smaugslair.thitracker.ui.powers;
 import com.smaugslair.thitracker.data.powers.Power;
 import com.smaugslair.thitracker.data.powers.PowerFilter;
 import com.smaugslair.thitracker.services.PowersCache;
+import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.ui.MainView;
 import com.smaugslair.thitracker.ui.components.FilterField;
 import com.vaadin.flow.component.grid.Grid;
@@ -14,15 +15,18 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.NativeButtonRenderer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import jakarta.annotation.security.PermitAll;
 
 import java.util.List;
 
+@PermitAll
 @PageTitle("Power Browser")
 @Route(value = "powerbrowser", layout = MainView.class)
 public class PowerBrowserView extends Grid<Power> {
 
-    public PowerBrowserView(PowersCache powersCache) {
+    public PowerBrowserView(SessionService sessionService, PowersCache powersCache) {
 
+        sessionService.getTitleBar().setTitle("Power Browser");
         setHeightFull();
 
         boolean showBugs = false;
@@ -59,7 +63,8 @@ public class PowerBrowserView extends Grid<Power> {
         List<GridSortOrder<Power>> sortByName = new GridSortOrderBuilder<Power>().thenAsc(nameColumn).build();
         sort(sortByName);
 
-        setItemDetailsRenderer(new ComponentRenderer<>(PowerDetails::new));
+        setItemDetailsRenderer(
+                new ComponentRenderer<>(power -> new PowerDetails(power, powersCache.getPowers())));
 
         HeaderRow filterRow = appendHeaderRow();
 

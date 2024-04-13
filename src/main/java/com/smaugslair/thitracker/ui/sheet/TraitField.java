@@ -33,7 +33,7 @@ public class TraitField implements TraitRow {
         if (TraitType.Hero.equals(trait.getType())) {
             pointField.setMax(1);
         }
-        pointField.setHasControls(true);
+        pointField.setStepButtonsVisible(true);
         pointField.addValueChangeListener(event -> {
             trait.setPoints(event.getValue());
             sheet.updatePC();

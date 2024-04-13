@@ -1,6 +1,6 @@
 package com.smaugslair.thitracker.data.pc;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Objects;
 import java.util.StringJoiner;
 

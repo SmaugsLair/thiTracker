@@ -11,28 +11,30 @@ import com.smaugslair.thitracker.ui.components.UserSafeButton;
 import com.smaugslair.thitracker.ui.components.ValidTextField;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.data.validator.StringLengthValidator;
 import com.vaadin.flow.router.Route;
+import jakarta.annotation.security.PermitAll;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+@PermitAll
 @Route(value = "games", layout = MainView.class)
-public class GamesManager extends VerticalLayout {
+public class GamesView extends VerticalLayout {
 
 
-    private static final Logger log = LoggerFactory.getLogger(GamesManager.class);
+    private static final Logger log = LoggerFactory.getLogger(GamesView.class);
 
     private final SessionService sessionService;
 
-    public GamesManager(SessionService sessionService) {
+    public GamesView(SessionService sessionService) {
         this.sessionService = sessionService;
         init();
+        sessionService.getTitleBar().setTitle("Games");
     }
 
     private void refresh() {
@@ -41,8 +43,6 @@ public class GamesManager extends VerticalLayout {
     }
 
     public void init() {
-
-        add(new Span("List of Games:"));
 
         Accordion accordion = new Accordion();
 
@@ -68,7 +68,7 @@ public class GamesManager extends VerticalLayout {
         ValidTextField gameName = new ValidTextField();
         gameName.setLabel("Game name");
         IntegerField maxDice = new IntegerField();
-        maxDice.setHasControls(true);
+        maxDice.setStepButtonsVisible(true);
         maxDice.setValue(10);
         maxDice.setMin(1);
         maxDice.setLabel("Max dice");

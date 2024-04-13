@@ -27,7 +27,7 @@ public class DeltaButton extends Button {
                 ++count;
             }
             IntegerField deltaField = new IntegerField();
-            deltaField.setHasControls(true);
+            deltaField.setStepButtonsVisible(true);
             deltaField.setValue(delta.getDelta());
             formLayout.addFormItem(deltaField, delta.getName());
             fieldMap.put(delta.getName(), deltaField);

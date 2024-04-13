@@ -13,7 +13,6 @@ import com.smaugslair.thitracker.ui.powers.transformers.TransformerException;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -22,6 +21,7 @@ import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import jakarta.annotation.security.PermitAll;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -34,11 +34,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@PermitAll
 @PageTitle("Powers Upload Page")
 @Route(value = "powersupload", layout = MainView.class)
-public class PowersUpload extends VerticalLayout {
+public class PowersUploadView extends VerticalLayout {
 
-    private static final Logger log = LoggerFactory.getLogger(PowersUpload.class);
+    private static final Logger log = LoggerFactory.getLogger(PowersUploadView.class);
 
     private final List<PowerSet> newPowerSets = new ArrayList<>();
     private final List<PowerSet> unchangedPowerSets = new ArrayList<>();
@@ -50,8 +51,9 @@ public class PowersUpload extends VerticalLayout {
 
     private final ProgressBar progressBar = new ProgressBar();
 
-    public PowersUpload(SessionService sessionService) {
+    public PowersUploadView(SessionService sessionService) {
 
+        sessionService.getTitleBar().setTitle("Upload Powers");
         Dialog dialog = new Dialog();
 
         Map<String, PowerSet> cachedPowerSetMap = new HashMap<>();
@@ -103,7 +105,7 @@ public class PowersUpload extends VerticalLayout {
 
         upload.addSucceededListener(event -> {
             output.removeAll();
-            output.add(new Label("Filename uploaded: "+event.getFileName()));
+            output.add(new Span("Filename uploaded: "+event.getFileName()));
             progressBar.setIndeterminate(true);
             output.add(progressBar);
             OPCPackage pkg;
@@ -127,14 +129,14 @@ public class PowersUpload extends VerticalLayout {
                     PowerSet oldPowerSet = cachedPowerSetMap.get(loadedPowerSet.getSsid());
                     if (oldPowerSet == null) {
                         newPowerSets.add(loadedPowerSet);
-                        newClutchLayout.add(new Label(loadedPowerSet.getName()));
+                        newClutchLayout.add(new Span(loadedPowerSet.getName()));
                     }
                     else if (loadedPowerSet.deepEquals(oldPowerSet)) {
-                        unchangedClutchLayout.add(new Label(loadedPowerSet.getName()));
+                        unchangedClutchLayout.add(new Span(loadedPowerSet.getName()));
                         unchangedPowerSets.add(oldPowerSet);
                     }
                     else {
-                        updatedClutchLayout.add(new Label(loadedPowerSet.getName()));
+                        updatedClutchLayout.add(new Span(loadedPowerSet.getName()));
                         updatedPowerSets.add(loadedPowerSet);
                     }
 
@@ -154,14 +156,14 @@ public class PowersUpload extends VerticalLayout {
                     Power oldPower = cachedPowerMap.get(loadedPower.getSsid());
                     if (oldPower == null) {
                         newPowers.add(loadedPower);
-                        newPowerLayout.add(new Label(loadedPower.getName()));
+                        newPowerLayout.add(new Span(loadedPower.getName()));
                     }
                     else if (loadedPower.deepEquals(oldPower)) {
-                        unchangedPowerLayout.add(new Label(loadedPower.getName()));
+                        unchangedPowerLayout.add(new Span(loadedPower.getName()));
                         unchangedPowers.add(oldPower);
                     }
                     else {
-                        updatedPowerLayout.add(new Label(loadedPower.getName()));
+                        updatedPowerLayout.add(new Span(loadedPower.getName()));
                         updatedPowers.add(loadedPower);
                     }
 

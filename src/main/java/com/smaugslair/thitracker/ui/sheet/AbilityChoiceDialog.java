@@ -5,7 +5,7 @@ import com.smaugslair.thitracker.rules.Ability;
 import com.smaugslair.thitracker.ui.components.MultiColumnLayout;
 import com.smaugslair.thitracker.ui.components.UserSafeButton;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 
@@ -22,7 +22,7 @@ public class AbilityChoiceDialog extends Dialog {
         this.choices = choices;
         setModal(true);
 
-        add(new Label("Choose "+choices+" abilities to improve:"));
+        add(new Span("Choose "+choices+" abilities to improve:"));
 
         MultiColumnLayout multiColumnLayout = new MultiColumnLayout(2);
         multiColumnLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);

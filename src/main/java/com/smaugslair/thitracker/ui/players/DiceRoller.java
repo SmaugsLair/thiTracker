@@ -3,6 +3,7 @@ package com.smaugslair.thitracker.ui.players;
 import com.smaugslair.thitracker.data.game.Game;
 import com.smaugslair.thitracker.data.log.Entry;
 import com.smaugslair.thitracker.data.log.EventType;
+import com.smaugslair.thitracker.data.pc.AbilityScore;
 import com.smaugslair.thitracker.data.pc.PlayerCharacter;
 import com.smaugslair.thitracker.data.pc.Trait;
 import com.smaugslair.thitracker.data.pc.TraitType;
@@ -13,8 +14,7 @@ import com.smaugslair.thitracker.websockets.RegisteredVerticalLayout;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.progressbar.ProgressBarVariant;
@@ -29,9 +29,10 @@ import java.util.List;
 import java.util.Optional;
 
 
-public class DiceRoller extends RegisteredVerticalLayout {
+public class DiceRoller extends RegisteredVerticalLayout implements AbilityChoice {
 
     private final String exp_val = "Exp val: ";
+
 
     private enum TokenType {HERO, DRAMA}
 
@@ -39,16 +40,18 @@ public class DiceRoller extends RegisteredVerticalLayout {
 
     private final SessionService sessionService;
 
+    private AbilityScore abilityScore;
+
     private final IntegerField d10s = new IntegerField();
     private final IntegerField maxDice = new IntegerField();
-    private final FormLayout resultLayout = new FormLayout();
-    private final Label progressLabel = new Label();
+    private final VerticalLayout resultLayout = new VerticalLayout();
+    private final IntegerField result = new IntegerField();
     private final ProgressBar progressBar = new ProgressBar();
-    private final Label expectedValue = new Label(exp_val+(3*5.5));
-    private final Label expectedHeroValue = new Label(exp_val+(4*5.5));
+    private final Span expectedValue = new Span(exp_val+(3*5.5));
+    private final Span expectedHeroValue = new Span(exp_val+(4*5.5));
     private final TextField diceText = new TextField();
     private final TextField droppedText = new TextField();
-    private final Label droppedLabel = new Label("Dropped");
+    private final Span droppedLabel = new Span("Dropped");
 
     private final Button preHeroRollButton = new UserSafeButton("Hero roll 4");
 
@@ -69,45 +72,59 @@ public class DiceRoller extends RegisteredVerticalLayout {
         //setPadding(false);
         setMargin(false);
         setSpacing(false);
+        add(new Span("Waiting for abilty choice"));
+    }
 
+    private void init() {
+        removeAll();
         PlayerCharacter pc = sessionService.getPc();
         if (pc == null) {
-            add(new Label("No Hero loaded"));
+            add(new Span("No Hero loaded"));
             return;
         }
 
 
-        FormLayout rollLayout = new FormLayout();
+        FormLayout topLayout = new FormLayout();
+        topLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 2));
+
         TextField heroField = new TextField();
-        heroField.setLabel("Hero");
+        heroField.setWidth("120px");
         heroField.setValue(pc.getName());
         heroField.setReadOnly(true);
-        heroField.setWidth("150px");
+        topLayout.addFormItem(heroField,"Hero");
+
+        TextField abilityField = new TextField();
+        abilityField.setWidth("120px");
+        abilityField.setValue(abilityScore.getAbility().getDisplayName());
+        abilityField.setReadOnly(true);
+        topLayout.addFormItem(abilityField, "Ability");
+
+        maxDice.setValue(getMaxDiceForGame());
+        maxDice.setWidth("120px");
+        maxDice.setReadOnly(true);
+        maxDice.setStepButtonsVisible(false);
+        topLayout.addFormItem(maxDice, "Max dice");
+
+        //topLayout.addFormItem(new Span(), "");
+
 
 
         //rollLayout.addFormItem(new Span("Hero: "+pc.getName()), "Dice Roller");
-        d10s.setLabel("d10s to roll");
-        d10s.setWidth("100px");
-        d10s.setValue(3);
-        d10s.setHasControls(true);
+        d10s.setValue(Math.min(getMaxDiceForGame(), abilityScore.getPoints()));
+        d10s.setWidth("120px");
+        d10s.setStepButtonsVisible(true);
         d10s.setMin(1);
+        d10s.setMax(getMaxDiceForGame());
+        topLayout.addFormItem(d10s, "Dice to roll");
 
-        maxDice.setLabel("Max dice");
-        maxDice.setWidth("60px");
-        maxDice.setValue(getMaxDiceForGame());
-        maxDice.setReadOnly(true);
+        Button rollButton = new UserSafeButton("Roll " +d10s.getValue());
+        topLayout.addFormItem(rollButton, expectedValue);
 
-        HorizontalLayout topLine = new HorizontalLayout(heroField, d10s, maxDice);
-        topLine.setMargin(false);
-        topLine.setPadding(false);
-
-        rollLayout.add(topLine);
-
-        Button rollButton = new UserSafeButton("Roll 3");
         preHeroRollButton.setEnabled(pc.isHeroPointsAvailable());
+        topLayout.addFormItem(preHeroRollButton, expectedHeroValue);
 
 
-        VerticalLayout normal = new VerticalLayout();
+       /* VerticalLayout normal = new VerticalLayout();
         normal.setWidthFull();
         normal.setAlignItems(Alignment.CENTER);
         normal.setPadding(false);
@@ -118,12 +135,12 @@ public class DiceRoller extends RegisteredVerticalLayout {
         hero.setAlignItems(Alignment.CENTER);
         hero.setPadding(false);
         hero.setMargin(false);
-        hero.setSpacing(false);
-
+        hero.setSpacing(false);*/
+/*
         normal.add(rollButton, expectedValue);
         hero.add(preHeroRollButton, expectedHeroValue);
 
-        rollLayout.addFormItem(hero, normal);
+        rollLayout.addFormItem(hero, normal);*/
 
 
 
@@ -134,30 +151,35 @@ public class DiceRoller extends RegisteredVerticalLayout {
             preHeroRollButton.setText("Hero roll "+(d10s.getValue()+1));
             expectedHeroValue.setText(exp_val+calcExpected(d10s.getValue()+1));
         });
-        maxDice.addValueChangeListener(event -> {
+        /*maxDice.addValueChangeListener(event -> {
             expectedValue.setText(exp_val+calcExpected(d10s.getValue()));
             expectedHeroValue.setText(exp_val+calcExpected(d10s.getValue()+1));
-        });
+        });*/
 
         rollButton.addClickListener(event -> initialRoll(null));
         preHeroRollButton.addClickListener(event -> showTraitRollDialog(TraitType.Hero, true));
 
-        add(rollLayout);
+        add(topLayout);
 
         resultLayout.setVisible(false);
-        resultLayout.addFormItem(progressBar, progressLabel);
+        resultLayout.removeAll();
+        resultLayout.add(progressBar);
+        FormLayout resultsForm = new FormLayout();
+        resultLayout.add(resultsForm);
+        add(resultLayout);
+        resultsForm.addFormItem(result, "Result");
         diceText.setSizeFull();
         diceText.setReadOnly(true);
-        resultLayout.addFormItem(diceText,"Dice");
+        resultsForm.addFormItem(diceText,"Dice");
         droppedText.setSizeFull();
         droppedText.setReadOnly(true);
-        resultLayout.addFormItem(droppedText, droppedLabel);
+        resultsForm.addFormItem(droppedText, droppedLabel);
 
         Button dramaRoll = new UserSafeButton("Roll 2 more, drop lowest",
                 event -> showTraitRollDialog(TraitType.Drama, false));
-        resultLayout.addFormItem(postHeroRollButton, "Spend Hero Token");
+        resultsForm.addFormItem(postHeroRollButton, "Spend Hero Token");
         postHeroRollButton.setEnabled(pc.isHeroPointsAvailable());
-        resultLayout.addFormItem(dramaRoll, "Spend Drama Token");
+        resultsForm.addFormItem(dramaRoll, "Spend Drama Token");
 
         add(resultLayout);
     }
@@ -224,7 +246,7 @@ public class DiceRoller extends RegisteredVerticalLayout {
         }
         progressBar.removeThemeVariants(ProgressBarVariant.values());
         progressBar.addThemeVariants(variant);
-        progressLabel.setText("Total: "+sum);
+        result.setValue(sum);
         diceText.setValue(dice.toString());
         droppedLabel.setVisible(!dropped.isEmpty());
         droppedText.setVisible(!dropped.isEmpty());
@@ -232,7 +254,7 @@ public class DiceRoller extends RegisteredVerticalLayout {
 
         PlayerCharacter pc = sessionService.getPc();
         StringBuilder sb = new StringBuilder();
-        sb.append(pc.getName()).append(" rolled ").append(sum);
+        sb.append(pc.getName()).append(" rolled ").append(sum).append(" on ").append(abilityScore.getAbility().getDisplayName());
         sb.append("  ").append(dice);
         if (trait != null) {
             sb.append(" ").append(trait.getType()).append(":").append(trait.getName());
@@ -335,5 +357,12 @@ public class DiceRoller extends RegisteredVerticalLayout {
             }
         });
         traitRollDialog.open();
+    }
+
+
+    @Override
+    public void setChoice(AbilityScore abilityScore) {
+        this.abilityScore = abilityScore;
+        init();
     }
 }

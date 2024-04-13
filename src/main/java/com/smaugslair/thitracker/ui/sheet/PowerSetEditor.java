@@ -10,10 +10,7 @@ import com.smaugslair.thitracker.rules.Ability;
 import com.smaugslair.thitracker.services.SessionService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.orderedlayout.FlexComponent;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
@@ -62,28 +59,25 @@ public class PowerSetEditor extends VerticalLayout {
         powerMap.forEach((tier, powers) -> {
             powerTargetMap.put(tier, new TreeSet<>());
             powers.forEach(power -> {
-                AvailableTaken at = determineAvailabilty(heroPowerSet, power, heroPowers, tier);
+                AvailableTaken at = determineAvailability(heroPowerSet, power, heroPowers, tier);
                 powerTargetMap.get(tier).add(new PowerTarget(power, tier, at.isAvailable(), at.getTimesTaken(), heroPowerSet));
             });
 
         });
 
-        HorizontalLayout powerSetRow = new HorizontalLayout();
-        powerSetRow.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
-        powerSetRow.add(new Label(heroPowerSet.getPowerSet().getName()));
-        powerSetRow.add(new Label());
-        //powerSetRow.add(new Label(AbilityModsRenderer.renderAmString(heroPowerSet.getMods().values())));
 
-        powerSetRow.add(new Button("Remove", event -> {
+        String psName = heroPowerSet.getPowerSet().getName();
+        add(new Span("Choosing "+psName+" powers for " + characterSheet.getCharacterName()));
+
+        add(new Button("Remove "+psName+ " power set", event -> {
             characterSheet.removeHeroPowerSet(heroPowerSet);
         }));
-        add(powerSetRow);
 /*
         for (HeroPower heroPower: heroPowers) {
             if (heroPower.getHeroPowerSet().equals(heroPowerSet)) {
-                HorizontalLayout powerRow = new HorizontalLayout(new Label("Power: "+heroPower.getPower().getName()));
+                HorizontalLayout powerRow = new HorizontalLayout(new Span("Power: "+heroPower.getPower().getName()));
                 powerRow.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
-                powerRow.add(new Label(AbilityModsRenderer.renderAmString(heroPower.getMods().values())));
+                powerRow.add(new Span(AbilityModsRenderer.renderAmString(heroPower.getMods().values())));
 
                 powerRow.add(new Button("Remove", event -> {
                     removePower(heroPower);
@@ -108,7 +102,7 @@ public class PowerSetEditor extends VerticalLayout {
         powerTargetMap.forEach((tier, powerCollection) -> {
             PowerTargetGrid grid = new PowerTargetGrid(tier, powerCollection, this);
 
-            Tab tab = new Tab(new Span("Tier "+tier + ": " + grid.getAvailable() + " of " +powerCollection.size() ));
+            Tab tab = new Tab(new Span("Tier "+tier + ": " + grid.getTaken()));
             tabs.add(tab);
             tabMap.put(tab, grid);
             if (tier == currentTier) {
@@ -126,7 +120,7 @@ public class PowerSetEditor extends VerticalLayout {
     }
 
 
-    private AvailableTaken determineAvailabilty(HeroPowerSet heroPowerSet, Power power, List<HeroPower> heroPowers, Integer tier) {
+    private AvailableTaken determineAvailability(HeroPowerSet heroPowerSet, Power power, List<HeroPower> heroPowers, Integer tier) {
 
 
         AvailableTaken availableTaken = new AvailableTaken();
@@ -221,5 +215,19 @@ public class PowerSetEditor extends VerticalLayout {
 
     public List<HeroPower> getHeroPowers() {
         return heroPowers;
+    }
+
+    public List<String> getSatisfiedPrereqs() {
+
+        List<String> list = new ArrayList<>();
+        for (HeroPower heroPower : heroPowers) {
+            list.addAll(heroPower.getPower().getPrereqList());
+        }
+        return list;
+
+    }
+
+    public SortedSet<Power> getAllPowers() {
+        return sessionService.getPowersCache().getPowers();
     }
 }

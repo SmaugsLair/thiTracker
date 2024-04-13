@@ -1,6 +1,6 @@
 package com.smaugslair.thitracker.data.user;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Objects;
 
 @Entity
@@ -9,14 +9,14 @@ public class User {
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Integer id;
-
+/*
     @Column(unique = true, nullable = false)
-    private String name;
+    private String name;*/
 
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String displayName;
 
     @Column(nullable = false)
@@ -35,14 +35,14 @@ public class User {
     public void setId(Integer id) {
         this.id = id;
     }
-
+/*
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
-    }
+    }*/
 
     public String getEmail() {
         return email;
@@ -82,7 +82,7 @@ public class User {
     public String toString() {
         return "User{" +
                 "id=" + id +
-                ", name='" + name + '\'' +
+               /* ", name='" + name + '\'' +*/
                 ", email='" + email + '\'' +
                 ", displayName='" + displayName + '\'' +
                 ", admin=" + admin +

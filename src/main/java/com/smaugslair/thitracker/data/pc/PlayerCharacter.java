@@ -3,7 +3,7 @@ package com.smaugslair.thitracker.data.pc;
 import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.rules.Ability;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.*;
 
 @Entity
@@ -31,7 +31,7 @@ public class PlayerCharacter implements Comparable<PlayerCharacter> {
     @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL)
     @JoinColumn(name = "pc_id" )
     @OrderBy("sortOrder ASC")
-    SortedSet<Trait> traits = new TreeSet<>();
+    Set<Trait> traits = new TreeSet<>();
 
 
     @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL)
@@ -80,11 +80,11 @@ public class PlayerCharacter implements Comparable<PlayerCharacter> {
         this.progressionTokens = progressionTokens;
     }
 
-    public SortedSet<Trait> getTraits() {
+    public Set<Trait> getTraits() {
         return traits;
     }
 
-    public void setTraits(SortedSet<Trait> traits) {
+    public void setTraits(Set<Trait> traits) {
         this.traits = traits;
     }
 

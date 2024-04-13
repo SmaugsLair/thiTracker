@@ -1,6 +1,6 @@
 package com.smaugslair.thitracker.data.game;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 public class Game {

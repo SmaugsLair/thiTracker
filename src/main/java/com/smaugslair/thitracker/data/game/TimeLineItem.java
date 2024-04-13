@@ -3,7 +3,7 @@ package com.smaugslair.thitracker.data.game;
 import com.smaugslair.thitracker.data.atd.ActionTime;
 import com.smaugslair.thitracker.data.atd.ActionTimeDefault;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.*;
 
 @Entity

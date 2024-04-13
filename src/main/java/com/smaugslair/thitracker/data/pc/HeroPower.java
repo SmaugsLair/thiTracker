@@ -4,7 +4,7 @@ import com.smaugslair.thitracker.data.powers.Power;
 import com.smaugslair.thitracker.rules.Ability;
 import com.smaugslair.thitracker.util.AbilityModsRenderer;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;

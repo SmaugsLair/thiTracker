@@ -8,7 +8,13 @@ public class PowerTargetAddButton extends UserSafeNativeButton {
         setText("+");
         setEnabled(true);
         addClickListener(event -> {
-            powerSetEditor.addPowerTarget(powerTarget);
+            if (powerTarget.getPower().getSubPowers().isEmpty()) {
+                powerSetEditor.addPowerTarget(powerTarget);
+            }
+            else {
+                new SubPowerChoiceDialog(powerTarget.getPower(), powerSetEditor.getAllPowers()).open();
+                //new ConfirmDialog("placeholder to select from subpowers").open();
+            }
         });
     }
 }

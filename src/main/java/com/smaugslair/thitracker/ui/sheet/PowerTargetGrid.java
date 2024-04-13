@@ -1,8 +1,8 @@
 package com.smaugslair.thitracker.ui.sheet;
 
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.NativeButtonRenderer;
 
@@ -11,6 +11,9 @@ import java.util.Collection;
 public class PowerTargetGrid extends Grid<PowerTarget> {
 
     private int available;
+
+
+    private int taken;
     private final Integer tier;
 
     public PowerTargetGrid(Integer tier, Collection<PowerTarget> powers, PowerSetEditor powerSetEditor) {
@@ -19,6 +22,7 @@ public class PowerTargetGrid extends Grid<PowerTarget> {
             if (powerTarget.isAvailable()) {
                 ++available;
             }
+            taken += powerTarget.getTimesTaken();
         });
         setThemeName("min-padding");
         setItems(powers);
@@ -27,14 +31,14 @@ public class PowerTargetGrid extends Grid<PowerTarget> {
                     if (item.isAvailable()) {
                         return new PowerTargetAddButton(item, powerSetEditor);
                     }
-                    else return new Label("");
+                    else return new Span("");
                 }
         );
         addComponentColumn(item -> {
                     if (item.getTimesTaken() > 0) {
                         return new PowerTargetRemoveButton(item, powerSetEditor);
                     }
-                    else return new Label("");
+                    else return new Span("");
                 }
         );
         addColumn(PowerTarget::getName).setHeader("Name");
@@ -48,12 +52,16 @@ public class PowerTargetGrid extends Grid<PowerTarget> {
 
         getColumns().forEach(powerColumn -> powerColumn.setAutoWidth(true));
         setWidthFull();
-        setHeightByRows(true);
+        setAllRowsVisible(true);
 
     }
 
     public int getAvailable() {
         return available;
+    }
+
+    public int getTaken() {
+        return taken;
     }
 
     public Integer getTier() {

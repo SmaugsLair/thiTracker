@@ -1,6 +1,6 @@
 package com.smaugslair.thitracker.data.user;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;

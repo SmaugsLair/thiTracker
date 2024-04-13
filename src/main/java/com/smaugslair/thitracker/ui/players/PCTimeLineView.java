@@ -4,20 +4,20 @@ import com.smaugslair.thitracker.data.game.Game;
 import com.smaugslair.thitracker.data.game.TimeLineItem;
 import com.smaugslair.thitracker.data.log.Entry;
 import com.smaugslair.thitracker.data.log.EventType;
-import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.websockets.RegisteredVerticalLayout;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.router.Route;
+import jakarta.annotation.security.PermitAll;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@PermitAll
 @CssImport(value = "./styles/color.css", themeFor = "vaadin-grid")
 @CssImport(value = "./styles/minPadding.css", themeFor = "vaadin-grid")
 @Route(value = "pcTimeLineView")
@@ -46,10 +46,6 @@ public class PCTimeLineView extends RegisteredVerticalLayout {
             add(new H1("Game not found"));
             return;
         }
-
-        User gm = sessionService.getUserRepository().findById(game.getGameMasterId()).orElse(new User());
-
-        add( new H3("Game: "+game.getName()+ " by "+ gm.getDisplayName()));
 
         List<TimeLineItem> items = sessionService.getTliRepo().findByGameId(gameId)
                 .stream().filter(item -> !item.getHidden()).sorted().collect(Collectors.toList());

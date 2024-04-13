@@ -64,13 +64,13 @@ public class NewItemForm extends FormLayout {
         addFormItem(radioFields, radioGroup);
 
         stunField = new IntegerField();
-        stunField.setHasControls(true);
+        stunField.setStepButtonsVisible(true);
         stunField.setValue(0);
         stunField.setMin(0);
         addFormItem(stunField, "Stun");
 
         timeField = new IntegerField();
-        timeField.setHasControls(true);
+        timeField.setStepButtonsVisible(true);
         timeField.setValue(0);
         addFormItem(timeField, "Time");
 

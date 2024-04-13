@@ -6,7 +6,6 @@ import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.security.SecurityUtils;
 import com.smaugslair.thitracker.services.SessionService;
 import com.vaadin.flow.component.details.Details;
-import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import java.util.List;
@@ -26,7 +25,6 @@ public class FriendsList extends VerticalLayout {
     }
 
     private void init() {
-        add(new H3("Friends list"));
         User user = SecurityUtils.getLoggedInUser();
         List<Friendship> friends = sessionService.getFriendsRepo().findAllByUserOrFriend(user, user);
 

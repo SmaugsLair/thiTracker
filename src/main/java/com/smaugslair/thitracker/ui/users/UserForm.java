@@ -19,7 +19,7 @@ public class UserForm extends FormLayout {
 
     final Binder<User> binder = new Binder<>(User.class);
 
-    private final TextField name = new TextField();
+    //private final TextField name = new TextField();
     private final EmailField email = new EmailField();
     private final TextField displayName = new TextField();
     private final boolean admin;
@@ -40,7 +40,7 @@ public class UserForm extends FormLayout {
         binder.bindInstanceFields(this);
         binder.readBean(user);
 
-        name.setRequired(true);
+       /* name.setRequired(true);
         name.setMinLength(6);
         name.setMaxLength(20);
         name.setRequiredIndicatorVisible(true);
@@ -50,7 +50,7 @@ public class UserForm extends FormLayout {
         binder.forField(name)
                 .asRequired("Required")
                 .withValidator(name -> name.length() >= 6, "6 char min")
-                .bind("name");
+                .bind("name");*/
 
         email.setRequiredIndicatorVisible(true);
         email.addValueChangeListener(event -> user.setEmail(event.getValue()));

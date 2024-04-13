@@ -14,7 +14,7 @@ public class AbilityField {
         pointField.setReadOnly(true);
         //pointField.setMin(0);
         //pointField.setWidth("40px");
-        //setHasControls(true);
+        //setStepButtonsVisible(true);
         /*pointField.addValueChangeListener(event -> {
             abilityScore.setPoints(event.getValue());
             details.updatePC();

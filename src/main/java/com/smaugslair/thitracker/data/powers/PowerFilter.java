@@ -79,7 +79,7 @@ public class PowerFilter {
         if (tier.length() > 0 && !StringUtils.containsIgnoreCase(power.getLowestTier().toString(), tier)) {
             return false;
         }
-        if (maxTaken.length() > 0 && !StringUtils.containsIgnoreCase(power.getMaxTaken(), maxTaken)) {
+        if (maxTaken.length() > 0 && !StringUtils.containsIgnoreCase(power.getMaxTaken().toString(), maxTaken)) {
             return false;
         }
         if (metaPower.length() > 0 && !StringUtils.containsIgnoreCase(

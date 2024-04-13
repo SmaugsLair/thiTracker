@@ -5,15 +5,18 @@ import com.smaugslair.thitracker.ui.MainView;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import jakarta.annotation.security.PermitAll;
 
+@PermitAll
 @PageTitle("Friends Page")
 @Route(value = "friends", layout = MainView.class)
-public class FriendsSession extends SplitLayout {
+public class FriendsView extends SplitLayout {
     private final SessionService sessionService;
 
-    public FriendsSession(SessionService sessionService) {
+    public FriendsView(SessionService sessionService) {
         this.sessionService = sessionService;
         init();
+        sessionService.getTitleBar().setTitle("Friends");
     }
 
     public void refresh() {

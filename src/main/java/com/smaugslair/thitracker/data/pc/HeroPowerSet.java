@@ -3,7 +3,7 @@ package com.smaugslair.thitracker.data.pc;
 import com.smaugslair.thitracker.data.powers.PowerSet;
 import com.smaugslair.thitracker.rules.Ability;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;

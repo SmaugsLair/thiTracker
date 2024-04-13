@@ -10,7 +10,7 @@ public class StunField extends IntegerField {
     public StunField(TimeLineItem item, GMTimeLineView gmTimeLineView) {
         super.setValue(item.getStun());
         setMin(0);
-        setHasControls(true);
+        setStepButtonsVisible(true);
         setWidth(120, Unit.PIXELS);
 
         addValueChangeListener(event -> {

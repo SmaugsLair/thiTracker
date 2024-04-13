@@ -14,6 +14,7 @@ import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.login.LoginForm;
+import com.vaadin.flow.component.login.LoginI18n;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -45,6 +46,11 @@ public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 		setAlignItems(Alignment.CENTER); 
 		setJustifyContentMode(JustifyContentMode.CENTER);
 
+		LoginI18n loginI18n = LoginI18n.createDefault();
+		LoginI18n.Form i18nForm = loginI18n.getForm();
+		i18nForm.setUsername("Email");
+		loginI18n.setForm(i18nForm);
+		login.setI18n(loginI18n);
 		login.setAction("login");  
 
 		add(new H1("The Hero Instant"), login);

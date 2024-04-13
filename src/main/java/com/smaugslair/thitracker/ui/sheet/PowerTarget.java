@@ -43,7 +43,7 @@ public class PowerTarget implements Comparable<PowerTarget> {
         return power.getPrerequisite();
     }
 
-    public String getMaxTaken() {
+    public Integer getMaxTaken() {
         return power.getMaxTaken();
     }
     public int getTimesTaken() {

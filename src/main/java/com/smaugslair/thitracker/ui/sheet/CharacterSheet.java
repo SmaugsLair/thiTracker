@@ -146,7 +146,7 @@ public class CharacterSheet extends RegisteredVerticalLayout {
 
         Grid<TraitRow> grid = new Grid<>();
         grid.setThemeName("min-padding");
-        grid.setHeightByRows(true);
+        grid.setAllRowsVisible(true);
 
         TraitRowFilter filter = new TraitRowFilter();
         filter.setShowDrama(dramaExpanded);
@@ -240,7 +240,7 @@ public class CharacterSheet extends RegisteredVerticalLayout {
         abilityRowGrid.addColumn(AbilityRow::getLabel2).setFlexGrow(3);
         abilityRowGrid.addComponentColumn(AbilityRow::getComponent2).setFlexGrow(1);
 
-        abilityRowGrid.setHeightByRows(true);
+        abilityRowGrid.setAllRowsVisible(true);
         abilityRowGrid.getColumns().forEach(itemColumn -> {
             itemColumn.setAutoWidth(true);
         });
@@ -338,6 +338,8 @@ public class CharacterSheet extends RegisteredVerticalLayout {
         editorDialog = new ConfirmDialog(powerSetEditor);
         List<HeroPower> starting = sessionService.getHpRepo().findAllByPlayerCharacter(pc);
         powerSetEditor.start(pc, powerSet, new ArrayList<>(starting));
+        editorDialog.setWidthFull();
+        editorDialog.setHeightFull();
         editorDialog.open();
         editorDialog.setConfirmButton(new UserSafeButton("Save", buttonClickEvent -> {
 
@@ -462,4 +464,7 @@ public class CharacterSheet extends RegisteredVerticalLayout {
         init();
     }
 
+    public String getCharacterName() {
+        return pc.getName();
+    }
 }

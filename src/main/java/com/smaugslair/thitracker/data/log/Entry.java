@@ -1,6 +1,6 @@
 package com.smaugslair.thitracker.data.log;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.StringJoiner;
 
 @Entity

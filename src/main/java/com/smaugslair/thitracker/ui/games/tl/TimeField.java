@@ -9,7 +9,7 @@ public class TimeField extends IntegerField {
 
     public TimeField(TimeLineItem item, GMTimeLineView gmTimeLineView) {
         super.setValue(item.getTime());
-        setHasControls(true);
+        setStepButtonsVisible(true);
         setWidth(120, Unit.PIXELS);
 
         addValueChangeListener(event -> {

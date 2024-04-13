@@ -11,8 +11,6 @@ public class UserFilter {
     private final ListDataProvider<User> dataProvider;
     private final static Logger log = LoggerFactory.getLogger(UserFilter.class);
 
-    private String name = "";
-
     private String email = "";
 
     private String displayName = "";
@@ -22,15 +20,6 @@ public class UserFilter {
     public UserFilter(ListDataProvider<User> dataProvider) {
         this.dataProvider = dataProvider;
         dataProvider.setFilter(this::test);
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-        dataProvider.refreshAll();
     }
 
     public String getEmail() {
@@ -62,9 +51,6 @@ public class UserFilter {
 
 
     public boolean test(User user) {
-        if (name.length() > 0 && !StringUtils.containsIgnoreCase(user.getName(), name)) {
-            return false;
-        }
         if (email.length() > 0 && !StringUtils.containsIgnoreCase(user.getEmail(), email)) {
             return false;
         }
