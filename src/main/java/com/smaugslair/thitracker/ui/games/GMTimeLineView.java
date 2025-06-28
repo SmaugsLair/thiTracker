@@ -92,7 +92,7 @@ public class GMTimeLineView extends VerticalLayout {
             add(new H1("Game not found!"));
             return null;
         }
-        User user = SecurityUtils.getLoggedInUser();
+        User user = SecurityUtils.getLoggedInUser(sessionService);
         if (user == null || !game.getGameMasterId().equals(user.getId())) {
             add(new H1("You are not the GameMaster for this game!"));
             return null;
@@ -322,7 +322,7 @@ public class GMTimeLineView extends VerticalLayout {
     }
 
     private Button createAddEventButton() {
-        User user = SecurityUtils.getLoggedInUser();
+        User user = SecurityUtils.getLoggedInUser(sessionService);
         if (user == null) {
             return new UserSafeButton();
         }
@@ -378,7 +378,7 @@ public class GMTimeLineView extends VerticalLayout {
     private Button createImportButton() {
         Button importButton = new UserSafeButton("Import");
         List<CollectedItem> collectedItems =
-            sessionService.getCiRepo().findAllByGmId(SecurityUtils.getLoggedInUser().getId());
+            sessionService.getCiRepo().findAllByGmId(SecurityUtils.getLoggedInUser(sessionService).getId());
         if (!collectedItems.isEmpty()) {
             Grid<CollectedItem> ciGrid = new Grid<>();
             ciGrid.setThemeName("min-padding");

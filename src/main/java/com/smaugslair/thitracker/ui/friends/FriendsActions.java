@@ -2,7 +2,7 @@ package com.smaugslair.thitracker.ui.friends;
 
 import com.smaugslair.thitracker.data.pc.PlayerCharacter;
 import com.smaugslair.thitracker.data.user.Friendship;
-import com.smaugslair.thitracker.security.SecurityUtils;
+import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.ui.components.UserSafeButton;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
@@ -18,7 +18,7 @@ import java.util.Objects;
 public class FriendsActions extends VerticalLayout {
 
 
-    public FriendsActions(Friendship friendship, List<PlayerCharacter> pcs, FriendsList parent) {
+    public FriendsActions(User user, Friendship friendship, List<PlayerCharacter> pcs, FriendsList parent) {
 
         if (friendship.getAccepted()) {
             Button deleteButton = new UserSafeButton("Remove");
@@ -39,7 +39,7 @@ public class FriendsActions extends VerticalLayout {
         }
         else {
             HorizontalLayout buttonRow = new HorizontalLayout();
-            if (Objects.equals(SecurityUtils.getLoggedInUser(), friendship.getUser())) {
+            if (Objects.equals(user, friendship.getUser())) {
                 buttonRow.add(new Span("Waiting..."));
                 buttonRow.add(new UserSafeButton("Cancel", event -> parent.delete(friendship)));
             }

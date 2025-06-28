@@ -1,8 +1,10 @@
 package com.smaugslair.thitracker.ui;
 
+import com.smaugslair.thitracker.data.pc.HeroPower;
 import com.smaugslair.thitracker.data.powers.Power;
 import com.smaugslair.thitracker.data.powers.PowerSet;
 import com.smaugslair.thitracker.data.powers.Sheetable;
+import com.smaugslair.thitracker.data.user.Message;
 import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.ui.components.UserSafeButton;
 import com.smaugslair.thitracker.ui.powers.PowerSetBrowserView;
@@ -48,6 +50,7 @@ public class PowersUploadView extends VerticalLayout {
     private final List<Power> newPowers = new ArrayList<>();
     private final List<Power> unchangedPowers = new ArrayList<>();
     private final List<Power> updatedPowers = new ArrayList<>();
+    private final List<Power> deletedPowers = new ArrayList<>();
 
     private final ProgressBar progressBar = new ProgressBar();
 
@@ -70,6 +73,8 @@ public class PowersUploadView extends VerticalLayout {
             sessionService.getPowerRepo().saveAll(updatedPowers);
             sessionService.getPowerSetRepo().saveAll(newPowerSets);
             sessionService.getPowerSetRepo().saveAll(updatedPowerSets);
+            handleDeletedPowers(sessionService);
+            handleOrphanedPowers(sessionService);
             sessionService.getPowersCache().load();
             event.getSource().getUI().ifPresent(ui -> ui.navigate(PowerSetBrowserView.class));
             dialog.close();
@@ -91,16 +96,19 @@ public class PowersUploadView extends VerticalLayout {
         VerticalLayout newPowerLayout = new VerticalLayout();
         VerticalLayout updatedPowerLayout = new VerticalLayout();
         VerticalLayout unchangedPowerLayout = new VerticalLayout();
+        VerticalLayout deletedPowerLayout = new VerticalLayout();
         Details newPowerDetails = new Details("New Powers", newPowerLayout);
         newPowerDetails.setEnabled(false);
         Details updatedPowerDetails = new Details("Modified Powers", updatedPowerLayout);
         updatedPowerDetails.setEnabled(false);
         Details unchangedPowerDetails = new Details("Unchanged Powers", unchangedPowerLayout);
         unchangedPowerDetails.setEnabled(false);
+        Details deletedPowerDetails = new Details("Deleted Powers", deletedPowerLayout);
+        deletedPowerDetails.setEnabled(false);
 
 
         results.add(newClutchDetails, updatedClutchDetails, unchangedClutchDetails);
-        results.add(newPowerDetails, updatedPowerDetails, unchangedPowerDetails);
+        results.add(newPowerDetails, updatedPowerDetails, unchangedPowerDetails, deletedPowerDetails);
 
 
         upload.addSucceededListener(event -> {
@@ -153,7 +161,8 @@ public class PowersUploadView extends VerticalLayout {
 
                 powersInSheet.forEach((name, loadedPower) -> {
                     //max[0] = Math.max(max[0], loadedPower.getSubPowers().length());
-                    Power oldPower = cachedPowerMap.get(loadedPower.getSsid());
+                    //Power oldPower = cachedPowerMap.get(loadedPower.getSsid());
+                    Power oldPower = cachedPowerMap.remove(loadedPower.getSsid());
                     if (oldPower == null) {
                         newPowers.add(loadedPower);
                         newPowerLayout.add(new Span(loadedPower.getName()));
@@ -169,6 +178,12 @@ public class PowersUploadView extends VerticalLayout {
 
                 });
 
+                deletedPowers.addAll(cachedPowerMap.values());
+                for (Power power : deletedPowers) {
+                    deletedPowerLayout.add(new Span(power.getName()));
+                }
+
+
 
                 newPowerDetails.setSummaryText("New Powers: " +newPowers.size());
                 newPowerDetails.setEnabled(true);
@@ -177,9 +192,13 @@ public class PowersUploadView extends VerticalLayout {
                 updatedPowerDetails.setSummaryText("Modified Powers: " +updatedPowers.size());
                 updatedPowerDetails.setEnabled(true);
 
+                deletedPowerDetails.setSummaryText("Deleted Powers: " +deletedPowers.size());
+                deletedPowerDetails.setEnabled(true);
+
                 progressBar.setValue(1);
                 saveButton.setEnabled(!newPowers.isEmpty() || !newPowerSets.isEmpty()
-                        || !updatedPowers.isEmpty() || !updatedPowerSets.isEmpty());
+                        || !updatedPowers.isEmpty() || !updatedPowerSets.isEmpty()
+                        || !deletedPowers.isEmpty());
 
 
             }
@@ -200,6 +219,45 @@ public class PowersUploadView extends VerticalLayout {
         upload.addStartedListener(event -> {dialog.open();});
 
         add(upload);
+    }
+
+    private void handleOrphanedPowers(SessionService sessionService) {
+        for (Power power : updatedPowers) {
+            if (power.getPowerSets() == null) {
+                log.info("Newly orphaned power " + power.getName());
+                deletePowerFromUsers(power, sessionService);
+            }
+        }
+        for (Power power : unchangedPowers) {
+            if (power.getPowerSets() == null) {
+                log.info("Older orphaned power " + power.getName());
+                deletePowerFromUsers(power, sessionService);
+            }
+        }
+    }
+
+    private void handleDeletedPowers(SessionService sessionService) {
+        if (deletedPowers.isEmpty()) {
+            return;
+        }
+        for (Power power : deletedPowers) {
+            deletePowerFromUsers(power, sessionService);
+            sessionService.getPowerRepo().delete(power);
+        }
+    }
+
+    private void deletePowerFromUsers(Power power, SessionService sessionService) {
+        List<HeroPower> heroPowers = sessionService.getHpRepo().findAllByPower(power);
+        for (HeroPower heroPower : heroPowers) {
+            //log.info("Deletion target"+heroPower.toString());
+            Message message = new Message();
+            message.setUserId(heroPower.getPlayerCharacter().getUserId());
+            message.setText("The " + power.getName() + " power has been removed from the game and removed from your character: "
+                    + heroPower.getPlayerCharacter().getName()+". Consult with your GM and choose a new power."
+            );
+            sessionService.getMessageRepository().save(message);
+            sessionService.getHpRepo().delete(heroPower);
+        }
     }
 
     private void validateSheetMetadata(XSSFWorkbook workbook, Transformer<? extends Sheetable> transformer) throws IllegalArgumentException {

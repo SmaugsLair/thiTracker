@@ -2,11 +2,8 @@ package com.smaugslair.thitracker;
 
 import com.smaugslair.thitracker.data.atd.ActionTimeDefault;
 import com.smaugslair.thitracker.data.atd.AtdRepository;
-import com.smaugslair.thitracker.data.user.Credentials;
-import com.smaugslair.thitracker.data.user.CredentialsRepository;
 import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.data.user.UserRepository;
-import com.smaugslair.thitracker.security.SecurityUtils;
 import com.smaugslair.thitracker.services.ThiProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +23,8 @@ public class ThiTrackerApplication {
 
     private static final Logger log = LoggerFactory.getLogger(ThiTrackerApplication.class);
 
+
+
     public static void main(String[] args) {
         log.info("STARTING THITRACKER");
         SpringApplication.run(ThiTrackerApplication.class, args);
@@ -34,8 +33,7 @@ public class ThiTrackerApplication {
     @Bean
     public CommandLineRunner loadData(
             AtdRepository repository,
-            UserRepository userRepository,
-            CredentialsRepository credentialsRepository
+            UserRepository userRepository
             ) {
         return (args) -> {
 
@@ -61,10 +59,6 @@ public class ThiTrackerApplication {
                 user.setFriendCode("9876");
                 user = userRepository.save(user);
 
-                Credentials credentials = new Credentials();
-                credentials.setUserId(user.getId());
-                credentials.setEncodedPassword(SecurityUtils.encode("password"));
-                credentialsRepository.save(credentials);
 
                 user = new User();
                 user.setDisplayName("Andy A");
@@ -73,10 +67,6 @@ public class ThiTrackerApplication {
                 user.setFriendCode("4321");
                 user = userRepository.save(user);
 
-                credentials = new Credentials();
-                credentials.setUserId(user.getId());
-                credentials.setEncodedPassword(SecurityUtils.encode("password"));
-                credentialsRepository.save(credentials);
             }/*
             List<Game> games = gameRepository.findAll();
             games.forEach(game -> {

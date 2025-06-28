@@ -37,7 +37,7 @@ public class NewItemForm extends FormLayout {
         otherField = new TextField();
         otherField.setPlaceholder("Other");
 
-        // = pcRepo.findAllByUserIdAndGameIdIsNull(SecurityUtils.getLoggedInUser().getId());
+        // = pcRepo.findAllByUserIdAndGameIdIsNull(SecurityUtils.getLoggedInUser(sessionService).getId());
         pcField.setItems(pcs);
 
         if (pcs.isEmpty()) {

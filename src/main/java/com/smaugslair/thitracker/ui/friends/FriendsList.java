@@ -25,7 +25,7 @@ public class FriendsList extends VerticalLayout {
     }
 
     private void init() {
-        User user = SecurityUtils.getLoggedInUser();
+        User user = SecurityUtils.getLoggedInUser(sessionService);
         List<Friendship> friends = sessionService.getFriendsRepo().findAllByUserOrFriend(user, user);
 
 
@@ -33,7 +33,7 @@ public class FriendsList extends VerticalLayout {
             User friend = friendship.getUser().equals(user) ? friendship.getFriend(): friendship.getUser();
             //NameValue nameValue = new NameValue("userId", friend.getId());
             List<PlayerCharacter> pcs = sessionService.getPcRepo().findAllByUserId(friend.getId());
-            Details details = new Details(friend.getDisplayName(), new FriendsActions(friendship, pcs, this) );
+            Details details = new Details(friend.getDisplayName(), new FriendsActions(user, friendship, pcs, this) );
             details.setOpened(!friendship.getAccepted());
             add(details);
         });

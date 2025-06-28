@@ -10,6 +10,7 @@ import com.smaugslair.thitracker.data.pc.PlayerCharacter;
 import com.smaugslair.thitracker.data.pc.PlayerCharacterRepository;
 import com.smaugslair.thitracker.data.powers.PowerRepository;
 import com.smaugslair.thitracker.data.powers.PowerSetRepository;
+import com.smaugslair.thitracker.data.templates.TemplateRepository;
 import com.smaugslair.thitracker.data.user.*;
 import com.smaugslair.thitracker.ui.components.TitleBar;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
@@ -24,6 +25,7 @@ public class SessionService {
     //private final CacheService cacheService;
     private Long gameId;
     private PlayerCharacter pc;
+    private User user;
 
     private JavaMailSender javaMailSender;
     private ThiProperties thiProperties;
@@ -31,7 +33,6 @@ public class SessionService {
 
     private AtdRepository atdRepo;
     private CollectedItemRepository ciRepo;
-    private CredentialsRepository credRepo;
     private PowerRepository powerRepo;
     private PowerSetRepository powerSetRepo;
     private PasswordResetRepository passwordResetRepo;
@@ -42,12 +43,11 @@ public class SessionService {
     private PlayerCharacterRepository pcRepo;
     private EntryRepository entryRepo;
     private HeroPowerSetRepository hpsRepo;
-
     private HeroPowerRepository hpRepo;
-
-
     private TitleBar titleBar;
-
+    private FreemarkerService freemarkerService;
+    private TemplateRepository templateRepository;
+    private MessageRepository messageRepository;
 
     public SessionService(/*CacheService cacheService*/) {
         /*this.cacheService = cacheService;*/
@@ -67,21 +67,19 @@ public class SessionService {
         this.pc = pc;
     }
 
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
     public void refreshPc() {
         if (pc != null) {
             pc = pcRepo.findById(pc.getId()).orElse(pc);
             //pc= cacheService.getPcCache().findOneById(pc.getId()).orElse(pc);
         }
-    }
-
-
-
-    public CredentialsRepository getCredRepo() {
-        return credRepo;
-    }
-    @Autowired
-    public void setCredRepo(CredentialsRepository credRepo) {
-        this.credRepo = credRepo;
     }
 
     public FriendshipRepository getFriendsRepo() {
@@ -233,4 +231,34 @@ public class SessionService {
     public void setTitleBar(TitleBar titleBar) {
         this.titleBar = titleBar;
     }
+
+    public FreemarkerService getFreemarkerService() {
+        return freemarkerService;
+    }
+
+    @Autowired
+    public void setFreemarkerService(FreemarkerService freemarkerService) {
+        this.freemarkerService = freemarkerService;
+    }
+
+    public TemplateRepository getTemplateRepository() {
+        return templateRepository;
+    }
+
+    @Autowired
+    public void setTemplateRepository(TemplateRepository templateRepository) {
+        this.templateRepository = templateRepository;
+    }
+
+
+    public MessageRepository getMessageRepository() {
+        return messageRepository;
+    }
+
+    @Autowired
+    public void setMessageRepository(MessageRepository messageRepository) {
+        this.messageRepository = messageRepository;
+    }
+
+
 }

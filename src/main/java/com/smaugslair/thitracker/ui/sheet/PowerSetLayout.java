@@ -35,11 +35,16 @@ public class PowerSetLayout extends VerticalLayout {
         for (HeroPower heroPower : set) {
             UnorderedList content = new UnorderedList();
             //content.add(new ListItem(heroPower.getPower().getShortDescr()));
+            String title = heroPower.getPower().getName();
+            /*if (heroPower.getPower().getPowerSets() == null) {
+                title = "!!-"+title+"-!!";
+                content.add(new ListItem("!! This power has been orphaned. Consult with your GM, remove this power and choose a replacement!!"));
+            }*/
             content.add(new ListItem(heroPower.getPower().getFullDescr()));
             if (!heroPower.getPower().getAbilityMods().isEmpty()) {
                 content.add(new ListItem(heroPower.getPower().getAbilityMods()));
             }
-            Details details = new Details(heroPower.getPower().getName(), content);
+            Details details = new Details(title, content);
             //details.
             details.setOpened(false);
             //details.addThemeVariants(DetailsVariant.REVERSE);

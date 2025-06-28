@@ -46,7 +46,7 @@ public class GamesView extends VerticalLayout {
 
         Accordion accordion = new Accordion();
 
-        User user = SecurityUtils.getLoggedInUser();
+        User user = SecurityUtils.getLoggedInUser(sessionService);
         if (user == null) return;
 /*
         NameValue example = new NameValue("gameMasterId", user.getId());*/
@@ -82,7 +82,7 @@ public class GamesView extends VerticalLayout {
             if (gameName.isValid()) {
                 Game game = new Game();
                 game.setName(gameName.getValue());
-                game.setGameMasterId(SecurityUtils.getLoggedInUser().getId());
+                game.setGameMasterId(SecurityUtils.getLoggedInUser(sessionService).getId());
                 game.setMaxDice(maxDice.getValue());
                 sessionService.getGameRepo().save(game);
                 //cacheService.getGameCache().save(game);

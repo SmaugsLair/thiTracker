@@ -66,7 +66,7 @@ public class GMActionBar extends HorizontalLayout {
             add(new H1("Game not found!"));
             return null;
         }
-        User user = SecurityUtils.getLoggedInUser();
+        User user = SecurityUtils.getLoggedInUser(sessionService);
         if (user == null || !game.getGameMasterId().equals(user.getId())) {
             add(new H1("You are not the GameMaster for this game!"));
             return null;
@@ -146,7 +146,7 @@ public class GMActionBar extends HorizontalLayout {
 
     private void sendPlayerInvitation(String name, String email) {
 
-        User gm = SecurityUtils.getLoggedInUser();
+        User gm = SecurityUtils.getLoggedInUser(sessionService);
         if (gm == null) {
             return;
         }

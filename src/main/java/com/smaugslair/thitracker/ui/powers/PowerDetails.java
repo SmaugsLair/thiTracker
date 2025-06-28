@@ -1,19 +1,30 @@
 package com.smaugslair.thitracker.ui.powers;
 
 import com.smaugslair.thitracker.data.powers.Power;
-import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.html.Span;
+import com.smaugslair.thitracker.ui.components.FormattedTextBlock;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
 
-public class PowerDetails extends FormLayout {
+public class PowerDetails extends VerticalLayout {
 
     public PowerDetails(Power power, SortedSet<Power> allPowers) {
 
-        addFormItem(new Span(power.getShortDescr()), "Short Description");
-        addFormItem(new Span(power.getFullDescr()), "Full Description");
+        HorizontalLayout horizontalLayout = new HorizontalLayout();
+
+        horizontalLayout.setWidthFull();
+        //setResponsiveSteps(new FormLayout.ResponsiveStep("0", 4));
+        horizontalLayout.add(new FormattedTextBlock(power.getShortDescr(), "Short Description"));
+        horizontalLayout.add(new FormattedTextBlock(power.getAbilityMods(), "Ability Mods"));
+        horizontalLayout.add(new FormattedTextBlock(power.getAssRules(), "Associated Rules"));
+        horizontalLayout.add(new FormattedTextBlock(power.getPrerequisite(), "Prerequisites"));
+        add(horizontalLayout);
+
+        /*addFormItem(new Span(power.getShortDescr()), "Short Description");
+
         if (!power.getAbilityMods().isEmpty()) {
             addFormItem(new Span(power.getAbilityMods()), "Ability Mods");
         }
@@ -22,10 +33,19 @@ public class PowerDetails extends FormLayout {
         }
         if (!power.getPrerequisite().isEmpty()) {
             addFormItem(new Span(power.getPrerequisite()), "Prerequisites");
+        }*/
+        add(new FormattedTextBlock(power.getFullDescr(), "Full Description"));
+        /*addFormItem(formattedTextBlock, "Full Description");
+        setColspan(formattedTextBlock, 4);*/
+
+        String powerSets = power.getPowerSets();
+        if (powerSets == null) {
+            powerSets = "";
         }
-        addFormItem(new Span(power.getPowerSets()), "Power Sets");
+
+        add(new FormattedTextBlock(powerSets, "Power Sets"));
         if (!power.getSubPowers().isEmpty()) {
-            addFormItem(new Span(power.getSubPowers()), "SubPowers");
+            add(new FormattedTextBlock(power.getSubPowers(), "SubPowers"));
             String[] strings = power.getSubPowers().split(":");
             List<String> subpowers = new ArrayList<>();
             for (Power p : allPowers) {
@@ -33,7 +53,7 @@ public class PowerDetails extends FormLayout {
                     subpowers.add(p.getName());
                 }
             }
-            addFormItem(new Span(subpowers.toString()), "SubPowers List");
+            add(new FormattedTextBlock(subpowers.toString(), "SubPowers List"));
         }
 
     }

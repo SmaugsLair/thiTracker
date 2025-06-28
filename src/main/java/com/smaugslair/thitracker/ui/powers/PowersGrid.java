@@ -1,8 +1,8 @@
 package com.smaugslair.thitracker.ui.powers;
 
 import com.smaugslair.thitracker.data.powers.Power;
+import com.smaugslair.thitracker.ui.components.FormattedTextBlock;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.NativeButtonRenderer;
 
@@ -21,7 +21,7 @@ public class PowersGrid extends Grid<Power> {
         addColumn(Power::getPrerequisite).setHeader("Prerequisites");
         addColumn(Power::getMaxTaken).setHeader("Limit");
 
-        setItemDetailsRenderer(new ComponentRenderer<>(power -> new Paragraph(power.getFullDescr())));
+        setItemDetailsRenderer(new ComponentRenderer<>(power -> new FormattedTextBlock(power.getFullDescr(), "")));
 
         getColumns().forEach(powerColumn -> powerColumn.setAutoWidth(true));
         setWidthFull();

@@ -1,0 +1,15 @@
+.login {
+    background-image: url("./images/HeroInstant_NewOldLogo_2025-06-24.jpg");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-color: #cb2332;
+
+    .login-button {
+        background-color: white;
+        background-image: url("./images/G.png");
+        background-position: right;
+        background-repeat: no-repeat;
+        padding-right: 32px;
+        background-size: 15%;
+    }
+}

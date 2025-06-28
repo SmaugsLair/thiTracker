@@ -1,6 +1,7 @@
 package com.smaugslair.thitracker.ui;
 
 import com.smaugslair.thitracker.security.SecurityUtils;
+import com.smaugslair.thitracker.services.SessionService;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
@@ -17,13 +18,16 @@ public class LogoutView extends VerticalLayout {
 
 	private static final Logger log = LoggerFactory.getLogger(LogoutView.class);
 
-	public LogoutView() {
+	public LogoutView(SessionService sessionService) {
 		setSizeFull();
 		setAlignItems(Alignment.CENTER); 
 		setJustifyContentMode(JustifyContentMode.CENTER);
+		String email = sessionService.getUser().getEmail();
+		log.info("Logging out user: " + email);
+		sessionService.setUser(null);
 		SecurityUtils.logout();
 		add(new Span("User logged out"));
-		add(new RouterLink("Login", LoginView.class));
+		add(new RouterLink("Login", OAuthView.class));
 	}
 
 

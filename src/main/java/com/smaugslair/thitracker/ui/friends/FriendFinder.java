@@ -17,11 +17,12 @@ public class FriendFinder extends VerticalLayout {
 
     private final SessionService sessionService;
     private final FriendsView friendsView;
-    private final User self = SecurityUtils.getLoggedInUser();
+    private final User self;
     private User friend = null;
 
     public FriendFinder(FriendsView friendsView, SessionService sessionService) {
         this.sessionService = sessionService;
+        self = SecurityUtils.getLoggedInUser(sessionService);
         this.friendsView = friendsView;
         init();
     }
@@ -29,7 +30,7 @@ public class FriendFinder extends VerticalLayout {
     private void init() {
         add("Friend Finder");
         TextField nameField = new TextField();
-        nameField.setPlaceholder("Email");
+        nameField.setPlaceholder("First name Last initial (eg 'Toni T')");
         add(nameField);
 
         TextField friendCode = new TextField();

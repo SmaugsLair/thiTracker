@@ -46,7 +46,7 @@ public class PCManager extends VerticalLayout {
 
     public void init() {
 
-        User user = SecurityUtils.getLoggedInUser();
+        User user = SecurityUtils.getLoggedInUser(sessionService);
         if (user == null) return;
 
         Iterable<PlayerCharacter> pcs = sessionService.getPcRepo().findAllByUserId(user.getId())
@@ -81,7 +81,7 @@ public class PCManager extends VerticalLayout {
             if (pcName.isValid()) {
                 PlayerCharacter pc = new PlayerCharacter();
                 pc.setName(pcName.getValue());
-                pc.setUserId(SecurityUtils.getLoggedInUser().getId());
+                pc.setUserId(SecurityUtils.getLoggedInUser(sessionService).getId());
                 for (int i = 1; i < 4; ++i) {
                     for (TraitType type: TraitType.values()) {
                         Trait trait = new Trait();

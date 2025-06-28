@@ -29,7 +29,7 @@ public class PowerSetBrowserView extends HorizontalLayout {
         tabs.setOrientation(Tabs.Orientation.VERTICAL);
         tabs.setFlexGrowForEnclosedTabs(0);
 
-        PowerSetDetails powerSetDetails = new PowerSetDetails(powersCache);
+        PowerSetDetails powerSetDetails = new PowerSetDetails(sessionService, powersCache);
         //powerSetDetails.setWidthFull();
 
         Map<Tab, PowerSet> map = new HashMap<>();

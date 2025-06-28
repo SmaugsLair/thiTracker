@@ -2,30 +2,67 @@ package com.smaugslair.thitracker.ui.powers;
 
 import com.smaugslair.thitracker.data.powers.Power;
 import com.smaugslair.thitracker.data.powers.PowerSet;
+import com.smaugslair.thitracker.data.templates.Template;
 import com.smaugslair.thitracker.services.PowersCache;
+import com.smaugslair.thitracker.services.SessionService;
+import com.smaugslair.thitracker.ui.components.FormattedTextBlock;
+import com.smaugslair.thitracker.ui.components.UserSafeButton;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.details.Details;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextArea;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.SortedSet;
 
 @CssImport(value = "./styles/minPadding.css", themeFor = "vaadin-grid")
+@JsModule("./src/copytoclipboard.js")
 public class PowerSetDetail extends VerticalLayout {
 
-    public PowerSetDetail(PowerSet powerSet, PowersCache powersCache) {
+
+    private Map<String, Object> root = new HashMap<>();
+
+    private final TextArea textArea = new TextArea();
+    private final Dialog dialog = new Dialog();
+
+    public PowerSetDetail(SessionService sessionService, PowerSet powerSet, PowersCache powersCache) {
+        textArea.setWidthFull();
+        Button button = new Button("Copy to clipboard", VaadinIcon.COPY.create());
+        button.addClickListener(
+                e -> UI.getCurrent().getPage().executeJs("window.copyToClipboard($0)", textArea.getValue())
+        );
+        dialog.add(button);
+        dialog.add(textArea);
+        dialog.setWidth("800px");
+
+
+        add(new UserSafeButton("Text version", buttonClickEvent -> {
+            Optional<Template> template = sessionService.getTemplateRepository().findByName("powerSetTemplate");
+            if (template.isPresent()) {
+                String text = sessionService.getFreemarkerService().applyTemplate(template.get().getText(), root);
+
+                textArea.setValue(text);
+                dialog.open();
+            }
+        }));
         setId(powerSet.getName());
 
         FormLayout formLayout = new FormLayout();
         formLayout.setResponsiveSteps(
                 new FormLayout.ResponsiveStep("0", 1)
         );
-        formLayout.addFormItem(new Paragraph(powerSet.getOpenText()), powerSet.getName());
-        formLayout.addFormItem(new Paragraph(powerSet.getAbilityText()), "Abilities");
-        formLayout.addFormItem(new Paragraph(powerSet.getAbilityModsText()), "");
-        formLayout.addFormItem(new Details("", new Paragraph(powerSet.getPowersText())), "Details");
+        formLayout.addFormItem(new FormattedTextBlock(powerSet.getOpenText(), powerSet.getName()), "");
+        formLayout.addFormItem(new FormattedTextBlock(powerSet.getAbilityText(), "Abilities"), "");
+        formLayout.addFormItem(new FormattedTextBlock(powerSet.getAbilityModsText(), "AbilityMods"), "");
+        formLayout.addFormItem(new Details("", new FormattedTextBlock(powerSet.getPowersText(), "")), "Details");
 
         VerticalLayout powersLayout = new VerticalLayout();
         powersLayout.setWidthFull();
@@ -39,6 +76,9 @@ public class PowerSetDetail extends VerticalLayout {
         });
 
         add(formLayout, powersLayout);
+
+        root.put("powerSet", powerSet);
+        root.put("powerMap", powerMap);
 
 
     }

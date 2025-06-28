@@ -34,7 +34,7 @@ public class CollectionView extends VerticalLayout {
     public void init() {
 
         List<CollectedItem> items = sessionService.getCiRepo()
-                .findAllByGmId(SecurityUtils.getLoggedInUser().getId());
+                .findAllByGmId(SecurityUtils.getLoggedInUser(sessionService).getId());
 
         if (items.isEmpty()) {
             add("Empty Collection - Items can be added from an active timeline");
