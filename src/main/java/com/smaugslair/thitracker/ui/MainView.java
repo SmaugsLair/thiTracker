@@ -15,6 +15,7 @@ import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
@@ -47,6 +48,7 @@ public class MainView extends AppLayout implements AfterNavigationObserver {
         appTitle.getStyle().set("font-size", "var(--lumo-font-size-l)")
                 .set("line-height", "var(--lumo-size-l)")
                 .set("margin", "0 var(--lumo-space-m)");
+        appTitle.setClassName("appTitle");
 
         sideNav = getPrimaryNavigation(user);
 
@@ -81,16 +83,31 @@ public class MainView extends AppLayout implements AfterNavigationObserver {
         //}
         sideNav.addItem(new SideNavItem("Heroes", HeroView.class));
         sideNav.addItem(new SideNavItem("Games", GamesView.class));
-        sideNav.addItem(new SideNavItem("Friends", FriendsView.class));
-        sideNav.addItem(new SideNavItem("Collection", CollectionView.class));
-        sideNav.addItem(new SideNavItem("Power Sets", PowerSetBrowserView.class));
-        sideNav.addItem(new SideNavItem("Powers", PowerBrowserView.class));
+
+        SideNavItem userItem = new SideNavItem(user.getDisplayName());
+        userItem.setPrefixComponent(VaadinIcon.USER.create());
+        userItem.addItem(new SideNavItem("Details", UserDetailsView.class));
+        userItem.addItem(new SideNavItem("Friends", FriendsView.class));
+        userItem.addItem(new SideNavItem("Collection", CollectionView.class));
+        sideNav.addItem(userItem);
+
+        SideNavItem referenceItem = new SideNavItem("References");
+        referenceItem.setPrefixComponent(VaadinIcon.BOOK.create());
+        referenceItem.addItem(new SideNavItem("Power Sets", PowerSetBrowserView.class));
+        referenceItem.addItem(new SideNavItem("Powers", PowerBrowserView.class));
+        sideNav.addItem(referenceItem);
+
         if (user.isAdmin()) {
-            sideNav.addItem(new SideNavItem("Users", UsersView.class));
-            sideNav.addItem(new SideNavItem("Upload", PowersUploadView.class));
-            sideNav.addItem(new SideNavItem("Templates", TemplateView.class));
+            SideNavItem adminItem = new SideNavItem("Admin");
+            adminItem.setPrefixComponent(VaadinIcon.COG.create());
+            adminItem.addItem(new SideNavItem("Users", UsersView.class));
+            adminItem.addItem(new SideNavItem("Upload", PowersUploadView.class));
+            adminItem.addItem(new SideNavItem("Templates", TemplateView.class));
+            sideNav.addItem(adminItem);
         }
-        sideNav.addItem(new SideNavItem("User Details", UserDetailsView.class));
+
+        sideNav.addItem(new SideNavItem(""));
+
         sideNav.addItem(new SideNavItem("Logout", LogoutView.class));
 
         return sideNav;

@@ -56,7 +56,7 @@ public class PowersUploadView extends VerticalLayout {
 
     public PowersUploadView(SessionService sessionService) {
 
-        sessionService.getTitleBar().setTitle("Upload Powers");
+        sessionService.getTitleBar().setTitle("Upload PowerSet Spreadsheet");
         Dialog dialog = new Dialog();
 
         Map<String, PowerSet> cachedPowerSetMap = new HashMap<>();

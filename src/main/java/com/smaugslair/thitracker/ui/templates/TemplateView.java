@@ -8,8 +8,6 @@ import com.smaugslair.thitracker.ui.components.UserSafeButton;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
-import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.router.PageTitle;
@@ -70,13 +68,16 @@ public class TemplateView extends VerticalLayout {
         //filterRow.getCell(adminColumn).setComponent(new FilterField(filterObject::setAdmin, "50px"));
 
         add(templateGrid);
+        templateGrid.addComponentColumn(template -> new EditButton(template));
+
+       /* });
         GridContextMenu<Template> contextMenu = new GridContextMenu<>(templateGrid);
         GridMenuItem<Template> editMenu = contextMenu.addItem("Edit", event -> {
             if (event.getItem().isPresent()) {
                 templateForm.setTemplate(event.getItem().get());
                 editTemplateDialog.open();
             }
-        });
+        });*/
 
         Button newTemplateButton = new UserSafeButton("Create new template", event -> {
             Template template = new Template();
@@ -85,4 +86,18 @@ public class TemplateView extends VerticalLayout {
         });
         add(newTemplateButton);
     }
+
+    private void editTemplate(Template template) {
+        templateForm.setTemplate(template);
+        editTemplateDialog.open();
+    }
+
+
+    private class EditButton extends UserSafeButton {
+        public EditButton(Template template) {
+            setText("Edit");
+            addClickListener(event -> editTemplate(template));
+        }
+    }
+
 }

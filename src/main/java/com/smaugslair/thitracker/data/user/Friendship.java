@@ -9,11 +9,11 @@ public class Friendship {
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Integer id;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name="userId")
     private User user;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name="friendId")
     private User friend;
 

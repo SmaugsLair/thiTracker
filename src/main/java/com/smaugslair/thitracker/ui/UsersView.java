@@ -12,8 +12,6 @@ import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.HeaderRow;
-import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
-import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.router.PageTitle;
@@ -21,7 +19,7 @@ import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 
 @PermitAll
-@PageTitle("Admin Page")
+@PageTitle("User Admin Page")
 @Route(value = "useradmin", layout = MainView.class)
 @CssImport(value = "./styles/minPadding.css", themeFor = "vaadin-grid")
 public class UsersView extends VerticalLayout {
@@ -68,6 +66,7 @@ public class UsersView extends VerticalLayout {
         Grid.Column<User> dnColumn = userGrid.addColumn(User::getDisplayName).setHeader("Display Name");
         Grid.Column<User> emailColumn = userGrid.addColumn(User::getEmail).setHeader("Email");
         Grid.Column<User> adminColumn = userGrid.addColumn(User::isAdmin).setHeader("Admin");
+        userGrid.addComponentColumn(user -> new EditButton(user));
 
         HeaderRow filterRow = userGrid.appendHeaderRow();
         //filterRow.getCell(nameColumn).setComponent(new FilterField(filterObject::setName));
@@ -76,14 +75,25 @@ public class UsersView extends VerticalLayout {
         filterRow.getCell(adminColumn).setComponent(new FilterField(filterObject::setAdmin, "50px"));
 
         add(userGrid);
-        GridContextMenu<User> contextMenu = new GridContextMenu<>(userGrid);
+        /*GridContextMenu<User> contextMenu = new GridContextMenu<>(userGrid);
         GridMenuItem<User> editMenu = contextMenu.addItem("Edit", event -> {
             if (event.getItem().isPresent()) {
                 userForm.setUser(event.getItem().get());
                 editUserDialog.open();
             }
-        });
+        });*/
 
     }
 
+    private void editUser(User user) {
+        userForm.setUser(user);
+        editUserDialog.open();
+    }
+
+    private class EditButton extends UserSafeButton {
+        public EditButton(User user) {
+            setText("Edit");
+            addClickListener(event -> editUser(user));
+        }
+    }
 }

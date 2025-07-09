@@ -13,3 +13,10 @@
         background-size: 15%;
     }
 }
+
+.appTitle {
+    background-image: url("./images/HeroInstant_Logo_2025-06-26_SquareBlueStar.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: right;
+}

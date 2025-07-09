@@ -25,11 +25,11 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.contextmenu.GridContextMenu;
-import com.vaadin.flow.component.grid.contextmenu.GridMenuItem;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -170,65 +170,66 @@ public class GMTimeLineView extends VerticalLayout {
 
         grid.addItemClickListener(event -> showHeroDetails(event.getItem()));
 
-
         ColorDialog colorDialog = new ColorDialog(this);
-        GridContextMenu<TimeLineItem> contextMenu = new GridContextMenu<>(grid);
-        GridMenuItem<TimeLineItem> colorMenu = contextMenu.addItem("Color", event -> {
-            if (event.getItem().isPresent()) {
-                colorDialog.openWith(event.getItem().get());
-            }
-        });
 
-        contextMenu.addItem("Copy", event -> event.getItem().ifPresent(item -> {
-            TimeLineItem copy = new TimeLineItem();
-            copy.setTime(item.getTime());
-            copy.setName(item.getName());
-            copy.setStun(item.getStun());
-            copy.setHidden(item.getHidden());
-            copy.setGameId(item.getGameId());
-            copy.setColor(item.getColor());
-            for (ActionTimeDelta delta: item.getDeltas().values()) {
-                ActionTimeDelta deltaCopy = new ActionTimeDelta();
-                deltaCopy.setDelta(delta.getDelta());
-                deltaCopy.setName(delta.getName());
-                copy.getDeltas().put(delta.getName(), deltaCopy);
-            }
-            getTliRepo().save(copy);
-            refreshAndBroadcast();
-        }));
-
-        contextMenu.addItem("Remove", event -> event.getItem().ifPresent(item -> {
-            if(item.getId().equals(game.getLastEventId())) {
-                game.setLastEventId(null);
-                sessionService.getGameRepo().save(game);
-            }
-            if (item.getPcId() != null) {
-                sessionService.getPcRepo().findById(item.getPcId()).ifPresent(pc -> {
-                    pc.setGameId(null);
-                    sessionService.getPcRepo().save(pc);
+        grid.addComponentColumn(item -> {
+                MenuBar menuBar = new MenuBar();
+                menuBar.addThemeVariants(MenuBarVariant.LUMO_TERTIARY);
+                menuBar.addItem("Color", event -> {
+                    colorDialog.openWith(item);
                 });
-            }
-            getTliRepo().delete(item);
-            refreshAndBroadcast();
-        }));
+                menuBar.addItem("Duplicate", event -> {
+                    TimeLineItem copy = new TimeLineItem();
+                    copy.setTime(item.getTime());
+                    copy.setName(item.getName());
+                    copy.setStun(item.getStun());
+                    copy.setHidden(item.getHidden());
+                    copy.setGameId(item.getGameId());
+                    copy.setColor(item.getColor());
+                    for (ActionTimeDelta delta: item.getDeltas().values()) {
+                        ActionTimeDelta deltaCopy = new ActionTimeDelta();
+                        deltaCopy.setDelta(delta.getDelta());
+                        deltaCopy.setName(delta.getName());
+                        copy.getDeltas().put(delta.getName(), deltaCopy);
+                    }
+                    getTliRepo().save(copy);
+                    refreshAndBroadcast();
+                });
+                menuBar.addItem("Remove from timeline", event -> {
+                    if (item.getId().equals(game.getLastEventId())) {
+                        game.setLastEventId(null);
+                        sessionService.getGameRepo().save(game);
+                    }
+                    if (item.getPcId() != null) {
+                        sessionService.getPcRepo().findById(item.getPcId()).ifPresent(pc -> {
+                            pc.setGameId(null);
+                            sessionService.getPcRepo().save(pc);
+                        });
+                    }
+                    getTliRepo().delete(item);
+                    refreshAndBroadcast();
+                });
+                menuBar.addItem("Add to your collection", event -> {
+                    CollectedItem collectedItem = new CollectedItem();
+                    collectedItem.setColor(item.getColor());
+                    collectedItem.setName(item.getName());
+                    collectedItem.setGmId(game.getGameMasterId());
+                    for (ActionTimeDelta delta : item.getDeltas().values()) {
+                        CollectedDelta collectedDelta = new CollectedDelta();
+                        collectedDelta.setDelta(delta.getDelta());
+                        collectedDelta.setName(delta.getName());
+                        collectedItem.getDeltas().add(collectedDelta);
+                    }
+                    sessionService.getCiRepo().save(collectedItem);
+                    Component oldButton = gameActions.getComponentAt(1);
+                    gameActions.replace(oldButton, createImportButton());
+                    Notification.show("Saved "+collectedItem.getName()+" to your collection",
+                            2000, Notification.Position.TOP_CENTER);
+                });
+                return menuBar;
 
-        contextMenu.addItem("Collect", event -> event.getItem().ifPresent(item -> {
-            CollectedItem collectedItem = new CollectedItem();
-            collectedItem.setColor(item.getColor());
-            collectedItem.setName(item.getName());
-            collectedItem.setGmId(game.getGameMasterId());
-            for (ActionTimeDelta delta : item.getDeltas().values()) {
-                CollectedDelta collectedDelta = new CollectedDelta();
-                collectedDelta.setDelta(delta.getDelta());
-                collectedDelta.setName(delta.getName());
-                collectedItem.getDeltas().add(collectedDelta);
-            }
-            sessionService.getCiRepo().save(collectedItem);
-            Component oldButton = gameActions.getComponentAt(1);
-            gameActions.replace(oldButton, createImportButton());
-            Notification.show("Saved "+collectedItem.getName()+" to your collection",
-                    2000, Notification.Position.TOP_CENTER);
-        }));
+            });
+
 
         add(grid);
 
