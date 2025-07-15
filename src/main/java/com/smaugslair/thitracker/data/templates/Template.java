@@ -12,7 +12,7 @@ public class Template {
     @Column(unique = true, nullable = false)
     private String name;
 
-    @Column(length = 2000)
+    @Column(length = 8000)
     private String text;
 
     public Integer getId() {

@@ -15,14 +15,16 @@ import com.smaugslair.thitracker.ui.powers.transformers.TransformerException;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.component.upload.Upload;
-import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.streams.InMemoryUploadHandler;
+import com.vaadin.flow.server.streams.UploadHandler;
 import jakarta.annotation.security.PermitAll;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -31,6 +33,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -65,8 +68,7 @@ public class PowersUploadView extends VerticalLayout {
         Map<String, Power> cachedPowerMap = new HashMap<>();
         sessionService.getPowerRepo().findAll().forEach(power -> cachedPowerMap.put(power.getSsid(), power));
 
-        MemoryBuffer buffer = new MemoryBuffer();
-        Upload upload = new Upload(buffer);
+
         VerticalLayout output = new VerticalLayout();
         Button saveButton = new UserSafeButton("Save changes", event -> {
             sessionService.getPowerRepo().saveAll(newPowers);
@@ -110,103 +112,108 @@ public class PowersUploadView extends VerticalLayout {
         results.add(newClutchDetails, updatedClutchDetails, unchangedClutchDetails);
         results.add(newPowerDetails, updatedPowerDetails, unchangedPowerDetails, deletedPowerDetails);
 
+        InMemoryUploadHandler handler = UploadHandler.inMemory(
+                (metadata, data) -> {
+                    output.removeAll();
+                    output.add(new Span("Filename uploaded: "+metadata.fileName()));
+                    progressBar.setIndeterminate(true);
+                    output.add(progressBar);
+                    OPCPackage pkg;
+                    try {
+                        pkg = OPCPackage.open(new ByteArrayInputStream(data));
+                        XSSFWorkbook workbook = new XSSFWorkbook(pkg);
+                        PowerTransformer powerTransformer = new PowerTransformer();
+                        PowerSetTransformer powerSetTransformer = new PowerSetTransformer();
+                        validateSheetMetadata(workbook, powerSetTransformer);
+                        validateSheetMetadata(workbook, powerTransformer);
 
-        upload.addSucceededListener(event -> {
-            output.removeAll();
-            output.add(new Span("Filename uploaded: "+event.getFileName()));
-            progressBar.setIndeterminate(true);
-            output.add(progressBar);
-            OPCPackage pkg;
-            try {
-                pkg = OPCPackage.open(buffer.getInputStream());
-                XSSFWorkbook workbook = new XSSFWorkbook(pkg);
-                PowerTransformer powerTransformer = new PowerTransformer();
-                PowerSetTransformer powerSetTransformer = new PowerSetTransformer();
-                validateSheetMetadata(workbook, powerSetTransformer);
-                validateSheetMetadata(workbook, powerTransformer);
+                        Map<String, PowerSet> powerSetsInSheet = (Map<String, PowerSet>) loadSheet(workbook, powerSetTransformer);
+                        log.info("PowerSets found:"+ powerSetsInSheet.size());
 
-                Map<String, PowerSet> powerSetsInSheet = (Map<String, PowerSet>) loadSheet(workbook, powerSetTransformer);
-                log.info("PowerSets found:"+ powerSetsInSheet.size());
-
-                Map<String, Power> powersInSheet = (Map<String, Power>) loadSheet(workbook, powerTransformer);
-                log.info("Powers found:"+ powersInSheet.size());
+                        Map<String, Power> powersInSheet = (Map<String, Power>) loadSheet(workbook, powerTransformer);
+                        log.info("Powers found:"+ powersInSheet.size());
 
 
-                powerSetsInSheet.forEach((name, loadedPowerSet) -> {
-                    //max[0] = Math.max(max[0], loadedPowerSet.getAbilityText().length());
-                    PowerSet oldPowerSet = cachedPowerSetMap.get(loadedPowerSet.getSsid());
-                    if (oldPowerSet == null) {
-                        newPowerSets.add(loadedPowerSet);
-                        newClutchLayout.add(new Span(loadedPowerSet.getName()));
+                        powerSetsInSheet.forEach((name, loadedPowerSet) -> {
+                            //max[0] = Math.max(max[0], loadedPowerSet.getAbilityText().length());
+                            PowerSet oldPowerSet = cachedPowerSetMap.get(loadedPowerSet.getSsid());
+                            if (oldPowerSet == null) {
+                                newPowerSets.add(loadedPowerSet);
+                                newClutchLayout.add(new Span(loadedPowerSet.getName()));
+                            }
+                            else if (loadedPowerSet.deepEquals(oldPowerSet)) {
+                                unchangedClutchLayout.add(new Span(loadedPowerSet.getName()));
+                                unchangedPowerSets.add(oldPowerSet);
+                            }
+                            else {
+                                updatedClutchLayout.add(new Span(loadedPowerSet.getName()));
+                                updatedPowerSets.add(loadedPowerSet);
+                            }
+
+                        });
+
+                        //log.info("Max ability text:"+max[0]);
+
+                        newClutchDetails.setSummaryText("New PowerSets: " + newPowerSets.size());
+                        newClutchDetails.setEnabled(true);
+                        unchangedClutchDetails.setSummaryText("Unchanged PowerSets: " + unchangedPowerSets.size());
+                        unchangedClutchDetails.setEnabled(true);
+                        updatedClutchDetails.setSummaryText("Modified PowerSets: " + updatedPowerSets.size());
+                        updatedClutchDetails.setEnabled(true);
+
+                        powersInSheet.forEach((name, loadedPower) -> {
+                            //max[0] = Math.max(max[0], loadedPower.getSubPowers().length());
+                            //Power oldPower = cachedPowerMap.get(loadedPower.getSsid());
+                            Power oldPower = cachedPowerMap.remove(loadedPower.getSsid());
+                            if (oldPower == null) {
+                                newPowers.add(loadedPower);
+                                newPowerLayout.add(new Span(loadedPower.getName()));
+                            }
+                            else if (loadedPower.deepEquals(oldPower)) {
+                                unchangedPowerLayout.add(new Span(loadedPower.getName()));
+                                unchangedPowers.add(oldPower);
+                            }
+                            else {
+                                updatedPowerLayout.add(new Span(loadedPower.getName()));
+                                updatedPowers.add(loadedPower);
+                            }
+
+                        });
+
+                        deletedPowers.addAll(cachedPowerMap.values());
+                        for (Power power : deletedPowers) {
+                            deletedPowerLayout.add(new Span(power.getName()));
+                        }
+
+
+
+                        newPowerDetails.setSummaryText("New Powers: " +newPowers.size());
+                        newPowerDetails.setEnabled(true);
+                        unchangedPowerDetails.setSummaryText("Unchanged Powers: " +unchangedPowers.size());
+                        unchangedPowerDetails.setEnabled(true);
+                        updatedPowerDetails.setSummaryText("Modified Powers: " +updatedPowers.size());
+                        updatedPowerDetails.setEnabled(true);
+
+                        deletedPowerDetails.setSummaryText("Deleted Powers: " +deletedPowers.size());
+                        deletedPowerDetails.setEnabled(true);
+
+                        progressBar.setValue(1);
+                        saveButton.setEnabled(!newPowers.isEmpty() || !newPowerSets.isEmpty()
+                                || !updatedPowers.isEmpty() || !updatedPowerSets.isEmpty()
+                                || !deletedPowers.isEmpty());
+
+
                     }
-                    else if (loadedPowerSet.deepEquals(oldPowerSet)) {
-                        unchangedClutchLayout.add(new Span(loadedPowerSet.getName()));
-                        unchangedPowerSets.add(oldPowerSet);
+                    catch (Throwable t) {
+                        output.add(new Span(t.getMessage()));
                     }
-                    else {
-                        updatedClutchLayout.add(new Span(loadedPowerSet.getName()));
-                        updatedPowerSets.add(loadedPowerSet);
-                    }
+                    progressBar.setIndeterminate(false);
+                }).whenStart(transferContext -> dialog.open()
 
-                });
+        );
 
-                //log.info("Max ability text:"+max[0]);
-
-                newClutchDetails.setSummaryText("New PowerSets: " + newPowerSets.size());
-                newClutchDetails.setEnabled(true);
-                unchangedClutchDetails.setSummaryText("Unchanged PowerSets: " + unchangedPowerSets.size());
-                unchangedClutchDetails.setEnabled(true);
-                updatedClutchDetails.setSummaryText("Modified PowerSets: " + updatedPowerSets.size());
-                updatedClutchDetails.setEnabled(true);
-
-                powersInSheet.forEach((name, loadedPower) -> {
-                    //max[0] = Math.max(max[0], loadedPower.getSubPowers().length());
-                    //Power oldPower = cachedPowerMap.get(loadedPower.getSsid());
-                    Power oldPower = cachedPowerMap.remove(loadedPower.getSsid());
-                    if (oldPower == null) {
-                        newPowers.add(loadedPower);
-                        newPowerLayout.add(new Span(loadedPower.getName()));
-                    }
-                    else if (loadedPower.deepEquals(oldPower)) {
-                        unchangedPowerLayout.add(new Span(loadedPower.getName()));
-                        unchangedPowers.add(oldPower);
-                    }
-                    else {
-                        updatedPowerLayout.add(new Span(loadedPower.getName()));
-                        updatedPowers.add(loadedPower);
-                    }
-
-                });
-
-                deletedPowers.addAll(cachedPowerMap.values());
-                for (Power power : deletedPowers) {
-                    deletedPowerLayout.add(new Span(power.getName()));
-                }
-
-
-
-                newPowerDetails.setSummaryText("New Powers: " +newPowers.size());
-                newPowerDetails.setEnabled(true);
-                unchangedPowerDetails.setSummaryText("Unchanged Powers: " +unchangedPowers.size());
-                unchangedPowerDetails.setEnabled(true);
-                updatedPowerDetails.setSummaryText("Modified Powers: " +updatedPowers.size());
-                updatedPowerDetails.setEnabled(true);
-
-                deletedPowerDetails.setSummaryText("Deleted Powers: " +deletedPowers.size());
-                deletedPowerDetails.setEnabled(true);
-
-                progressBar.setValue(1);
-                saveButton.setEnabled(!newPowers.isEmpty() || !newPowerSets.isEmpty()
-                        || !updatedPowers.isEmpty() || !updatedPowerSets.isEmpty()
-                        || !deletedPowers.isEmpty());
-
-
-            }
-            catch (Throwable t) {
-                output.add(new Span(t.getMessage()));
-            }
-            progressBar.setIndeterminate(false);
-        });
+        Upload upload = new Upload(handler);
+        upload.setAcceptedFileTypes("application/xlsx", ".xlsx");
 
         upload.addFileRejectedListener(event -> {
             output.removeAll();
@@ -216,8 +223,7 @@ public class PowersUploadView extends VerticalLayout {
 
         dialog.add(output, saveButton, results);
 
-        upload.addStartedListener(event -> {dialog.open();});
-
+        add(new Paragraph("Accepted file format: MS Excel (.xlsx)"));
         add(upload);
     }
 

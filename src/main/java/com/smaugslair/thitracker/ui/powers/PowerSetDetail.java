@@ -48,10 +48,12 @@ public class PowerSetDetail extends VerticalLayout {
             Optional<Template> template = sessionService.getTemplateRepository().findByName("powerSetTemplate");
             if (template.isPresent()) {
                 String text = sessionService.getFreemarkerService().applyTemplate(template.get().getText(), root);
-
                 textArea.setValue(text);
-                dialog.open();
             }
+            else {
+                textArea.setValue("Failed to find template named 'powerSetTemplate'");
+            }
+            dialog.open();
         }));
         setId(powerSet.getName());
 

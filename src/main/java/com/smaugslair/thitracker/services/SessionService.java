@@ -15,6 +15,7 @@ import com.smaugslair.thitracker.data.user.*;
 import com.smaugslair.thitracker.ui.components.TitleBar;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
 
@@ -22,20 +23,22 @@ import org.springframework.stereotype.Component;
 @VaadinSessionScope
 public class SessionService {
 
+
+    @Value("${thi.appurl}")
+    private String appUrl;
+
     //private final CacheService cacheService;
     private Long gameId;
     private PlayerCharacter pc;
     private User user;
 
     private JavaMailSender javaMailSender;
-    private ThiProperties thiProperties;
     private PowersCache powersCache;
 
     private AtdRepository atdRepo;
     private CollectedItemRepository ciRepo;
     private PowerRepository powerRepo;
     private PowerSetRepository powerSetRepo;
-    private PasswordResetRepository passwordResetRepo;
     private FriendshipRepository friendsRepo;
     private UserRepository userRepository;
     private TimeLineItemRepository tliRepo;
@@ -114,14 +117,6 @@ public class SessionService {
         this.javaMailSender = javaMailSender;
     }
 
-    public PasswordResetRepository getPasswordResetRepo() {
-        return passwordResetRepo;
-    }
-    @Autowired
-    public void setPasswordResetRepo(PasswordResetRepository passwordResetRepo) {
-        this.passwordResetRepo = passwordResetRepo;
-    }
-
     public UserRepository getUserRepository() {
         return userRepository;
     }
@@ -129,15 +124,6 @@ public class SessionService {
     public void setUserRepository(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
-
-    public ThiProperties getThiProperties() {
-        return thiProperties;
-    }
-    @Autowired
-    public void setThiProperties(ThiProperties thiProperties) {
-        this.thiProperties = thiProperties;
-    }
-
 
     public PowersCache getPowersCache() {
         return  powersCache;
@@ -260,5 +246,9 @@ public class SessionService {
         this.messageRepository = messageRepository;
     }
 
+
+    public String getAppUrl() {
+        return appUrl;
+    }
 
 }

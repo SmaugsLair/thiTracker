@@ -15,7 +15,6 @@ import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.validator.StringLengthValidator;
 import org.slf4j.Logger;
@@ -103,7 +102,7 @@ public class PCManager extends VerticalLayout {
         button.addClickListener(event -> confirmDialog.open());
     }
 
-    private HorizontalLayout getPcRow(PlayerCharacter pc, Game game) {
+    private VerticalLayout getPcRow(PlayerCharacter pc, Game game) {
 
         ConfirmDialog deleteDialog = new ConfirmDialog("Are you sure you want to delete the character "+pc.getName()+"?");
         Button confirmButton = new UserSafeButton("Delete", event -> {
@@ -120,7 +119,7 @@ public class PCManager extends VerticalLayout {
         });
         deleteDialog.setConfirmButton(confirmButton);
 
-        HorizontalLayout layout = new HorizontalLayout();
+        VerticalLayout layout = new VerticalLayout();
         if (pc.getGameId() != null) {
             Button launch = new UserSafeButton("Launch "+ game.getName());
             launch.addClickListener(e -> launch.getUI().ifPresent(ui -> {
@@ -133,14 +132,33 @@ public class PCManager extends VerticalLayout {
         else {
             Icon icon = VaadinIcon.FROWN_O.create();
             icon.setSize("16px");
+            icon.setTooltipText("Character has no game.");
             layout.add(icon);
         }
 
+        Button sheet = new UserSafeButton("Edit sheet -->", event -> pcSelector.accept(pc));
+        layout.add(sheet);
+
+
+        Button printableSheet = new UserSafeButton("Printable Sheet", event -> {
+            sessionService.setPc(pc);
+            getUI().ifPresent(ui -> {
+                ui.getPage().open("printableSheet", "Printable Character Sheet");
+            });
+        });
+        layout.add(printableSheet);
+
+        Button printablePowers = new UserSafeButton("Printable Powers", event -> {
+            sessionService.setPc(pc);
+            getUI().ifPresent(ui -> {
+                ui.getPage().open("printablePowers", "Printable Character Powers");
+            });
+        });
+        layout.add(printablePowers);
+
+
         Button delete = new UserSafeButton("Delete", event -> deleteDialog.open());
         layout.add(delete);
-
-        Button sheet = new UserSafeButton("Sheet -->", event -> pcSelector.accept(pc));
-        layout.add(sheet);
 
         return layout;
     }

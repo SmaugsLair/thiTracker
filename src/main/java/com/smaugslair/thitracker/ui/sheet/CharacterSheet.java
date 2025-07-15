@@ -251,17 +251,6 @@ public class CharacterSheet extends RegisteredVerticalLayout {
         List<HeroPowerSet> heroPowerSets = sessionService.getHpsRepo().findAllByPlayerCharacter(pc);
         List<HeroPower> heroPowers = sessionService.getHpRepo().findAllByPlayerCharacter(pc);
 
-        StringBuilder sb = new StringBuilder("Powers: ");
-        for (HeroPowerSet powerSet : heroPowerSets) {
-            sb.append(powerSet.getPowerSet().getName()).append("[");
-            int count = 0;
-            for (HeroPower power : heroPowers) {
-                if (power.getHeroPowerSet().equals(powerSet)) {
-                    ++count;
-                }
-            }
-            sb.append(count).append("] ");
-        }
         HorizontalLayout heroPowersLayout = new HorizontalLayout();
         //heroPowersLayout.setWidthFull();
         int needed = 2;

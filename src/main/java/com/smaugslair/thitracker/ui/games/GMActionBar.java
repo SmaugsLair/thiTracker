@@ -22,6 +22,7 @@ import java.util.List;
 
 public class GMActionBar extends HorizontalLayout {
 
+
     private final SessionService sessionService;
 
     private final GMSession gmSession;
@@ -159,7 +160,7 @@ public class GMActionBar extends HorizontalLayout {
 
         String sb = "Hello " + name + "\n You've been invited to create an account on The Hero Instance app and join a game with " +
                 gm.getDisplayName() + "!\n" + "To start, point your browser to " +
-                sessionService.getThiProperties().getAppUrl() + ", create an account, sign in, click on the Friends tab, " +
+                sessionService.getAppUrl() + ", create an account, sign in, click on the Friends tab, " +
                 "and enter \nPlayer name: " + gm.getDisplayName() + "\nFriend code: " +
                 gm.getFriendCode() + "\nin the Friend Finder. Then create a character and " +
                 gm.getDisplayName() + " will be able to add you to their game.";
