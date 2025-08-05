@@ -13,8 +13,7 @@ import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.NativeButtonRenderer;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.*;
 import jakarta.annotation.security.PermitAll;
 
 import java.util.List;
@@ -22,7 +21,9 @@ import java.util.List;
 @PermitAll
 @PageTitle("Power Browser")
 @Route(value = "powerbrowser", layout = MainView.class)
-public class PowerBrowserView extends Grid<Power> {
+public class PowerBrowserView extends Grid<Power> implements HasUrlParameter<String> {
+
+    private FilterField tagField;
 
     public PowerBrowserView(SessionService sessionService, PowersCache powersCache) {
 
@@ -71,7 +72,15 @@ public class PowerBrowserView extends Grid<Power> {
         filterRow.getCell(nameColumn).setComponent(new FilterField(filterObject::setName));
         filterRow.getCell(tierColumn).setComponent(new FilterField(filterObject::setTier, "50px"));
         filterRow.getCell(metaColumn).setComponent(new FilterField(filterObject::setMetaPower, "50px"));
-        filterRow.getCell(tagColumn).setComponent(new FilterField(filterObject::setPowerTag));
+        tagField = new FilterField(filterObject::setPowerTag);
+        filterRow.getCell(tagColumn).setComponent(tagField);
         filterRow.getCell(maxColumn).setComponent(new FilterField(filterObject::setMaxTaken));
+    }
+
+    @Override
+    public void setParameter(BeforeEvent beforeEvent, @OptionalParameter String tag) {
+        if (tag != null) {
+            tagField.setValue(tag);
+        }
     }
 }

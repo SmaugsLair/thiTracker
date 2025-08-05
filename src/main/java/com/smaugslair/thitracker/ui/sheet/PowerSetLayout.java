@@ -2,6 +2,7 @@ package com.smaugslair.thitracker.ui.sheet;
 
 import com.smaugslair.thitracker.data.pc.HeroPower;
 import com.smaugslair.thitracker.data.pc.HeroPowerSet;
+import com.smaugslair.thitracker.data.pc.HeroSubPower;
 import com.smaugslair.thitracker.ui.components.UserSafeButton;
 import com.vaadin.flow.component.details.Details;
 import com.vaadin.flow.component.html.ListItem;
@@ -41,8 +42,16 @@ public class PowerSetLayout extends VerticalLayout {
                 content.add(new ListItem("!! This power has been orphaned. Consult with your GM, remove this power and choose a replacement!!"));
             }*/
             content.add(new ListItem(heroPower.getPower().getFullDescr()));
-            if (!heroPower.getPower().getAbilityMods().isEmpty()) {
+            /*if (!heroPower.getPower().getAbilityMods().isEmpty()) {
                 content.add(new ListItem(heroPower.getPower().getAbilityMods()));
+            }*/
+            if (!heroPower.getMods().isEmpty()) {
+                content.add(new ListItem(heroPower.getModText()));
+            }
+            if (!heroPower.getSubPowers().isEmpty()) {
+                for (HeroSubPower subPower : heroPower.getSubPowers()) {
+                    content.add(new ListItem(subPower.getPower().getName()+": "+subPower.getPower().getFullDescr()));
+                }
             }
             Details details = new Details(title, content);
             //details.

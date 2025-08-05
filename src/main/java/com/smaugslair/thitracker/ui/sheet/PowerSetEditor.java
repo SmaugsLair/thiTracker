@@ -1,9 +1,6 @@
 package com.smaugslair.thitracker.ui.sheet;
 
-import com.smaugslair.thitracker.data.pc.HeroPower;
-import com.smaugslair.thitracker.data.pc.HeroPowerMod;
-import com.smaugslair.thitracker.data.pc.HeroPowerSet;
-import com.smaugslair.thitracker.data.pc.PlayerCharacter;
+import com.smaugslair.thitracker.data.pc.*;
 import com.smaugslair.thitracker.data.powers.Power;
 import com.smaugslair.thitracker.data.powers.PowerMod;
 import com.smaugslair.thitracker.rules.Ability;
@@ -153,7 +150,7 @@ public class PowerSetEditor extends VerticalLayout {
 
 
 
-    public void addPowerTarget(PowerTarget powerTarget) {
+    public void addPowerTarget(PowerTarget powerTarget, Set<Power> subPowers) {
 
         Power power = powerTarget.getPower();
 
@@ -163,6 +160,15 @@ public class PowerSetEditor extends VerticalLayout {
         heroPower.setPlayerCharacter(pc);
         heroPower.setTier(powerTarget.getTier());
         heroPowers.add(heroPower);
+
+        if (subPowers != null && !subPowers.isEmpty()) {
+            for (Power subPower : subPowers) {
+                HeroSubPower heroSubPower = new HeroSubPower();
+                heroSubPower.setHeroPower(heroPower);
+                heroSubPower.setPower(subPower);
+                heroPower.getSubPowers().add(heroSubPower);
+            }
+        }
 
         if (!power.getPowerMods().isEmpty()) {
             if (power.getPowerMods().containsKey(Ability.Choice)) {

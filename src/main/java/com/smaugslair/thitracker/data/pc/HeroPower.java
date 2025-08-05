@@ -5,9 +5,8 @@ import com.smaugslair.thitracker.rules.Ability;
 import com.smaugslair.thitracker.util.AbilityModsRenderer;
 
 import jakarta.persistence.*;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
+
+import java.util.*;
 
 @Entity
 public class HeroPower implements Moddable, Comparable<HeroPower> {
@@ -36,6 +35,9 @@ public class HeroPower implements Moddable, Comparable<HeroPower> {
     @MapKey(name = "ability")
     Map<Ability, HeroPowerMod> mods = new HashMap<>();
 
+    @OneToMany(fetch = FetchType.EAGER, orphanRemoval = true, cascade = CascadeType.ALL)
+    @JoinColumn(name = "hp_id" )
+    Set<HeroSubPower> subPowers = new HashSet<>();
 
     public Long getId() {
         return id;
@@ -120,6 +122,15 @@ public class HeroPower implements Moddable, Comparable<HeroPower> {
 
     public void setTier(Integer tier) {
         this.tier = tier;
+    }
+
+
+    public Set<HeroSubPower> getSubPowers() {
+        return subPowers;
+    }
+
+    public void setSubPowers(Set<HeroSubPower> subPowers) {
+        this.subPowers = subPowers;
     }
 
     @Override

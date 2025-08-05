@@ -18,10 +18,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.SortedSet;
+import java.util.*;
 
 @CssImport(value = "./styles/minPadding.css", themeFor = "vaadin-grid")
 @JsModule("./src/copytoclipboard.js")
@@ -79,8 +76,29 @@ public class PowerSetDetail extends VerticalLayout {
 
         add(formLayout, powersLayout);
 
+
+        TreeMap<String, List<Power>> subPowersMap = new TreeMap<>();
+
+        for (SortedSet<Power> powerList: powerMap.values()) {
+            powerList.forEach(power -> {
+                if (!power.getSubPowers().isEmpty()) {
+                    String[] name = power.getSubPowers().split(":");
+                    List<Power> subpowers = new ArrayList<>();
+                    for (Power p : powersCache.getPowers()) {
+                        if (p.getPowerTag().contains(name[0])) {
+                            subpowers.add(p);
+                        }
+                    }
+                    if (!subpowers.isEmpty()) {
+                        subPowersMap.put(name[0], subpowers);
+                    }
+                }
+            });
+        }
+
         root.put("powerSet", powerSet);
         root.put("powerMap", powerMap);
+        root.put("subPowersMap", subPowersMap);
 
 
     }

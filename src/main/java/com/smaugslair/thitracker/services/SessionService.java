@@ -13,6 +13,7 @@ import com.smaugslair.thitracker.data.powers.PowerSetRepository;
 import com.smaugslair.thitracker.data.templates.TemplateRepository;
 import com.smaugslair.thitracker.data.user.*;
 import com.smaugslair.thitracker.ui.components.TitleBar;
+import com.smaugslair.thitracker.ui.components.events.HeroCountListener;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,7 +23,6 @@ import org.springframework.stereotype.Component;
 @Component
 @VaadinSessionScope
 public class SessionService {
-
 
     @Value("${thi.appurl}")
     private String appUrl;
@@ -47,10 +47,12 @@ public class SessionService {
     private EntryRepository entryRepo;
     private HeroPowerSetRepository hpsRepo;
     private HeroPowerRepository hpRepo;
+    // private HeroSubPowerRepository hspRepo;
     private TitleBar titleBar;
     private FreemarkerService freemarkerService;
     private TemplateRepository templateRepository;
     private MessageRepository messageRepository;
+    private HeroCountListener heroCountListener;
 
     public SessionService(/*CacheService cacheService*/) {
         /*this.cacheService = cacheService;*/
@@ -59,6 +61,7 @@ public class SessionService {
     public Long getGameId() {
         return gameId;
     }
+
     public void setGameId(Long gameId) {
         this.gameId = gameId;
     }
@@ -66,6 +69,7 @@ public class SessionService {
     public PlayerCharacter getPc() {
         return pc;
     }
+
     public void setPc(PlayerCharacter pc) {
         this.pc = pc;
     }
@@ -88,6 +92,7 @@ public class SessionService {
     public FriendshipRepository getFriendsRepo() {
         return friendsRepo;
     }
+
     @Autowired
     public void setFriendsRepo(FriendshipRepository friendsRepo) {
         this.friendsRepo = friendsRepo;
@@ -96,6 +101,7 @@ public class SessionService {
     public PowerRepository getPowerRepo() {
         return powerRepo;
     }
+
     @Autowired
     public void setPowerRepo(PowerRepository powerRepo) {
         this.powerRepo = powerRepo;
@@ -104,6 +110,7 @@ public class SessionService {
     public PowerSetRepository getPowerSetRepo() {
         return powerSetRepo;
     }
+
     @Autowired
     public void setPowerSetRepo(PowerSetRepository powerSetRepo) {
         this.powerSetRepo = powerSetRepo;
@@ -112,6 +119,7 @@ public class SessionService {
     public JavaMailSender getJavaMailSender() {
         return javaMailSender;
     }
+
     @Autowired
     public void setJavaMailSender(JavaMailSender javaMailSender) {
         this.javaMailSender = javaMailSender;
@@ -120,14 +128,16 @@ public class SessionService {
     public UserRepository getUserRepository() {
         return userRepository;
     }
+
     @Autowired
     public void setUserRepository(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
     public PowersCache getPowersCache() {
-        return  powersCache;
+        return powersCache;
     }
+
     @Autowired
     public void setPowersCache(PowersCache powersCache) {
         this.powersCache = powersCache;
@@ -138,14 +148,14 @@ public class SessionService {
     }*/
 
 
-   public AtdRepository getAtdRepo() {
-       return atdRepo;
-   }
+    public AtdRepository getAtdRepo() {
+        return atdRepo;
+    }
 
-   @Autowired
-   public void setAtdRepo(AtdRepository atdRepository) {
-       this.atdRepo = atdRepository;
-   }
+    @Autowired
+    public void setAtdRepo(AtdRepository atdRepository) {
+        this.atdRepo = atdRepository;
+    }
 
     public CollectedItemRepository getCiRepo() {
         return ciRepo;
@@ -208,7 +218,16 @@ public class SessionService {
     @Autowired
     public void setHpRepo(HeroPowerRepository hpRepo) {
         this.hpRepo = hpRepo;
+    }/*
+
+    public HeroSubPowerRepository getHspRepo() {
+        return hspRepo;
     }
+
+    @Autowired
+    public void setHspRepo(HeroSubPowerRepository hspRepo) {
+        this.hspRepo = hspRepo;
+    }*/
 
     public TitleBar getTitleBar() {
         return titleBar;
@@ -250,5 +269,10 @@ public class SessionService {
     public String getAppUrl() {
         return appUrl;
     }
+    
+    public HeroCountListener getHeroCountListener() { return heroCountListener;}
 
+    public void addHeroCountListener(HeroCountListener heroCountListener) {
+        this.heroCountListener = heroCountListener;
+    }
 }

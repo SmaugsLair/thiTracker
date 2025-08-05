@@ -263,7 +263,18 @@ public class PowersUploadView extends VerticalLayout {
             );
             sessionService.getMessageRepository().save(message);
             sessionService.getHpRepo().delete(heroPower);
-        }
+        }/*
+        List<HeroSubPower> heroSubPowers = sessionService.getHspRepo().findAllByPower(power);
+        for (HeroSubPower heroSubPower : heroSubPowers) {
+            //log.info("Deletion target"+heroPower.toString());
+            Message message = new Message();
+            message.setUserId(heroSubPower.getPlayerCharacter().getUserId());
+            message.setText("The " + power.getName() + " power has been removed from the game and removed from your character: "
+                    + heroSubPower.getPlayerCharacter().getName()+". Consult with your GM and choose a new power."
+            );
+            sessionService.getMessageRepository().save(message);
+            sessionService.getHspRepo().delete(heroSubPower);
+        }*/
     }
 
     private void validateSheetMetadata(XSSFWorkbook workbook, Transformer<? extends Sheetable> transformer) throws IllegalArgumentException {
