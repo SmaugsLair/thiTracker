@@ -1,17 +1,22 @@
 package com.smaugslair.thitracker.ui.sheet;
 
 import com.smaugslair.thitracker.data.game.TimeLineItem;
+import com.smaugslair.thitracker.data.game.TimeLineItemRepository;
 import com.smaugslair.thitracker.data.log.Entry;
 import com.smaugslair.thitracker.data.log.EventType;
 import com.smaugslair.thitracker.data.pc.*;
 import com.smaugslair.thitracker.data.powers.PowerSet;
 import com.smaugslair.thitracker.data.powers.PowerSetMod;
 import com.smaugslair.thitracker.data.user.User;
+import com.smaugslair.thitracker.data.user.UserRepository;
 import com.smaugslair.thitracker.rules.Ability;
+import com.smaugslair.thitracker.services.PowersCache;
 import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.ui.components.ConfirmDialog;
 import com.smaugslair.thitracker.ui.components.MultiColumnLayout;
 import com.smaugslair.thitracker.ui.components.UserSafeButton;
+import com.smaugslair.thitracker.ui.players.PCUpdater;
+import com.smaugslair.thitracker.util.BeanFinder;
 import com.smaugslair.thitracker.websockets.RegisteredVerticalLayout;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -21,38 +26,25 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import org.apache.commons.collections.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.SortedSet;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @CssImport(value = "./styles/color.css", themeFor = "vaadin-grid")
 @CssImport(value = "./styles/minPadding.css", themeFor = "vaadin-grid")
-public class CharacterSheet extends RegisteredVerticalLayout {
+public class CharacterSheet extends RegisteredVerticalLayout implements HeroPowerSetHolder, CharacterEditor {
 
-    private final static Logger log = LoggerFactory.getLogger(CharacterSheet.class);
-/*
-    private final static String[][] ABILITY_LAYOUT = {
-            {"Perception", "Stealth"},
-            {"Aim", "Dodge"},
-            {"Strength", "Toughness"},
-            {"Influence", "Self-Control"},
-            {"Initiative", "Movement"},
-            {"", "Travel Mult"}
-    };*/
+    //private final static Logger log = LoggerFactory.getLogger(CharacterSheet.class);
 
     private final static int MAX_DRAMA = 10;
 
-    private final Function<PlayerCharacter, PlayerCharacter> pcUpdater;
+    private PCUpdater pcUpdater;
     private boolean editablePowers;
     private boolean editingPowers = false;
-    private final SessionService sessionService;
+    private SessionService sessionService;
     private PlayerCharacter pc = null;
     private String color;
     private DerivedField tsSpace;
@@ -64,15 +56,11 @@ public class CharacterSheet extends RegisteredVerticalLayout {
     private boolean dramaExpanded = false;
     private boolean abilitiesExpanded = false;
 
-    public CharacterSheet(Function<PlayerCharacter, PlayerCharacter> pcUpdater,
-                          boolean editablePowers,
-                          SessionService sessionService) {
-        this.pcUpdater = pcUpdater;
-        this.editablePowers = editablePowers;
-        this.sessionService = sessionService;
+    public CharacterSheet() {
         setPadding(false);
         setSpacing(false);
-        init();
+        //log.info("Character sheet created");
+        //init();
     }
 
     public void setPc(PlayerCharacter pc) {
@@ -82,7 +70,7 @@ public class CharacterSheet extends RegisteredVerticalLayout {
             //NameValue nameValue = new NameValue("gameId", pc.getGameId());
             //Loading the whole list so that the cache is not loaded with only a single item
             //List<TimeLineItem> items = cacheService.getTliCache().findManyByProperty(nameValue);
-            List<TimeLineItem> items = sessionService.getTliRepo().findByGameId(pc.getGameId());
+            List<TimeLineItem> items = BeanFinder.getBean(TimeLineItemRepository.class).findByGameId(pc.getGameId());
             for (TimeLineItem item : items) {
                 if (pc.getId().equals(item.getPcId())) {
                     color = item.getColor();
@@ -99,43 +87,45 @@ public class CharacterSheet extends RegisteredVerticalLayout {
             add(new Paragraph("Choose a Hero to view details"));
             return;
         }
-        User user = sessionService.getUserRepository().findById(pc.getUserId()).orElse(new User());
+        User user = BeanFinder.getBean(UserRepository.class).findById(pc.getUserId()).orElse(new User());
         List<TraitRow> traitRows = new ArrayList<>(9);
         traitRows.add(new MetaRow(pc.getName(), user.getDisplayName(), color));
         traitRows.add(new CivilianName(pc, this));
         traitRows.add(new ProgressionPoint(pc, this));
 
-        List<Trait> traits = pc.getTraits().stream().sorted().collect(Collectors.toList());
+        List<Trait> traits = pc.getTraits().stream()
+                .filter(trait -> trait.getType().equals(TraitType.Hero))
+                .sorted().collect(Collectors.toList());
 
-        AtomicInteger dramaCount = new AtomicInteger();
-        AtomicInteger sortOrder = new AtomicInteger();
+        int traitCount = traits.size();
+
+        //AtomicInteger dramaCount = new AtomicInteger();
+        //AtomicInteger sortOrder = new AtomicInteger();
 
         traitRows.add(new MetaRow("Hero Traits"));
         traits.forEach(trait -> {
-            if (trait.getType().equals(TraitType.Hero)) {
-                traitRows.add(new TraitField(trait, this));
-            }
-            else {
-                dramaCount.incrementAndGet();
-                sortOrder.set(trait.getSortOrder());
-            }
+            traitRows.add(new TraitField(trait, this));
         });
 
-        int newDrama = dramaCount.get() + 1;
+        traits = pc.getTraits().stream()
+                .filter(trait -> trait.getType().equals(TraitType.Drama))
+                .sorted().collect(Collectors.toList());
 
+        traitCount += traits.size();
         traitRows.add(new MetaRow("Drama Traits"));
         traits.forEach(trait -> {
-            if (trait.getType().equals(TraitType.Drama)) {
-                traitRows.add(new TraitField(trait, this));
-            }
+            traitRows.add(new TraitField(trait, this));
         });
-        if (dramaCount.get() < MAX_DRAMA) {
+
+
+        if (traits.size() < MAX_DRAMA) {
+            int finalTraitCount = traitCount;
             Button button = new UserSafeButton("+", event -> {
                 Trait trait = new Trait();
                 trait.setType(TraitType.Drama);
                 trait.setPoints(0);
-                trait.setName("Drama Trait "+newDrama);
-                trait.setSortOrder(sortOrder.get()+1);
+                trait.setName("new Drama Trait");
+                trait.setSortOrder(finalTraitCount +1);
                 trait.setPlayerCharacter(pc);
                 pc.getTraits().add(trait);
                 updatePC();
@@ -204,7 +194,7 @@ public class CharacterSheet extends RegisteredVerticalLayout {
             //log.info("Char sheet, creating row "+i);
             abilityRows.add(new AbilityRow(
                     pc.getAbilityScores().get(Ability.getAt(i, 0)),
-                    pc.getAbilityScores().get(Ability.getAt(i, 1)), this
+                    pc.getAbilityScores().get(Ability.getAt(i, 1))
             ));
         }
 
@@ -248,8 +238,8 @@ public class CharacterSheet extends RegisteredVerticalLayout {
         abilityRowGrid.setClassNameGenerator(item -> item.getColor());
         add(abilityRowGrid);
 
-        List<HeroPowerSet> heroPowerSets = sessionService.getHpsRepo().findAllByPlayerCharacter(pc);
-        List<HeroPower> heroPowers = sessionService.getHpRepo().findAllByPlayerCharacter(pc);
+        List<HeroPowerSet> heroPowerSets = getHeroPowerSetRepository().findAllByPlayerCharacter(pc);
+        List<HeroPower> heroPowers = getHeroPowerRepository().findAllByPlayerCharacter(pc);
 
         HorizontalLayout heroPowersLayout = new HorizontalLayout();
         //heroPowersLayout.setWidthFull();
@@ -288,8 +278,16 @@ public class CharacterSheet extends RegisteredVerticalLayout {
         add(powerLayout);*/
 
 
-        powerSetEditor = new PowerSetEditor(this, sessionService);
+        powerSetEditor = new PowerSetEditor(this);
 
+    }
+
+    private HeroPowerSetRepository getHeroPowerSetRepository() {
+        return BeanFinder.getBean(HeroPowerSetRepository.class);
+    }
+
+    private HeroPowerRepository getHeroPowerRepository() {
+        return BeanFinder.getBean(HeroPowerRepository.class);
     }
 
     private void calcSpeeds() {
@@ -300,8 +298,8 @@ public class CharacterSheet extends RegisteredVerticalLayout {
     }
 
     public void updatePC() {
-        log.info("updating pc");
-        pc = pcUpdater.apply(pc);
+        //log.info("updating pc");
+        pc = pcUpdater.updatePc(pc);
         calcSpeeds();
     }
 
@@ -309,13 +307,14 @@ public class CharacterSheet extends RegisteredVerticalLayout {
     protected void handleMessage(Entry entry) {
         if (EventType.PCUpdate.equals(entry.getType())) {
             if (pc != null && entry.getPcId().equals(pc.getId())) {
-                sessionService.getPcRepo().findById(pc.getId()).ifPresent(playerCharacter -> {
+                BeanFinder.getBean(PlayerCharacterRepository.class).findById(pc.getId()).ifPresent(playerCharacter -> {
                     pc = playerCharacter;
                 });
                 init();
             }
         }
     }
+
 
     public void removeTrait(Trait trait) {
         pc.getTraits().remove(trait);
@@ -325,7 +324,7 @@ public class CharacterSheet extends RegisteredVerticalLayout {
 
     public void showPowerChoiceDialog(HeroPowerSet powerSet) {
         editorDialog = new ConfirmDialog(powerSetEditor);
-        List<HeroPower> starting = sessionService.getHpRepo().findAllByPlayerCharacter(pc);
+        List<HeroPower> starting = getHeroPowerRepository().findAllByPlayerCharacter(pc);
         powerSetEditor.start(pc, powerSet, new ArrayList<>(starting));
         editorDialog.setWidthFull();
         editorDialog.setHeightFull();
@@ -344,11 +343,11 @@ public class CharacterSheet extends RegisteredVerticalLayout {
             disjunction.forEach(heroPower -> {
                 if (heroPower.getId() == null) {
                     //log.info("saving new: "+heroPower);
-                    sessionService.getHpRepo().save(heroPower);
+                    getHeroPowerRepository().save(heroPower);
                 }
                 else {
                     //log.info("deleting old : "+heroPower);
-                    sessionService.getHpRepo().delete(heroPower);
+                    getHeroPowerRepository().delete(heroPower);
                 }
             });
 
@@ -371,7 +370,7 @@ public class CharacterSheet extends RegisteredVerticalLayout {
         MultiColumnLayout multiColumnLayout = new MultiColumnLayout(3);
 
         Dialog dialog = new Dialog(multiColumnLayout);
-        SortedSet<PowerSet> powerSetList = sessionService.getPowersCache().getPowerSetList();
+        SortedSet<PowerSet> powerSetList = BeanFinder.getBean(PowersCache.class).getPowerSetList();
         powerSetList.forEach(powerSet -> {
             if (!excludes.contains(powerSet)) {
                 multiColumnLayout.addToNextColumn(new Button(powerSet.getName(), chooseEvent -> {
@@ -404,20 +403,20 @@ public class CharacterSheet extends RegisteredVerticalLayout {
                 }
             }
         }
-        sessionService.getHpsRepo().save(heroPowerSet);
+        getHeroPowerSetRepository().save(heroPowerSet);
         calculateAbilityScores();
         updatePC();
         init();
     }
 
     public void removeHeroPowerSet(HeroPowerSet heroPowerSet) {
-        List<HeroPower> heroPowers = sessionService.getHpRepo().findAllByPlayerCharacter(pc);
+        List<HeroPower> heroPowers = getHeroPowerRepository().findAllByPlayerCharacter(pc);
         for (HeroPower hp : heroPowers) {
             if (hp.getHeroPowerSet().equals(heroPowerSet)) {
-                sessionService.getHpRepo().delete(hp);
+                getHeroPowerRepository().delete(hp);
             }
         }
-        sessionService.getHpsRepo().delete(heroPowerSet);
+        getHeroPowerSetRepository().delete(heroPowerSet);
         calculateAbilityScores();
         updatePC();
         editorDialog.close();
@@ -427,13 +426,13 @@ public class CharacterSheet extends RegisteredVerticalLayout {
 
     private void calculateAbilityScores() {
         pc.getAbilityScores().forEach((ability, abilityScore) -> abilityScore.reset());
-        List<HeroPowerSet> heroPowerSets = sessionService.getHpsRepo().findAllByPlayerCharacter(pc);
+        List<HeroPowerSet> heroPowerSets = getHeroPowerSetRepository().findAllByPlayerCharacter(pc);
         heroPowerSets.forEach(heroPowerSet -> {
             heroPowerSet.getMods().forEach((ability, heroPowerSetMod) -> {
                 pc.getAbilityScores().get(ability).adjustMods(heroPowerSetMod.getValue());
             });
         });
-        List<HeroPower> heroPowers = sessionService.getHpRepo().findAllByPlayerCharacter(pc);
+        List<HeroPower> heroPowers = getHeroPowerRepository().findAllByPlayerCharacter(pc);
         heroPowers.forEach(heroPower -> {
             heroPower.getMods().forEach((ability, heroPowerMod) -> {
                 pc.getAbilityScores().get(ability).adjustMods(heroPowerMod.getValue());
@@ -447,7 +446,7 @@ public class CharacterSheet extends RegisteredVerticalLayout {
                 heroPowerSet.addMod(mod.getAbility(), mod.getValue());
             }
         }
-        sessionService.getHpsRepo().save(heroPowerSet);
+        getHeroPowerSetRepository().save(heroPowerSet);
         calculateAbilityScores();
         updatePC();
         init();
@@ -455,5 +454,13 @@ public class CharacterSheet extends RegisteredVerticalLayout {
 
     public String getCharacterName() {
         return pc.getName();
+    }
+
+    public void setPcUpdater(PCUpdater pcUpdater) {
+        this.pcUpdater = pcUpdater;
+    }
+
+    public void setEditablePowers(boolean editablePowers) {
+        this.editablePowers = editablePowers;
     }
 }

@@ -1,16 +1,21 @@
 package com.smaugslair.thitracker.ui;
 
 import com.smaugslair.thitracker.data.game.Game;
+import com.smaugslair.thitracker.data.game.GameRepository;
 import com.smaugslair.thitracker.data.pc.PlayerCharacter;
+import com.smaugslair.thitracker.data.pc.PlayerCharacterRepository;
+import com.smaugslair.thitracker.data.user.MessageRepository;
 import com.smaugslair.thitracker.data.user.User;
-import com.smaugslair.thitracker.security.SecurityUtils;
+import com.smaugslair.thitracker.data.user.UserRepository;
 import com.smaugslair.thitracker.services.SessionService;
+import com.smaugslair.thitracker.services.UIService;
 import com.smaugslair.thitracker.ui.components.TitleBar;
-import com.smaugslair.thitracker.ui.components.events.HeroCountEvent;
-import com.smaugslair.thitracker.ui.components.events.HeroCountListener;
+import com.smaugslair.thitracker.ui.components.events.AppEvent;
+import com.smaugslair.thitracker.ui.components.events.AppEventListener;
 import com.smaugslair.thitracker.ui.friends.FriendsView;
 import com.smaugslair.thitracker.ui.games.CollectionView;
-import com.smaugslair.thitracker.ui.games.GamesView;
+import com.smaugslair.thitracker.ui.games.GameCreationView;
+import com.smaugslair.thitracker.ui.players.HeroCreationView;
 import com.smaugslair.thitracker.ui.powers.PowerBrowserView;
 import com.smaugslair.thitracker.ui.powers.PowerSetBrowserView;
 import com.smaugslair.thitracker.ui.templates.TemplateView;
@@ -27,32 +32,52 @@ import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
+import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
-public class MainView extends AppLayout implements AfterNavigationObserver, HeroCountListener {
+@UIScope
+public class MainView extends AppLayout implements AfterNavigationObserver, AppEventListener {
 
     private static final Logger log = LoggerFactory.getLogger(MainView.class);
+
     private final SessionService sessionService;
+
+    private final UIService uiService;
+
+    private final UserRepository userRepository;
+
+    private final PlayerCharacterRepository playerCharacterRepository;
+
+    private final GameRepository gameRepository;
+
+    private final MessageRepository messageRepository;
+
+    private final TitleBar titleBar;
+
     private boolean newUI = true;
     SideNavItem messagesItem;
     private SideNav sideNav;
+    //private ApplicationContext context;
+    private SideNavItem heroesItem, gamesItem;
 
-    public MainView(@Autowired SessionService sessionService) {
-
-        //log.info("Constructor");
+    public MainView(SessionService sessionService, UIService uiService, UserRepository userRepository, PlayerCharacterRepository playerCharacterRepository, GameRepository gameRepository, MessageRepository messageRepository, TitleBar titleBar) {
         this.sessionService = sessionService;
+        this.uiService = uiService;
+        this.userRepository = userRepository;
+        this.playerCharacterRepository = playerCharacterRepository;
+        this.gameRepository = gameRepository;
+        this.messageRepository = messageRepository;
+        this.titleBar = titleBar;
 
-        sessionService.addHeroCountListener(this);
+        uiService.addAppEventListener(this);
 
-        User user = SecurityUtils.getLoggedInUser(sessionService);
+        User user = sessionService.getLoggedInUser();
 
         H1 appTitle = new H1("The Hero Instant");
         appTitle.getStyle().set("font-size", "var(--lumo-font-size-l)")
@@ -61,7 +86,10 @@ public class MainView extends AppLayout implements AfterNavigationObserver, Hero
         appTitle.setClassName("appTitle");
 
         sideNav = new SideNav();
-        getPrimaryNavigation(user).stream().forEach(sideNavItem -> {sideNav.addItem(sideNavItem);});
+        getPrimaryNavigation(user)
+                .stream().forEach(sideNavItem -> {
+                    sideNav.addItem(sideNavItem);}
+        );
         //sideNav.addItem(getPrimaryNavigation(user));
         //sideNav = getPrimaryNavigation(user);
 
@@ -71,11 +99,7 @@ public class MainView extends AppLayout implements AfterNavigationObserver, Hero
         DrawerToggle toggle = new DrawerToggle();
         toggle.setTooltipText("Click to toggle the nav bar");
 
-        TitleBar viewTitle = new TitleBar();
-        sessionService.setTitleBar(viewTitle);
-
-
-        HorizontalLayout wrapper = new HorizontalLayout(toggle, viewTitle);
+        HorizontalLayout wrapper = new HorizontalLayout(toggle, titleBar);
         wrapper.setAlignItems(FlexComponent.Alignment.CENTER);
         wrapper.setSpacing(false);
 
@@ -91,28 +115,26 @@ public class MainView extends AppLayout implements AfterNavigationObserver, Hero
 
         List<SideNavItem> items = new ArrayList<>();
 
-        SideNavItem heroesItem = new SideNavItem("Heroes");
+        heroesItem = new SideNavItem("Heroes");
         heroesItem.setPrefixComponent(VaadinIcon.USER_STAR.create());
         items.add(heroesItem);
 
-        Iterable<PlayerCharacter> pcs = sessionService.getPcRepo().findAllByUserId(user.getId())
+        Iterable<PlayerCharacter> pcs = playerCharacterRepository.findAllByUserId(user.getId())
                 .stream().sorted().collect(Collectors.toList());
 
         for (PlayerCharacter pc : pcs) {
-            String name = pc.getName();
-            Game game = null;
-            if (pc.getGameId() != null) {
-                game = sessionService.getGameRepo().findById(pc.getGameId()).orElse(null);
-                name += " ("+game.getName()+")";
-            }
-            heroesItem.addItem(new SideNavItem(name, "/hero/"+pc.getId()));
+            heroesItem.addItem(generatePCSideNavItem(pc));
         }
-        heroesItem.addItem(new SideNavItem("++", "/hero/new"));
+        heroesItem.addItem(new SideNavItem("++", HeroCreationView.class));
 
-        SideNavItem gamesItem = new SideNavItem("Games", GamesView.class);
+        gamesItem = new SideNavItem("Games");
         gamesItem.setPrefixComponent(VaadinIcon.GAMEPAD.create());
-
         items.add(gamesItem);
+        Iterable<Game> games = gameRepository.findAllByGameMasterId(user.getId()).stream().sorted().collect(Collectors.toList());
+        for (Game g : games) {
+            gamesItem.addItem(generateGameSideNavItem(g));
+        }
+        gamesItem.addItem(new SideNavItem("++", GameCreationView.class));
 
 
         SideNavItem userItem = new SideNavItem(user.getDisplayName());
@@ -144,10 +166,49 @@ public class MainView extends AppLayout implements AfterNavigationObserver, Hero
         return items;
     }
 
+    private SideNavItem generateGameSideNavItem(Game game) {
+        String name = game.getName();
+        SideNavItem gameMenuItem = new SideNavItem(name);
+
+        SideNavItem gameItem = new SideNavItem("Launch","/gmsession/"+game.getId());
+        gameMenuItem.addItem(gameItem);
+
+        SideNavItem gameDeletion = new SideNavItem("Delete", "/gamedeletion/"+game.getId());
+        gameMenuItem.addItem(gameDeletion);
+
+        return gameMenuItem;
+    }
+
+    private SideNavItem generatePCSideNavItem(PlayerCharacter pc) {
+        String name = pc.getName();
+        Game game = null;
+        if (pc.getGameId() != null) {
+            game = gameRepository.findById(pc.getGameId()).orElse(null);
+            name += " ("+game.getName()+")";
+        }
+        SideNavItem heroItem = new SideNavItem(name,"/hero/"+pc.getId());
+        if (game != null) {
+            heroItem.addItem(new SideNavItem("Join "+game.getName(), "/playersession/"+pc.getId()));
+        }
+
+        SideNavItem printableSheet = new SideNavItem("Printable sheet", "/printableSheet/"+pc.getId());
+        printableSheet.setOpenInNewBrowserTab(true);
+        heroItem.addItem(printableSheet);
+
+        SideNavItem printablePowers = new SideNavItem("Printable powers", "/printablePowers/"+pc.getId());
+        printablePowers.setOpenInNewBrowserTab(true);
+        heroItem.addItem(printablePowers);
+
+        SideNavItem herodeletion = new SideNavItem("Delete "+pc.getName(), "/herodeletion/"+pc.getId());
+        heroItem.addItem(herodeletion);
+
+        return heroItem;
+    }
+
     private void refreshMessagesItem() {
 
-        User user = SecurityUtils.getLoggedInUser(sessionService);
-        int count = sessionService.getMessageRepository().findAllByUserId(user.getId()).size();
+        User user = sessionService.getLoggedInUser();
+        int count = messageRepository.findAllByUserId(user.getId()).size();
         if (count > 0) {
             messagesItem = new SideNavItem("Messages", MessageView.class);
             messagesItem.setSuffixComponent(new Span(String.valueOf(count)));
@@ -170,15 +231,18 @@ public class MainView extends AppLayout implements AfterNavigationObserver, Hero
     }
 
     @Override
-    public void heroCountChanged(HeroCountEvent event) {
-
-        log.info("heroCountChanged");
-
-        //sideNav = getPrimaryNavigation(sessionService.getUser());
-        sideNav.removeAll();
-
-        getPrimaryNavigation(sessionService.getUser()).stream().forEach(sideNavItem -> {sideNav.addItem(sideNavItem);});
-
-
+    public void onAppEvent(AppEvent appEvent) {
+        if(AppEvent.AppEventType.MenuChange.equals(appEvent.getType())) {
+            boolean heroesOpen = heroesItem.isExpanded();
+            boolean gamesOpen = gamesItem.isExpanded();
+            sideNav.removeAll();
+            getPrimaryNavigation(sessionService.getUser())
+                    .stream().forEach(sideNavItem -> {
+                        sideNav.addItem(sideNavItem);}
+                    );
+            heroesItem.setExpanded(heroesOpen);
+            gamesItem.setExpanded(gamesOpen);
+        }
     }
+
 }

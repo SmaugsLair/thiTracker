@@ -1,20 +1,23 @@
 package com.smaugslair.thitracker.ui;
 
 import com.smaugslair.thitracker.data.pc.HeroPower;
-import com.smaugslair.thitracker.data.powers.Power;
-import com.smaugslair.thitracker.data.powers.PowerSet;
-import com.smaugslair.thitracker.data.powers.Sheetable;
+import com.smaugslair.thitracker.data.pc.HeroPowerRepository;
+import com.smaugslair.thitracker.data.powers.*;
 import com.smaugslair.thitracker.data.user.Message;
-import com.smaugslair.thitracker.services.SessionService;
+import com.smaugslair.thitracker.data.user.MessageRepository;
+import com.smaugslair.thitracker.services.PowersCache;
+import com.smaugslair.thitracker.ui.components.AbstractMainView;
+import com.smaugslair.thitracker.ui.components.ConfirmDialog;
+import com.smaugslair.thitracker.ui.components.TitleBar;
 import com.smaugslair.thitracker.ui.components.UserSafeButton;
 import com.smaugslair.thitracker.ui.powers.PowerSetBrowserView;
 import com.smaugslair.thitracker.ui.powers.transformers.PowerSetTransformer;
 import com.smaugslair.thitracker.ui.powers.transformers.PowerTransformer;
 import com.smaugslair.thitracker.ui.powers.transformers.Transformer;
 import com.smaugslair.thitracker.ui.powers.transformers.TransformerException;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.details.Details;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -25,6 +28,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.streams.InMemoryUploadHandler;
 import com.vaadin.flow.server.streams.UploadHandler;
+import com.vaadin.flow.spring.annotation.UIScope;
 import jakarta.annotation.security.PermitAll;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -32,6 +36,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
@@ -39,10 +44,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Component
 @PermitAll
 @PageTitle("Powers Upload Page")
 @Route(value = "powersupload", layout = MainView.class)
-public class PowersUploadView extends VerticalLayout {
+@UIScope
+public class PowersUploadView extends AbstractMainView {
 
     private static final Logger log = LoggerFactory.getLogger(PowersUploadView.class);
 
@@ -57,29 +64,45 @@ public class PowersUploadView extends VerticalLayout {
 
     private final ProgressBar progressBar = new ProgressBar();
 
-    public PowersUploadView(SessionService sessionService) {
 
-        sessionService.getTitleBar().setTitle("Upload PowerSet Spreadsheet");
-        Dialog dialog = new Dialog();
+    private final PowersCache powersCache;
+    private final PowerRepository powerRepository;
+    private final PowerSetRepository powerSetRepository;
+    private final HeroPowerRepository heroPowerRepository;
+    private final MessageRepository messageRepository;
+
+    public PowersUploadView(TitleBar titleBar, PowersCache powersCache, PowerRepository powerRepository, PowerSetRepository powerSetRepository, HeroPowerRepository heroPowerRepository, MessageRepository messageRepository) {
+        super(titleBar);
+        this.powersCache = powersCache;
+        this.powerRepository = powerRepository;
+        this.powerSetRepository = powerSetRepository;
+        this.heroPowerRepository = heroPowerRepository;
+        this.messageRepository = messageRepository;
+
+        init();
+    }
+
+    public void init() {
+        ConfirmDialog dialog = new ConfirmDialog();
 
         Map<String, PowerSet> cachedPowerSetMap = new HashMap<>();
-        sessionService.getPowersCache().getPowerSetList().forEach(powerSet -> cachedPowerSetMap.put(powerSet.getSsid(), powerSet));
+        powersCache.getPowerSetList().forEach(powerSet -> cachedPowerSetMap.put(powerSet.getSsid(), powerSet));
 
         Map<String, Power> cachedPowerMap = new HashMap<>();
-        sessionService.getPowerRepo().findAll().forEach(power -> cachedPowerMap.put(power.getSsid(), power));
+        powerRepository.findAll().forEach(power -> cachedPowerMap.put(power.getSsid(), power));
 
 
         VerticalLayout output = new VerticalLayout();
         Button saveButton = new UserSafeButton("Save changes", event -> {
-            sessionService.getPowerRepo().saveAll(newPowers);
-            sessionService.getPowerRepo().saveAll(updatedPowers);
-            sessionService.getPowerSetRepo().saveAll(newPowerSets);
-            sessionService.getPowerSetRepo().saveAll(updatedPowerSets);
-            handleDeletedPowers(sessionService);
-            handleOrphanedPowers(sessionService);
-            sessionService.getPowersCache().load();
-            event.getSource().getUI().ifPresent(ui -> ui.navigate(PowerSetBrowserView.class));
+            powerRepository.saveAll(newPowers);
+            powerRepository.saveAll(updatedPowers);
+            powerSetRepository.saveAll(newPowerSets);
+            powerSetRepository.saveAll(updatedPowerSets);
+            handleDeletedPowers();
+            handleOrphanedPowers();
+            powersCache.load();
             dialog.close();
+            UI.getCurrent().navigate(PowerSetBrowserView.class);
         });
         saveButton.setEnabled(false);
         HorizontalLayout results = new HorizontalLayout();
@@ -221,39 +244,40 @@ public class PowersUploadView extends VerticalLayout {
         });
         upload.getElement().addEventListener("file-remove", event -> output.removeAll());
 
-        dialog.add(output, saveButton, results);
+        dialog.add(output, results);
+        dialog.setConfirmButton(saveButton);
 
         add(new Paragraph("Accepted file format: MS Excel (.xlsx)"));
         add(upload);
     }
 
-    private void handleOrphanedPowers(SessionService sessionService) {
+    private void handleOrphanedPowers() {
         for (Power power : updatedPowers) {
             if (power.getPowerSets() == null) {
                 log.info("Newly orphaned power " + power.getName());
-                deletePowerFromUsers(power, sessionService);
+                deletePowerFromUsers(power);
             }
         }
         for (Power power : unchangedPowers) {
             if (power.getPowerSets() == null) {
                 log.info("Older orphaned power " + power.getName());
-                deletePowerFromUsers(power, sessionService);
+                deletePowerFromUsers(power);
             }
         }
     }
 
-    private void handleDeletedPowers(SessionService sessionService) {
+    private void handleDeletedPowers() {
         if (deletedPowers.isEmpty()) {
             return;
         }
         for (Power power : deletedPowers) {
-            deletePowerFromUsers(power, sessionService);
-            sessionService.getPowerRepo().delete(power);
+            deletePowerFromUsers(power);
+            powerRepository.delete(power);
         }
     }
 
-    private void deletePowerFromUsers(Power power, SessionService sessionService) {
-        List<HeroPower> heroPowers = sessionService.getHpRepo().findAllByPower(power);
+    private void deletePowerFromUsers(Power power) {
+        List<HeroPower> heroPowers = heroPowerRepository.findAllByPower(power);
         for (HeroPower heroPower : heroPowers) {
             //log.info("Deletion target"+heroPower.toString());
             Message message = new Message();
@@ -261,8 +285,8 @@ public class PowersUploadView extends VerticalLayout {
             message.setText("The " + power.getName() + " power has been removed from the game and removed from your character: "
                     + heroPower.getPlayerCharacter().getName()+". Consult with your GM and choose a new power."
             );
-            sessionService.getMessageRepository().save(message);
-            sessionService.getHpRepo().delete(heroPower);
+            messageRepository.save(message);
+            heroPowerRepository.delete(heroPower);
         }/*
         List<HeroSubPower> heroSubPowers = sessionService.getHspRepo().findAllByPower(power);
         for (HeroSubPower heroSubPower : heroSubPowers) {
@@ -317,4 +341,8 @@ public class PowersUploadView extends VerticalLayout {
     }
 
 
+    @Override
+    public String getTitle() {
+        return "Upload PowerSet Spreadsheet";
+    }
 }

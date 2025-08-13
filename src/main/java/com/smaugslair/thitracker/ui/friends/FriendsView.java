@@ -1,22 +1,30 @@
 package com.smaugslair.thitracker.ui.friends;
 
-import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.ui.MainView;
+import com.smaugslair.thitracker.ui.components.AbstractMainView;
+import com.smaugslair.thitracker.ui.components.TitleBar;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.spring.annotation.UIScope;
 import jakarta.annotation.security.PermitAll;
+import org.springframework.stereotype.Component;
 
+@Component
 @PermitAll
 @PageTitle("Friends Page")
 @Route(value = "friends", layout = MainView.class)
-public class FriendsView extends SplitLayout {
-    private final SessionService sessionService;
+@UIScope
+public class FriendsView extends AbstractMainView {
 
-    public FriendsView(SessionService sessionService) {
-        this.sessionService = sessionService;
+    private final FriendFinder friendFinder;
+    private final FriendsList friendsList;
+
+    public FriendsView(TitleBar titleBar, FriendFinder friendFinder, FriendsList friendsList) {
+        super(titleBar);
+        this.friendFinder = friendFinder;
+        this.friendsList = friendsList;
         init();
-        sessionService.getTitleBar().setTitle("Friends");
     }
 
     public void refresh() {
@@ -25,11 +33,16 @@ public class FriendsView extends SplitLayout {
     }
 
     private void init() {
-        addToPrimary(new FriendsList(sessionService));
-        addToSecondary(new FriendFinder(this, sessionService));
+        SplitLayout splitLayout = new SplitLayout();
+        splitLayout.setWidthFull();
+        add(splitLayout);
+        splitLayout.addToPrimary(friendsList);
+        splitLayout.addToSecondary(friendFinder);
     }
 
 
-
-
+    @Override
+    public String getTitle() {
+        return "Friends";
+    }
 }

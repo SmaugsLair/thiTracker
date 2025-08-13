@@ -1,77 +1,35 @@
 package com.smaugslair.thitracker.services;
 
-import com.smaugslair.thitracker.data.atd.AtdRepository;
-import com.smaugslair.thitracker.data.game.GameRepository;
-import com.smaugslair.thitracker.data.game.TimeLineItemRepository;
-import com.smaugslair.thitracker.data.log.EntryRepository;
-import com.smaugslair.thitracker.data.pc.HeroPowerRepository;
-import com.smaugslair.thitracker.data.pc.HeroPowerSetRepository;
-import com.smaugslair.thitracker.data.pc.PlayerCharacter;
-import com.smaugslair.thitracker.data.pc.PlayerCharacterRepository;
-import com.smaugslair.thitracker.data.powers.PowerRepository;
-import com.smaugslair.thitracker.data.powers.PowerSetRepository;
-import com.smaugslair.thitracker.data.templates.TemplateRepository;
-import com.smaugslair.thitracker.data.user.*;
-import com.smaugslair.thitracker.ui.components.TitleBar;
-import com.smaugslair.thitracker.ui.components.events.HeroCountListener;
+import com.smaugslair.thitracker.data.user.User;
+import com.smaugslair.thitracker.data.user.UserRepository;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.stereotype.Component;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.core.OAuth2AuthenticatedPrincipal;
+import org.springframework.stereotype.Service;
 
-@Component
+import java.util.Optional;
+
+@Service
 @VaadinSessionScope
 public class SessionService {
+
+    private static final Logger log = LoggerFactory.getLogger(SessionService.class);
 
     @Value("${thi.appurl}")
     private String appUrl;
 
-    //private final CacheService cacheService;
-    private Long gameId;
-    private PlayerCharacter pc;
     private User user;
 
-    private JavaMailSender javaMailSender;
-    private PowersCache powersCache;
 
-    private AtdRepository atdRepo;
-    private CollectedItemRepository ciRepo;
-    private PowerRepository powerRepo;
-    private PowerSetRepository powerSetRepo;
-    private FriendshipRepository friendsRepo;
-    private UserRepository userRepository;
-    private TimeLineItemRepository tliRepo;
-    private GameRepository gameRepo;
-    private PlayerCharacterRepository pcRepo;
-    private EntryRepository entryRepo;
-    private HeroPowerSetRepository hpsRepo;
-    private HeroPowerRepository hpRepo;
-    // private HeroSubPowerRepository hspRepo;
-    private TitleBar titleBar;
-    private FreemarkerService freemarkerService;
-    private TemplateRepository templateRepository;
-    private MessageRepository messageRepository;
-    private HeroCountListener heroCountListener;
+    private final UserRepository userRepository;
 
-    public SessionService(/*CacheService cacheService*/) {
-        /*this.cacheService = cacheService;*/
-    }
-
-    public Long getGameId() {
-        return gameId;
-    }
-
-    public void setGameId(Long gameId) {
-        this.gameId = gameId;
-    }
-
-    public PlayerCharacter getPc() {
-        return pc;
-    }
-
-    public void setPc(PlayerCharacter pc) {
-        this.pc = pc;
+    public SessionService(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     public User getUser() {
@@ -82,197 +40,80 @@ public class SessionService {
         this.user = user;
     }
 
-    public void refreshPc() {
-        if (pc != null) {
-            pc = pcRepo.findById(pc.getId()).orElse(pc);
-            //pc= cacheService.getPcCache().findOneById(pc.getId()).orElse(pc);
-        }
-    }
-
-    public FriendshipRepository getFriendsRepo() {
-        return friendsRepo;
-    }
-
-    @Autowired
-    public void setFriendsRepo(FriendshipRepository friendsRepo) {
-        this.friendsRepo = friendsRepo;
-    }
-
-    public PowerRepository getPowerRepo() {
-        return powerRepo;
-    }
-
-    @Autowired
-    public void setPowerRepo(PowerRepository powerRepo) {
-        this.powerRepo = powerRepo;
-    }
-
-    public PowerSetRepository getPowerSetRepo() {
-        return powerSetRepo;
-    }
-
-    @Autowired
-    public void setPowerSetRepo(PowerSetRepository powerSetRepo) {
-        this.powerSetRepo = powerSetRepo;
-    }
-
-    public JavaMailSender getJavaMailSender() {
-        return javaMailSender;
-    }
-
-    @Autowired
-    public void setJavaMailSender(JavaMailSender javaMailSender) {
-        this.javaMailSender = javaMailSender;
-    }
-
-    public UserRepository getUserRepository() {
-        return userRepository;
-    }
-
-    @Autowired
-    public void setUserRepository(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
-
-    public PowersCache getPowersCache() {
-        return powersCache;
-    }
-
-    @Autowired
-    public void setPowersCache(PowersCache powersCache) {
-        this.powersCache = powersCache;
-    }
-/*
-    public CacheService getCacheService() {
-        return cacheService;
-    }*/
-
-
-    public AtdRepository getAtdRepo() {
-        return atdRepo;
-    }
-
-    @Autowired
-    public void setAtdRepo(AtdRepository atdRepository) {
-        this.atdRepo = atdRepository;
-    }
-
-    public CollectedItemRepository getCiRepo() {
-        return ciRepo;
-    }
-
-    @Autowired
-    public void setCiRepo(CollectedItemRepository ciRepo) {
-        this.ciRepo = ciRepo;
-    }
-
-    public TimeLineItemRepository getTliRepo() {
-        return tliRepo;
-    }
-
-    @Autowired
-    public void setTliRepo(TimeLineItemRepository tliRepo) {
-        this.tliRepo = tliRepo;
-    }
-
-    public GameRepository getGameRepo() {
-        return gameRepo;
-    }
-
-    @Autowired
-    public void setGameRepo(GameRepository gameRepo) {
-        this.gameRepo = gameRepo;
-    }
-
-    public PlayerCharacterRepository getPcRepo() {
-        return pcRepo;
-    }
-
-    @Autowired
-    public void setPcRepo(PlayerCharacterRepository pcRepo) {
-        this.pcRepo = pcRepo;
-    }
-
-    public EntryRepository getEntryRepo() {
-        return entryRepo;
-    }
-
-    @Autowired
-    public void setEntryRepo(EntryRepository entryRepo) {
-        this.entryRepo = entryRepo;
-    }
-
-    public HeroPowerSetRepository getHpsRepo() {
-        return hpsRepo;
-    }
-
-    @Autowired
-    public void setHpsRepo(HeroPowerSetRepository hpsRepo) {
-        this.hpsRepo = hpsRepo;
-    }
-
-    public HeroPowerRepository getHpRepo() {
-        return hpRepo;
-    }
-
-    @Autowired
-    public void setHpRepo(HeroPowerRepository hpRepo) {
-        this.hpRepo = hpRepo;
-    }/*
-
-    public HeroSubPowerRepository getHspRepo() {
-        return hspRepo;
-    }
-
-    @Autowired
-    public void setHspRepo(HeroSubPowerRepository hspRepo) {
-        this.hspRepo = hspRepo;
-    }*/
-
-    public TitleBar getTitleBar() {
-        return titleBar;
-    }
-
-    public void setTitleBar(TitleBar titleBar) {
-        this.titleBar = titleBar;
-    }
-
-    public FreemarkerService getFreemarkerService() {
-        return freemarkerService;
-    }
-
-    @Autowired
-    public void setFreemarkerService(FreemarkerService freemarkerService) {
-        this.freemarkerService = freemarkerService;
-    }
-
-    public TemplateRepository getTemplateRepository() {
-        return templateRepository;
-    }
-
-    @Autowired
-    public void setTemplateRepository(TemplateRepository templateRepository) {
-        this.templateRepository = templateRepository;
-    }
-
-
-    public MessageRepository getMessageRepository() {
-        return messageRepository;
-    }
-
-    @Autowired
-    public void setMessageRepository(MessageRepository messageRepository) {
-        this.messageRepository = messageRepository;
-    }
-
-
     public String getAppUrl() {
         return appUrl;
     }
-    
-    public HeroCountListener getHeroCountListener() { return heroCountListener;}
 
-    public void addHeroCountListener(HeroCountListener heroCountListener) {
-        this.heroCountListener = heroCountListener;
+    public boolean isUserLoggedIn() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null
+                && !(authentication instanceof AnonymousAuthenticationToken)
+                && authentication.isAuthenticated();
     }
+
+    public User getLoggedInUser() {
+        if(isUserLoggedIn()) {
+            if (user != null) {
+                return user;
+            }
+            OAuth2AuthenticatedPrincipal principal = (OAuth2AuthenticatedPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+            String email = principal.getAttribute("email");
+            if (email != null) {
+                Optional<User> optionalUser = userRepository.findUserByEmail(email);
+                if (optionalUser.isPresent()) {
+                    log.info("Logged in user:"+ email);
+                    user = optionalUser.get();
+                    return user;
+                }
+                else {
+                    User newUser = new User();
+                    newUser.setEmail(email);
+                    newUser.setAdmin(false);
+                    String first = principal.getAttribute("given_name");
+                    String last = principal.getAttribute("family_name");
+
+                    String displayName = findAvailableDisplayName(first + last.substring(0, 1), 0, userRepository);
+
+                    newUser.setDisplayName(displayName);
+                    newUser.setFriendCode(generateFriendCode());
+
+                    log.info("Added and logged in new user:"+ email);
+                    newUser = userRepository.save(newUser);
+                    user = newUser;
+                    return user;
+                }
+            }
+        }
+        return null;
+    }
+
+    private String findAvailableDisplayName(String displayName, Integer count, UserRepository userRepository) {
+        log.info("Finding available display name: " + displayName+", count"+count);
+        String testname = displayName;
+        if (count > 0) {
+            testname = displayName + count;
+        }
+        Optional<User> optionalUser = userRepository.findUserByDisplayName(testname);
+        if (optionalUser.isPresent()) {
+            return findAvailableDisplayName(displayName, ++count, userRepository);
+        }
+        else  {
+            return testname;
+        }
+    }
+
+    private String generateFriendCode() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 4; ++i) {
+            sb.append((int)(Math.random() * 10));
+        }
+        return sb.toString();
+
+    }
+
+    public void logout() {
+        SecurityContextHolder.getContext().setAuthentication(null);
+    }
+
 }

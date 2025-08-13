@@ -1,29 +1,38 @@
 package com.smaugslair.thitracker.ui.friends;
 
 import com.smaugslair.thitracker.data.user.Friendship;
+import com.smaugslair.thitracker.data.user.FriendshipRepository;
 import com.smaugslair.thitracker.data.user.User;
-import com.smaugslair.thitracker.security.SecurityUtils;
+import com.smaugslair.thitracker.data.user.UserRepository;
 import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.ui.components.UserSafeButton;
+import com.smaugslair.thitracker.util.BeanFinder;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.spring.annotation.UIScope;
+import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
-
+@Component
+@UIScope
 public class FriendFinder extends VerticalLayout {
 
     private final SessionService sessionService;
-    private final FriendsView friendsView;
+    //private final FriendsView friendsView;
     private final User self;
+    private final FriendshipRepository friendshipRepository;
+    private final UserRepository userRepository;
     private User friend = null;
 
-    public FriendFinder(FriendsView friendsView, SessionService sessionService) {
+    public FriendFinder(SessionService sessionService, FriendshipRepository friendshipRepository, UserRepository userRepository) {
         this.sessionService = sessionService;
-        self = SecurityUtils.getLoggedInUser(sessionService);
-        this.friendsView = friendsView;
+        self = sessionService.getLoggedInUser();
+        //this.friendsView = friendsView;
+        this.friendshipRepository = friendshipRepository;
+        this.userRepository = userRepository;
         init();
     }
 
@@ -47,15 +56,14 @@ public class FriendFinder extends VerticalLayout {
             friendship.setAccepted(false);
             friendship.setUser(self);
             friendship.setFriend(friend);
-            sessionService.getFriendsRepo().save(friendship);
-            //sendEmail(friend);
-            friendsView.refresh();
+            friendshipRepository.save(friendship);
+            BeanFinder.getBean(FriendsView.class).refresh();
         });
         request.setVisible(false);
 
         Button button = new UserSafeButton("Find", event -> {
             request.setVisible(false);
-            Optional<User> optionalUser = sessionService.getUserRepository().findUserByDisplayName(nameField.getValue());
+            Optional<User> optionalUser = userRepository.findUserByDisplayName(nameField.getValue());
             if (optionalUser.isPresent()) {
                 User user = optionalUser.get();
                 if (user.equals(self)) {
@@ -65,7 +73,7 @@ public class FriendFinder extends VerticalLayout {
                 if (!user.getFriendCode().equals(friendCode.getValue())) {
                     message.setText("Not found");
                 }
-                Optional<Friendship> friendship = sessionService.getFriendsRepo().findByUserAndFriend(user, self);
+                Optional<Friendship> friendship = friendshipRepository.findByUserAndFriend(user, self);
                 if (friendship.isPresent()) {
                     if (friendship.get().getAccepted()) {
                         message.setText("Already friends with " + user.getDisplayName());
@@ -75,7 +83,7 @@ public class FriendFinder extends VerticalLayout {
                     }
                     return;
                 }
-                friendship = sessionService.getFriendsRepo().findByUserAndFriend(self, user);
+                friendship = friendshipRepository.findByUserAndFriend(self, user);
                 if (friendship.isPresent()) {
                     if (friendship.get().getAccepted()) {
                         message.setText("Already friends with " + user.getDisplayName());

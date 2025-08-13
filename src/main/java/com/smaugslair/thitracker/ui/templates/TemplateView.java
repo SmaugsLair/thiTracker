@@ -2,13 +2,13 @@ package com.smaugslair.thitracker.ui.templates;
 
 import com.smaugslair.thitracker.data.templates.Template;
 import com.smaugslair.thitracker.data.templates.TemplateRepository;
-import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.ui.MainView;
+import com.smaugslair.thitracker.ui.components.AbstractMainView;
+import com.smaugslair.thitracker.ui.components.ConfirmDialog;
+import com.smaugslair.thitracker.ui.components.TitleBar;
 import com.smaugslair.thitracker.ui.components.UserSafeButton;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -17,17 +17,18 @@ import jakarta.annotation.security.PermitAll;
 @PermitAll
 @PageTitle("Template")
 @Route(value = "template", layout = MainView.class)
-public class TemplateView extends VerticalLayout {
+public class TemplateView extends AbstractMainView {
 
     private final TemplateRepository templateRepository;
-    private final Dialog editTemplateDialog;
-    private final TemplateForm templateForm;
 
-    public TemplateView(SessionService sessionService, TemplateRepository templateRepository) {
-        sessionService.getTitleBar().setTitle("Manage templates");
+    private ConfirmDialog editTemplateDialog;
+    private TemplateForm templateForm;
+
+    public TemplateView( TitleBar titleBar, TemplateRepository templateRepository) {
+        super(titleBar);
         this.templateRepository = templateRepository;
 
-        editTemplateDialog = new Dialog();
+        editTemplateDialog = new ConfirmDialog();
         editTemplateDialog.setWidthFull();
         templateForm = new TemplateForm();
         editTemplateDialog.add(templateForm);
@@ -40,7 +41,7 @@ public class TemplateView extends VerticalLayout {
                 init();
             }
         });
-        editTemplateDialog.add(saveTemplate);
+        editTemplateDialog.setConfirmButton(saveTemplate);
         init();
     }
 
@@ -90,6 +91,11 @@ public class TemplateView extends VerticalLayout {
     private void editTemplate(Template template) {
         templateForm.setTemplate(template);
         editTemplateDialog.open();
+    }
+
+    @Override
+    public String getTitle() {
+        return "Manage templates";
     }
 
 

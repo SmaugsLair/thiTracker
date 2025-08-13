@@ -1,15 +1,21 @@
 package com.smaugslair.thitracker.ui.players;
 
-import com.smaugslair.thitracker.services.SessionService;
+import com.smaugslair.thitracker.services.UIService;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DiceRollView extends HorizontalLayout {
 
+    private final static Logger log = LoggerFactory.getLogger(DiceRollView.class);
+    private final UIService uiService;
 
-    public DiceRollView(SessionService sessionService) {
-        DiceRoller diceRoller = new DiceRoller(sessionService);
-        add(new RollChooser(sessionService, diceRoller));
-        add(diceRoller);
+    public DiceRollView(UIService uiService) {
+        this.uiService = uiService;
         setAlignItems(Alignment.START);
+
+        DiceRoller diceRoller = new DiceRoller(uiService);
+        add(new RollChooser(uiService.getPc(),  diceRoller));
+        add(diceRoller);
     }
 }

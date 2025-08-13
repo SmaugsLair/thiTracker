@@ -16,7 +16,7 @@ public class TraitField implements TraitRow {
     private final IntegerField pointField;
     private HorizontalLayout hl = null;
 
-    public TraitField(Trait trait, CharacterSheet sheet) {
+    public TraitField(Trait trait, CharacterEditor editor) {
         this.trait = trait;
 
         nameField = new TextField();
@@ -24,7 +24,7 @@ public class TraitField implements TraitRow {
         //nameField.setReadOnly(true);
         nameField.addValueChangeListener(event -> {
             trait.setName(event.getValue());
-            sheet.updatePC();
+            editor.updatePC();
         });
 
         pointField = new IntegerField();
@@ -34,16 +34,17 @@ public class TraitField implements TraitRow {
             pointField.setMax(1);
         }
         pointField.setStepButtonsVisible(true);
+        pointField.setWidth("110px");
         pointField.addValueChangeListener(event -> {
             trait.setPoints(event.getValue());
-            sheet.updatePC();
+            editor.updatePC();
         });
 
         if (trait.isDeletable()) {
             hl = new HorizontalLayout();
             hl.add(pointField);
             Button deleteButton = new UserSafeButton("X", event -> {
-                sheet.removeTrait(trait);
+                editor.removeTrait(trait);
             });
             hl.add(deleteButton);
         }

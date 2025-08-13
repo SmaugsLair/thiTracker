@@ -13,13 +13,14 @@ public class ProgressionPoint implements TraitRow {
     private final Component label = new Span(labelStr);
     private final IntegerField pointField = new IntegerField();
 
-    public ProgressionPoint(PlayerCharacter pc, CharacterSheet sheet) {
+    public ProgressionPoint(PlayerCharacter pc, CharacterEditor editor) {
         pointField.setValue(pc.getProgressionTokens());
         pointField.setMin(0);
         pointField.setStepButtonsVisible(true);
+        pointField.setWidth("110px");
         pointField. addValueChangeListener(event -> {
             pc.setProgressionTokens(event.getValue());
-            sheet.updatePC();
+            editor.updatePC();
         });
     }
 

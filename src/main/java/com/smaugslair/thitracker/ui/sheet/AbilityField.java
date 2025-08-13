@@ -8,7 +8,7 @@ public class AbilityField {
     private final AbilityScore abilityScore;
     private final TextField pointField = new TextField();
 
-    public AbilityField(AbilityScore abilityScore, CharacterSheet details) {
+    public AbilityField(AbilityScore abilityScore) {
         this.abilityScore = abilityScore;
         pointField.setValue(String.valueOf(abilityScore.getPoints()));
         pointField.setReadOnly(true);

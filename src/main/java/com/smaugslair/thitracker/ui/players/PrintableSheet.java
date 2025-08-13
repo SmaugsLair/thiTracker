@@ -1,47 +1,60 @@
 package com.smaugslair.thitracker.ui.players;
 
+import com.smaugslair.thitracker.data.game.GameRepository;
 import com.smaugslair.thitracker.data.pc.*;
 import com.smaugslair.thitracker.data.templates.Template;
+import com.smaugslair.thitracker.data.templates.TemplateRepository;
 import com.smaugslair.thitracker.data.user.User;
+import com.smaugslair.thitracker.data.user.UserRepository;
+import com.smaugslair.thitracker.services.FreemarkerService;
 import com.smaugslair.thitracker.services.SessionService;
+import com.smaugslair.thitracker.services.UIService;
+import com.smaugslair.thitracker.ui.components.TitleBar;
 import com.vaadin.flow.component.Html;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import org.apache.commons.lang3.tuple.MutableTriple;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
 @PermitAll
 @Route("printableSheet")
-public class PrintableSheet extends VerticalLayout {
+public class PrintableSheet extends AbstractHeroView {
 
-    private static final Logger log = LoggerFactory.getLogger(PrintableSheet.class);
+    //private static final Logger log = LoggerFactory.getLogger(PrintableSheet.class);
 
-    //private final SessionService sessionService;
-    //private final IFrame iFrame = new IFrame();
+    private final TemplateRepository templateRepository;
+    private final SessionService sessionService;
+    private final HeroPowerSetRepository heroPowerSetRepository;
+    private final HeroPowerRepository heroPowerRepository;
+    private final FreemarkerService freemarkerService;
 
-    public PrintableSheet(SessionService sessionService) {
-        log.info("Constructor");
-        //this.sessionService = sessionService;
-        Optional<Template> template = sessionService.getTemplateRepository().findByName("charSheetTemplate");
+    protected PrintableSheet(UIService uiService, GameRepository gameRepository, PlayerCharacterRepository playerCharacterRepository, TitleBar titleBar, TemplateRepository templateRepository, UserRepository userRepository, SessionService sessionService, HeroPowerSetRepository heroPowerSetRepository, HeroPowerRepository heroPowerRepository, FreemarkerService freemarkerService) {
+        super(uiService, gameRepository, playerCharacterRepository, titleBar);
+        this.templateRepository = templateRepository;
+        this.sessionService = sessionService;
+        this.heroPowerSetRepository = heroPowerSetRepository;
+        this.heroPowerRepository = heroPowerRepository;
+        this.freemarkerService = freemarkerService;
+    }
+
+
+    protected void init() {
+        Optional<Template> template = templateRepository.findByName("charSheetTemplate");
         if (template.isPresent()) {
             final Map<String, Object> root = new HashMap<>();
             User user = sessionService.getUser();
             root.put("user", user.getDisplayName());
-            PlayerCharacter pc = sessionService.getPc();
-            root.put("pc", pc);
+            root.put("pc", hero);
 
-            pc.getAbilityScores().forEach((ability, abilityScore) -> {
+            hero.getAbilityScores().forEach((ability, abilityScore) -> {
                 root.put(ability.getDisplayName(), abilityScore.getPoints());
             });
 
             Set<String> heroTraits = new HashSet<>();
             Set<String> dramaTraits = new HashSet<>();
 
-            for (Trait trait : pc.getTraits()) {
+            for (Trait trait : hero.getTraits()) {
                 switch (trait.getType()) {
                     case Hero:
                         heroTraits.add(trait.getName());
@@ -64,8 +77,8 @@ public class PrintableSheet extends VerticalLayout {
 
 
 
-            List<HeroPowerSet> heroPowerSets = sessionService.getHpsRepo().findAllByPlayerCharacter(pc);
-            List<HeroPower> heroPowers = sessionService.getHpRepo().findAllByPlayerCharacter(pc);
+            List<HeroPowerSet> heroPowerSets = heroPowerSetRepository.findAllByPlayerCharacter(hero);
+            List<HeroPower> heroPowers = heroPowerRepository.findAllByPlayerCharacter(hero);
 
             int maxPowerRow = Math.max(heroPowers.size()+1, 11);
 
@@ -113,9 +126,9 @@ public class PrintableSheet extends VerticalLayout {
             }
             root.put("totalPowers", totalPowers);
 
-            log.info(root.keySet().toString());
+            //log.info(root.keySet().toString());
 
-            String text = sessionService.getFreemarkerService().applyTemplate(template.get().getText(), root);
+            String text = freemarkerService.applyTemplate(template.get().getText(), root);
             add(new Html(text));
         }
         else {

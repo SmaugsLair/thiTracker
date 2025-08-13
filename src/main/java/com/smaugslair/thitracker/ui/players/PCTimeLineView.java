@@ -1,59 +1,70 @@
 package com.smaugslair.thitracker.ui.players;
 
 import com.smaugslair.thitracker.data.game.Game;
+import com.smaugslair.thitracker.data.game.GameRepository;
 import com.smaugslair.thitracker.data.game.TimeLineItem;
+import com.smaugslair.thitracker.data.game.TimeLineItemRepository;
 import com.smaugslair.thitracker.data.log.Entry;
 import com.smaugslair.thitracker.data.log.EventType;
-import com.smaugslair.thitracker.services.SessionService;
+import com.smaugslair.thitracker.services.UIService;
+import com.smaugslair.thitracker.ui.components.events.AppEvent;
+import com.smaugslair.thitracker.ui.components.events.AppEventListener;
+import com.smaugslair.thitracker.util.BeanFinder;
 import com.smaugslair.thitracker.websockets.RegisteredVerticalLayout;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.router.BeforeEvent;
+import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.spring.annotation.RouteScope;
 import jakarta.annotation.security.PermitAll;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @PermitAll
 @CssImport(value = "./styles/color.css", themeFor = "vaadin-grid")
 @CssImport(value = "./styles/minPadding.css", themeFor = "vaadin-grid")
 @Route(value = "pcTimeLineView")
-public class PCTimeLineView extends RegisteredVerticalLayout {
+@Component
+@RouteScope
+public class PCTimeLineView extends RegisteredVerticalLayout implements AppEventListener, HasUrlParameter<Long> {
 
-    private static final Logger log = LoggerFactory.getLogger(PCTimeLineView.class);
+    //private static final Logger log = LoggerFactory.getLogger(PCTimeLineView.class);
 
-    private final SessionService sessionService;
+    private final UIService uiService;
+    private final TimeLineItemRepository timeLineItemRepository;
 
-    public PCTimeLineView(SessionService sessionService) {
-        this.sessionService = sessionService;
-        init();
+    private Game game = null;
+
+    public PCTimeLineView(UIService uiService, TimeLineItemRepository timeLineItemRepository) {
+        this.uiService = uiService;
+        this.timeLineItemRepository = timeLineItemRepository;
+
+        uiService.addAppEventListener(this);
+        //log.info("PCTimeLineView created");
     }
 
     public void init() {
+        //log.info("PCTimeLineView init");
+        removeAll();
 
-        Long gameId = sessionService.getGameId();
-
-        if (gameId == null) {
-            add(new H1("No Game loaded"));
-            return;
-        }
-
-        final Game game = sessionService.getGameRepo().findById(gameId).orElse(new Game());
-        if (game.getId() == null) {
+        //final Game game = uiService.getGame();
+        if (game == null || game.getId() == null) {
             add(new H1("Game not found"));
             return;
         }
 
-        List<TimeLineItem> items = sessionService.getTliRepo().findByGameId(gameId)
+        List<TimeLineItem> items = timeLineItemRepository.findByGameId(game.getId())
                 .stream().filter(item -> !item.getHidden()).sorted().collect(Collectors.toList());
 
 
         TimeLineItem lastEvent = null;
         if (game.getLastEventId() != null) {
-            lastEvent = sessionService.getTliRepo().findById(game.getLastEventId()).orElse(null);
+            lastEvent = timeLineItemRepository.findById(game.getLastEventId()).orElse(null);
         }
 
         for (TimeLineItem item : items) {
@@ -79,11 +90,32 @@ public class PCTimeLineView extends RegisteredVerticalLayout {
 
     @Override
     protected void handleMessage(Entry entry) {
-        if (EventType.GMAction.equals(entry.getType())) {
-            if (entry.getGameId().equals(sessionService.getGameId())) {
-                removeAll();
+        if (EventType.GMAction.equals(entry.getType()) && game != null) {
+            if (entry.getGameId().equals(game.getId())) {
+                //log.info("PCTimeLineView handleMessage");
                 init();
             }
         }
+    }
+
+    @Override
+    public void onAppEvent(AppEvent e) {
+        if (AppEvent.AppEventType.GameChosen.equals(e.getType())) {
+            //log.info("PCTimeLineView onAppEvent");
+            game = uiService.getGame();
+            init();
+        }
+    }
+
+    @Override
+    public void setParameter(BeforeEvent beforeEvent, Long gameId) {
+        Optional<Game> optionalGame = BeanFinder.getBean(GameRepository.class).findById(gameId);
+        if (optionalGame.isPresent()) {
+            game = optionalGame.get();
+        }
+        else {
+            game = null;
+        }
+        init();
     }
 }

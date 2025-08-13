@@ -3,9 +3,10 @@ package com.smaugslair.thitracker.ui.powers;
 import com.smaugslair.thitracker.data.powers.Power;
 import com.smaugslair.thitracker.data.powers.PowerFilter;
 import com.smaugslair.thitracker.services.PowersCache;
-import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.ui.MainView;
 import com.smaugslair.thitracker.ui.components.FilterField;
+import com.smaugslair.thitracker.ui.components.TitleBar;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.grid.GridSortOrderBuilder;
@@ -14,20 +15,39 @@ import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.NativeButtonRenderer;
 import com.vaadin.flow.router.*;
+import com.vaadin.flow.spring.annotation.UIScope;
 import jakarta.annotation.security.PermitAll;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @PermitAll
 @PageTitle("Power Browser")
 @Route(value = "powerbrowser", layout = MainView.class)
-public class PowerBrowserView extends Grid<Power> implements HasUrlParameter<String> {
+@UIScope
+@Component
+public class PowerBrowserView extends Grid<Power> implements HasUrlParameter<String>, BeforeEnterListener {
+
+
+    //private final static Logger log = LoggerFactory.getLogger(PowerSetBrowserView.class);
+    private final TitleBar titleBar;
+    private final PowersCache powersCache;
 
     private FilterField tagField;
 
-    public PowerBrowserView(SessionService sessionService, PowersCache powersCache) {
+    public PowerBrowserView(TitleBar titleBar, PowersCache powersCache) {
+        this.titleBar = titleBar;
+        this.powersCache = powersCache;
+        UI.getCurrent().addBeforeEnterListener(this);
+        titleBar.setTitle("Power Browser");
+        init();
+    }
 
-        sessionService.getTitleBar().setTitle("Power Browser");
+    public void init() {
+
+        //log.info("Initializing Power Browser");
+
+
         setHeightFull();
 
         boolean showBugs = false;
@@ -81,6 +101,14 @@ public class PowerBrowserView extends Grid<Power> implements HasUrlParameter<Str
     public void setParameter(BeforeEvent beforeEvent, @OptionalParameter String tag) {
         if (tag != null) {
             tagField.setValue(tag);
+        }
+    }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent beforeEnterEvent) {
+        if (beforeEnterEvent.getNavigationTarget().equals(this.getClass())) {
+            //log.info("Before Enter : " + beforeEnterEvent.getNavigationTarget());
+            titleBar.setTitle("Power Browser");
         }
     }
 }

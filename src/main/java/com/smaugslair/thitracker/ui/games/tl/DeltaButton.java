@@ -3,9 +3,11 @@ package com.smaugslair.thitracker.ui.games.tl;
 import com.smaugslair.thitracker.data.atd.ActionTimeDefault;
 import com.smaugslair.thitracker.data.game.ActionTimeDelta;
 import com.smaugslair.thitracker.data.game.TimeLineItem;
+import com.smaugslair.thitracker.data.game.TimeLineItemRepository;
 import com.smaugslair.thitracker.ui.components.ConfirmDialog;
 import com.smaugslair.thitracker.ui.components.UserSafeButton;
 import com.smaugslair.thitracker.ui.games.GMTimeLineView;
+import com.smaugslair.thitracker.util.BeanFinder;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
@@ -14,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DeltaButton extends Button {
+
 
     private final Map<String, IntegerField> fieldMap = new HashMap<>();
 
@@ -42,7 +45,7 @@ public class DeltaButton extends Button {
                 ActionTimeDelta delta = item.getDeltas().get(atd.getName());
                 delta.setDelta(fieldMap.get(delta.getName()).getValue());
             }
-            gmTimeLineView.getTliRepo().save(item);
+            BeanFinder.getBean(TimeLineItemRepository.class).save(item);
             deltaDialog.close();
             gmTimeLineView.refreshAndBroadcast();
         });

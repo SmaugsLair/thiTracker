@@ -1,6 +1,7 @@
 package com.smaugslair.thitracker.ui.games.tl;
 
 import com.smaugslair.thitracker.data.game.TimeLineItem;
+import com.smaugslair.thitracker.data.game.TimeLineItemRepository;
 import com.smaugslair.thitracker.ui.components.UserSafeButton;
 import com.smaugslair.thitracker.ui.games.GMTimeLineView;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -14,12 +15,12 @@ import java.util.stream.Collectors;
 
 public class InitiativeDialog extends Dialog {
 
-    public InitiativeDialog(GMTimeLineView gmTimeLineView) {
+    public InitiativeDialog(GMTimeLineView gmTimeLineView, TimeLineItemRepository timeLineItemRepository) {
 
         setModal(true);
 
 
-        List<TimeLineItem> items = gmTimeLineView.getTliRepo().findByGameId(gmTimeLineView.getGameId()).stream()
+        List<TimeLineItem> items = timeLineItemRepository.findByGameId(gmTimeLineView.getGameId()).stream()
                 .sorted().collect(Collectors.toList());
 
         Grid<TimeLineItem> grid = new Grid<>();

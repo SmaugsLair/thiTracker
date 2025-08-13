@@ -3,10 +3,12 @@ package com.smaugslair.thitracker.ui.powers;
 import com.smaugslair.thitracker.data.powers.Power;
 import com.smaugslair.thitracker.data.powers.PowerSet;
 import com.smaugslair.thitracker.data.templates.Template;
+import com.smaugslair.thitracker.data.templates.TemplateRepository;
+import com.smaugslair.thitracker.services.FreemarkerService;
 import com.smaugslair.thitracker.services.PowersCache;
-import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.ui.components.FormattedTextBlock;
 import com.smaugslair.thitracker.ui.components.UserSafeButton;
+import com.smaugslair.thitracker.util.BeanFinder;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -24,13 +26,13 @@ import java.util.*;
 @JsModule("./src/copytoclipboard.js")
 public class PowerSetDetail extends VerticalLayout {
 
-
     private Map<String, Object> root = new HashMap<>();
 
     private final TextArea textArea = new TextArea();
     private final Dialog dialog = new Dialog();
 
-    public PowerSetDetail(SessionService sessionService, PowerSet powerSet, PowersCache powersCache) {
+    public PowerSetDetail(PowerSet powerSet, PowersCache powersCache) {
+
         textArea.setWidthFull();
         Button button = new Button("Copy to clipboard", VaadinIcon.COPY.create());
         button.addClickListener(
@@ -42,9 +44,9 @@ public class PowerSetDetail extends VerticalLayout {
 
 
         add(new UserSafeButton("Text version", buttonClickEvent -> {
-            Optional<Template> template = sessionService.getTemplateRepository().findByName("powerSetTemplate");
+            Optional<Template> template = BeanFinder.getBean(TemplateRepository.class).findByName("powerSetTemplate");
             if (template.isPresent()) {
-                String text = sessionService.getFreemarkerService().applyTemplate(template.get().getText(), root);
+                String text = BeanFinder.getBean(FreemarkerService.class).applyTemplate(template.get().getText(), root);
                 textArea.setValue(text);
             }
             else {
@@ -102,5 +104,7 @@ public class PowerSetDetail extends VerticalLayout {
 
 
     }
+
+
 
 }

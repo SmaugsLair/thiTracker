@@ -4,7 +4,8 @@ import com.smaugslair.thitracker.data.pc.*;
 import com.smaugslair.thitracker.data.powers.Power;
 import com.smaugslair.thitracker.data.powers.PowerMod;
 import com.smaugslair.thitracker.rules.Ability;
-import com.smaugslair.thitracker.services.SessionService;
+import com.smaugslair.thitracker.services.PowersCache;
+import com.smaugslair.thitracker.util.BeanFinder;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Span;
@@ -23,17 +24,15 @@ public class PowerSetEditor extends VerticalLayout {
     private final static Logger log = LoggerFactory.getLogger(PowerSetEditor.class);
 
     private PlayerCharacter pc;
-    private final SessionService sessionService;
-    private final CharacterSheet characterSheet;
+    private final HeroPowerSetHolder heroPowerSetHolder;
     private HeroPowerSet heroPowerSet;
     private List<HeroPower> heroPowers;
     Map<Integer, SortedSet<Power>> powerMap;
 
     private Integer currentTier = 1;
 
-    public PowerSetEditor(CharacterSheet characterSheet, SessionService sessionService) {
-        this.sessionService = sessionService;
-        this.characterSheet = characterSheet;
+    public PowerSetEditor(HeroPowerSetHolder heroPowerSetHolder) {
+        this.heroPowerSetHolder = heroPowerSetHolder;
         //init();
     }
 
@@ -41,7 +40,7 @@ public class PowerSetEditor extends VerticalLayout {
         this.pc = pc;
         this.heroPowerSet = heroPowerSet;
         this.heroPowers = heroPowers;
-        powerMap = sessionService.getPowersCache().getPowersMap().get(heroPowerSet.getPowerSet().getName());
+        powerMap = BeanFinder.getBean(PowersCache.class).getPowersMap().get(heroPowerSet.getPowerSet().getName());
 
         init();
     }
@@ -64,10 +63,10 @@ public class PowerSetEditor extends VerticalLayout {
 
 
         String psName = heroPowerSet.getPowerSet().getName();
-        add(new Span("Choosing "+psName+" powers for " + characterSheet.getCharacterName()));
+        add(new Span("Choosing "+psName+" powers for " + pc.getName()));
 
         add(new Button("Remove "+psName+ " power set", event -> {
-            characterSheet.removeHeroPowerSet(heroPowerSet);
+            heroPowerSetHolder.removeHeroPowerSet(heroPowerSet);
         }));
 /*
         for (HeroPower heroPower: heroPowers) {
@@ -234,6 +233,6 @@ public class PowerSetEditor extends VerticalLayout {
     }
 
     public SortedSet<Power> getAllPowers() {
-        return sessionService.getPowersCache().getPowers();
+        return BeanFinder.getBean(PowersCache.class).getPowers();
     }
 }

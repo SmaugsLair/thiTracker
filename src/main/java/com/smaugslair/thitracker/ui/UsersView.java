@@ -3,38 +3,38 @@ package com.smaugslair.thitracker.ui;
 import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.data.user.UserFilter;
 import com.smaugslair.thitracker.data.user.UserRepository;
-import com.smaugslair.thitracker.services.SessionService;
-import com.smaugslair.thitracker.ui.components.FilterField;
-import com.smaugslair.thitracker.ui.components.UserSafeButton;
+import com.smaugslair.thitracker.ui.components.*;
 import com.smaugslair.thitracker.ui.users.UserForm;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.HeaderRow;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.spring.annotation.UIScope;
 import jakarta.annotation.security.PermitAll;
+import org.springframework.stereotype.Component;
 
 @PermitAll
 @PageTitle("User Admin Page")
 @Route(value = "useradmin", layout = MainView.class)
 @CssImport(value = "./styles/minPadding.css", themeFor = "vaadin-grid")
-public class UsersView extends VerticalLayout {
+@Component
+@UIScope
+public class UsersView extends AbstractMainView {
+
+    private ConfirmDialog editUserDialog;
+    private UserForm userForm;
 
     private final UserRepository userRepository;
-    private final Dialog editUserDialog;
-    private final UserForm userForm;
 
-
-    public UsersView(SessionService sessionService, UserRepository userRepository) {
-
-        sessionService.getTitleBar().setTitle("Manage Users");
+    public UsersView(TitleBar titleBar, UserRepository userRepository) {
+        super(titleBar);
         this.userRepository = userRepository;
 
-        editUserDialog = new Dialog();
+
+        editUserDialog = new ConfirmDialog();
         editUserDialog.setWidth("500px");
         userForm = new UserForm();
         editUserDialog.add(userForm);
@@ -47,7 +47,7 @@ public class UsersView extends VerticalLayout {
                 init();
             }
         });
-        editUserDialog.add(saveNewUser);
+        editUserDialog.setConfirmButton(saveNewUser);
         init();
     }
 
@@ -88,6 +88,11 @@ public class UsersView extends VerticalLayout {
     private void editUser(User user) {
         userForm.setUser(user);
         editUserDialog.open();
+    }
+
+    @Override
+    public String getTitle() {
+        return "Manage Users";
     }
 
     private class EditButton extends UserSafeButton {

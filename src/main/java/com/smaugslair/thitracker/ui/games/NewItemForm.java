@@ -2,7 +2,8 @@ package com.smaugslair.thitracker.ui.games;
 
 import com.smaugslair.thitracker.data.pc.PlayerCharacter;
 import com.smaugslair.thitracker.data.user.User;
-import com.smaugslair.thitracker.services.SessionService;
+import com.smaugslair.thitracker.data.user.UserRepository;
+import com.smaugslair.thitracker.util.BeanFinder;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
@@ -22,7 +23,7 @@ public class NewItemForm extends FormLayout {
     private final IntegerField timeField;
     private final Checkbox hidden;
 
-    public NewItemForm(List<PlayerCharacter> pcs, SessionService sessionService) {
+    public NewItemForm(List<PlayerCharacter> pcs) {
 
         radioGroup = new RadioButtonGroup<>();
         radioGroup.setItems("PC", "Other");
@@ -32,12 +33,12 @@ public class NewItemForm extends FormLayout {
         Div radioFields = new Div();
         pcField = new Select<>();
         pcField.setItemLabelGenerator(item -> item.getCharacterAndPlayerName(
-                sessionService.getUserRepository().findById(item.getUserId()).orElse(new User())));
+                BeanFinder.getBean(UserRepository.class).findById(item.getUserId()).orElse(new User())));
 
         otherField = new TextField();
         otherField.setPlaceholder("Other");
 
-        // = pcRepo.findAllByUserIdAndGameIdIsNull(SecurityUtils.getLoggedInUser(sessionService).getId());
+        // = pcRepo.findAllByUserIdAndGameIdIsNull(sessionService.getLoggedInUser().getId());
         pcField.setItems(pcs);
 
         if (pcs.isEmpty()) {

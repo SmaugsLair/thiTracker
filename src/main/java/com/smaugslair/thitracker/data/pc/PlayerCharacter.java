@@ -155,4 +155,14 @@ public class PlayerCharacter implements Comparable<PlayerCharacter> {
     public int compareTo(PlayerCharacter o) {
         return name.compareTo(o.name);
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("PlayerCharacter{");
+        sb.append("id=").append(id);
+        sb.append(", name='").append(name).append('\'');
+        sb.append(", pcPlayerName='").append(pcPlayerName).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
 }

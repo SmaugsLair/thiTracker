@@ -2,14 +2,16 @@ package com.smaugslair.thitracker.ui.games.tl;
 
 import com.smaugslair.thitracker.data.game.ActionTimeDelta;
 import com.smaugslair.thitracker.data.game.TimeLineItem;
+import com.smaugslair.thitracker.data.game.TimeLineItemRepository;
 import com.smaugslair.thitracker.data.user.CollectedDelta;
 import com.smaugslair.thitracker.data.user.CollectedItem;
 import com.smaugslair.thitracker.ui.games.GMTimeLineView;
+import com.smaugslair.thitracker.util.BeanFinder;
 import com.vaadin.flow.component.button.Button;
 
 public class ImportButton extends Button {
 
-    public ImportButton(CollectedItem item, GMTimeLineView gmTimeLineView) {
+    public ImportButton(CollectedItem item, Long gameId) {
         setText("Import");
         addClickListener(event -> {
             TimeLineItem tli = new TimeLineItem();
@@ -18,7 +20,7 @@ public class ImportButton extends Button {
             tli.setTime(0);
             tli.setStun(0);
             tli.setHidden(true);
-            tli.setGameId(gmTimeLineView.getGameID());
+            tli.setGameId(gameId);
             for(CollectedDelta delta : item.getDeltas()) {
                 ActionTimeDelta atd = new ActionTimeDelta();
                 atd.setName(delta.getName());
@@ -26,8 +28,8 @@ public class ImportButton extends Button {
                 atd.setTimeLineItem(tli);
                 tli.getDeltas().put(delta.getName(), atd);
             }
-            gmTimeLineView.getTliRepo().save(tli);
-            gmTimeLineView.refreshAndBroadcast();
+            BeanFinder.getBean(TimeLineItemRepository.class).save(tli);
+            BeanFinder.getBean(GMTimeLineView.class).refreshAndBroadcast();
         });
     }
 }

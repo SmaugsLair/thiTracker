@@ -1,15 +1,17 @@
 package com.smaugslair.thitracker.ui.players;
 
-import com.smaugslair.thitracker.data.pc.HeroPower;
-import com.smaugslair.thitracker.data.pc.HeroPowerSet;
-import com.smaugslair.thitracker.data.pc.HeroSubPower;
-import com.smaugslair.thitracker.data.pc.PlayerCharacter;
+import com.smaugslair.thitracker.data.game.GameRepository;
+import com.smaugslair.thitracker.data.pc.*;
 import com.smaugslair.thitracker.data.templates.Template;
+import com.smaugslair.thitracker.data.templates.TemplateRepository;
 import com.smaugslair.thitracker.data.user.User;
+import com.smaugslair.thitracker.data.user.UserRepository;
+import com.smaugslair.thitracker.services.FreemarkerService;
 import com.smaugslair.thitracker.services.SessionService;
+import com.smaugslair.thitracker.services.UIService;
+import com.smaugslair.thitracker.ui.components.TitleBar;
 import com.smaugslair.thitracker.util.AbilityModsRenderer;
 import com.vaadin.flow.component.Html;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import org.slf4j.Logger;
@@ -19,28 +21,37 @@ import java.util.*;
 
 @PermitAll
 @Route("printablePowers")
-public class PrintablePowers extends VerticalLayout {
+public class PrintablePowers extends AbstractHeroView {
 
     private static final Logger log = LoggerFactory.getLogger(PrintablePowers.class);
 
-    //private final SessionService sessionService;
-    //private final IFrame iFrame = new IFrame();
+    private final TemplateRepository templateRepository;
+    private final SessionService sessionService;
+    private final HeroPowerSetRepository heroPowerSetRepository;
+    private final HeroPowerRepository heroPowerRepository;
+    private final FreemarkerService freemarkerService;
 
-    public PrintablePowers(SessionService sessionService) {
-        //log.info("Constructor");
-        //this.sessionService = sessionService;
-        Optional<Template> template = sessionService.getTemplateRepository().findByName("powerPrintTemplate");
+    protected PrintablePowers(UIService uiService, GameRepository gameRepository, PlayerCharacterRepository playerCharacterRepository, TitleBar titleBar, TemplateRepository templateRepository, UserRepository userRepository, SessionService sessionService, HeroPowerSetRepository heroPowerSetRepository, HeroPowerRepository heroPowerRepository, FreemarkerService freemarkerService) {
+        super(uiService, gameRepository, playerCharacterRepository, titleBar);
+        this.templateRepository = templateRepository;
+        this.sessionService = sessionService;
+        this.heroPowerSetRepository = heroPowerSetRepository;
+        this.heroPowerRepository = heroPowerRepository;
+        this.freemarkerService = freemarkerService;
+    }
+
+    protected void init() {
+        Optional<Template> template = templateRepository.findByName("powerPrintTemplate");
         if (template.isPresent()) {
             final Map<String, Object> root = new HashMap<>();
             User user = sessionService.getUser();
             root.put("user", user.getDisplayName());
-            PlayerCharacter pc = sessionService.getPc();
-            root.put("pc", pc);
+            root.put("pc", hero);
 
             ArrayList<PrintableHeroPowerSet> powerSets = new ArrayList<>();
 
-            List<HeroPowerSet> heroPowerSets = sessionService.getHpsRepo().findAllByPlayerCharacter(pc);
-            List<HeroPower> heroPowers = sessionService.getHpRepo().findAllByPlayerCharacter(pc);
+            List<HeroPowerSet> heroPowerSets = heroPowerSetRepository.findAllByPlayerCharacter(hero);
+            List<HeroPower> heroPowers = heroPowerRepository.findAllByPlayerCharacter(hero);
 
             for (HeroPowerSet heroPowerSet : heroPowerSets) {
                 PrintableHeroPowerSet copy = new PrintableHeroPowerSet(heroPowerSet);
@@ -54,7 +65,7 @@ public class PrintablePowers extends VerticalLayout {
             root.put("powerSets", powerSets);
 
 
-            String text = sessionService.getFreemarkerService().applyTemplate(template.get().getText(), root);
+            String text = freemarkerService.applyTemplate(template.get().getText(), root);
             add(new Html(text));
         }
         else {

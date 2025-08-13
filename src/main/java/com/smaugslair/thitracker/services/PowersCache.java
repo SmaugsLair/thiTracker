@@ -4,7 +4,6 @@ import com.smaugslair.thitracker.data.powers.Power;
 import com.smaugslair.thitracker.data.powers.PowerRepository;
 import com.smaugslair.thitracker.data.powers.PowerSet;
 import com.smaugslair.thitracker.data.powers.PowerSetRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -12,8 +11,8 @@ import java.util.*;
 @Service
 public class PowersCache {
 
-    private PowerRepository powerRepo;
-    private PowerSetRepository powerSetRepo;
+    private final PowerRepository powerRepo;
+    private final PowerSetRepository powerSetRepo;
 
     private final SortedSet<PowerSet> powerSets = new TreeSet<>();
 
@@ -22,6 +21,11 @@ public class PowersCache {
     private final Map<String, PowerSet> powerSetMap = new HashMap<>();
 
     private final SortedSet<Power> powers = new TreeSet<>();
+
+    public PowersCache(PowerRepository powerRepo, PowerSetRepository powerSetRepo) {
+        this.powerRepo = powerRepo;
+        this.powerSetRepo = powerSetRepo;
+    }
 
     public synchronized Map<String, Map<Integer, SortedSet<Power>>> getPowersMap() {
         if (powersMap.isEmpty()) {
@@ -50,17 +54,6 @@ public class PowersCache {
         }
         return powerSets;
     }
-
-    @Autowired
-    public void setPowerRepo(PowerRepository powerRepo) {
-        this.powerRepo = powerRepo;
-    }
-
-    @Autowired
-    public void setPowerSetRepo(PowerSetRepository powerSetRepo) {
-        this.powerSetRepo = powerSetRepo;
-    }
-
 
     public synchronized void load() {
         powers.clear();

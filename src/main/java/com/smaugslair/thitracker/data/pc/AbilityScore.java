@@ -100,4 +100,8 @@ public class AbilityScore {
         sb.append('}');
         return sb.toString();
     }
+
+    public String getText() {
+        return ability.name() + " : " + getPoints();
+    }
 }

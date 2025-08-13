@@ -1,14 +1,12 @@
 package com.smaugslair.thitracker.ui.players;
 
-import com.smaugslair.thitracker.data.game.Game;
 import com.smaugslair.thitracker.data.log.Entry;
+import com.smaugslair.thitracker.data.log.EntryRepository;
 import com.smaugslair.thitracker.data.log.EventType;
-import com.smaugslair.thitracker.data.pc.AbilityScore;
-import com.smaugslair.thitracker.data.pc.PlayerCharacter;
-import com.smaugslair.thitracker.data.pc.Trait;
-import com.smaugslair.thitracker.data.pc.TraitType;
-import com.smaugslair.thitracker.services.SessionService;
+import com.smaugslair.thitracker.data.pc.*;
+import com.smaugslair.thitracker.services.UIService;
 import com.smaugslair.thitracker.ui.components.UserSafeButton;
+import com.smaugslair.thitracker.util.BeanFinder;
 import com.smaugslair.thitracker.websockets.Broadcaster;
 import com.smaugslair.thitracker.websockets.RegisteredVerticalLayout;
 import com.vaadin.flow.component.button.Button;
@@ -26,8 +24,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
-
 
 public class DiceRoller extends RegisteredVerticalLayout implements AbilityChoice {
 
@@ -38,7 +34,9 @@ public class DiceRoller extends RegisteredVerticalLayout implements AbilityChoic
 
     private static final Logger log = LoggerFactory.getLogger(DiceRoller.class);
 
-    private final SessionService sessionService;
+    private final UIService uiService;
+   // private final EntryRepository entryRepository;
+   // private final PlayerCharacterRepository playerCharacterRepository;
 
     private AbilityScore abilityScore;
 
@@ -65,8 +63,9 @@ public class DiceRoller extends RegisteredVerticalLayout implements AbilityChoic
     private int sum = 0;
 
 
-    public DiceRoller(SessionService sessionService) {
-        this.sessionService = sessionService;
+    public DiceRoller(UIService uiService) {
+        this.uiService = uiService;
+        //this.sessionService = sessionService;
 
 
         //setPadding(false);
@@ -77,7 +76,7 @@ public class DiceRoller extends RegisteredVerticalLayout implements AbilityChoic
 
     private void init() {
         removeAll();
-        PlayerCharacter pc = sessionService.getPc();
+        PlayerCharacter pc = uiService.getPc();
         if (pc == null) {
             add(new Span("No Hero loaded"));
             return;
@@ -252,7 +251,7 @@ public class DiceRoller extends RegisteredVerticalLayout implements AbilityChoic
         droppedText.setVisible(!dropped.isEmpty());
         droppedText.setValue(dropped.toString());
 
-        PlayerCharacter pc = sessionService.getPc();
+        PlayerCharacter pc = uiService.getPc();
         StringBuilder sb = new StringBuilder();
         sb.append(pc.getName()).append(" rolled ").append(sum).append(" on ").append(abilityScore.getAbility().getDisplayName());
         sb.append("  ").append(dice);
@@ -262,11 +261,11 @@ public class DiceRoller extends RegisteredVerticalLayout implements AbilityChoic
 
 
         Entry message = new Entry();
-        message.setGameId(sessionService.getGameId());
+        message.setGameId(uiService.getGame().getId());
         message.setType(EventType.DiceRoll);
         message.setText(sb.toString());
 
-        sessionService.getEntryRepo().save(message);
+        BeanFinder.getBean(EntryRepository.class).save(message);
 
         Broadcaster.broadcast(message);
 
@@ -274,18 +273,18 @@ public class DiceRoller extends RegisteredVerticalLayout implements AbilityChoic
 
     private void spendToken(Trait trait) {
 
-        PlayerCharacter pc = sessionService.getPc();
+        PlayerCharacter pc = uiService.getPc();
         if (TraitType.Hero.equals(trait.getType())) {
             trait.setPoints(trait.getPoints()-1);
         }
         else {
             trait.setPoints(trait.getPoints()+1);
         }
-        pc = sessionService.getPcRepo().save(pc);
-        sessionService.setPc(pc);
+        pc = BeanFinder.getBean(PlayerCharacterRepository.class).save(pc);
+        uiService.setPc(pc);
         Entry entry = new Entry();
         entry.setPcId(pc.getId());
-        entry.setGameId(sessionService.getGameId());
+        entry.setGameId(uiService.getGame().getId());
         entry.setType(EventType.PCUpdate);
         Broadcaster.broadcast(entry);
     }
@@ -307,8 +306,8 @@ public class DiceRoller extends RegisteredVerticalLayout implements AbilityChoic
     }
 
     private void handlePcUpdates() {
-        sessionService.refreshPc();
-        boolean hasHeroPoints = sessionService.getPc().isHeroPointsAvailable();
+        uiService.refreshPc();
+        boolean hasHeroPoints = uiService.getPc().isHeroPointsAvailable();
         postHeroRollButton.setEnabled(hasHeroPoints);
         preHeroRollButton.setEnabled(hasHeroPoints);
 
@@ -319,12 +318,12 @@ public class DiceRoller extends RegisteredVerticalLayout implements AbilityChoic
 
         switch (entry.getType()) {
             case PCUpdate:
-                if (entry.getPcId().equals(sessionService.getPc().getId())) {
+                if (entry.getPcId().equals(uiService.getPc().getId())) {
                     handlePcUpdates();
                 }
                 break;
             case MaxDiceUpdate:
-                if (entry.getGameId().equals(sessionService.getGameId())) {
+                if (entry.getGameId().equals(uiService.getGame().getId())) {
                     maxDice.setValue(getMaxDiceForGame());
                 }
                 break;
@@ -333,15 +332,14 @@ public class DiceRoller extends RegisteredVerticalLayout implements AbilityChoic
     }
 
     private Integer getMaxDiceForGame() {
-        Optional<Game> game = sessionService.getGameRepo().findById(sessionService.getGameId());
-        return game.isPresent() ? game.get().getMaxDice() : 10;
+        return uiService.getGame().getMaxDice();
     }
 
     private void showTraitRollDialog(TraitType type, boolean initial) {
         traitRollDialog.removeAll();
         VerticalLayout buttonColumn = new VerticalLayout();
         traitRollDialog.add(buttonColumn);
-        PlayerCharacter pc = sessionService.getPc();
+        PlayerCharacter pc = uiService.getPc();
         pc.getTraits().stream().filter(trait -> trait.getType().equals(type)).forEach(trait -> {
             //Drama always, Hero if points available
             if (TraitType.Drama.equals(trait.getType()) || trait.getPoints() > 0) {
