@@ -2,6 +2,7 @@ package com.smaugslair.thitracker.ui;
 
 import com.smaugslair.thitracker.data.game.Game;
 import com.smaugslair.thitracker.data.game.GameRepository;
+import com.smaugslair.thitracker.data.pc.HeroPowerRepository;
 import com.smaugslair.thitracker.data.pc.PlayerCharacter;
 import com.smaugslair.thitracker.data.pc.PlayerCharacterRepository;
 import com.smaugslair.thitracker.data.user.MessageRepository;
@@ -57,6 +58,7 @@ public class MainView extends AppLayout implements AfterNavigationObserver, AppE
     private final GameRepository gameRepository;
 
     private final MessageRepository messageRepository;
+    private final HeroPowerRepository heroPowerSetRepository;
 
     private final TitleBar titleBar;
 
@@ -66,13 +68,14 @@ public class MainView extends AppLayout implements AfterNavigationObserver, AppE
     //private ApplicationContext context;
     private SideNavItem heroesItem, gamesItem;
 
-    public MainView(SessionService sessionService, UIService uiService, UserRepository userRepository, PlayerCharacterRepository playerCharacterRepository, GameRepository gameRepository, MessageRepository messageRepository, TitleBar titleBar) {
+    public MainView(SessionService sessionService, UIService uiService, UserRepository userRepository, PlayerCharacterRepository playerCharacterRepository, GameRepository gameRepository, MessageRepository messageRepository, HeroPowerRepository heroPowerSetRepository, TitleBar titleBar) {
         this.sessionService = sessionService;
         this.uiService = uiService;
         this.userRepository = userRepository;
         this.playerCharacterRepository = playerCharacterRepository;
         this.gameRepository = gameRepository;
         this.messageRepository = messageRepository;
+        this.heroPowerSetRepository = heroPowerSetRepository;
         this.titleBar = titleBar;
 
         uiService.addAppEventListener(this);
@@ -191,13 +194,15 @@ public class MainView extends AppLayout implements AfterNavigationObserver, AppE
             heroItem.addItem(new SideNavItem("Join "+game.getName(), "/playersession/"+pc.getId()));
         }
 
-        SideNavItem printableSheet = new SideNavItem("Printable sheet", "/printableSheet/"+pc.getId());
-        printableSheet.setOpenInNewBrowserTab(true);
-        heroItem.addItem(printableSheet);
+        if (heroPowerSetRepository.findAllByPlayerCharacter(pc).size() > 0) {
+            SideNavItem printableSheet = new SideNavItem("Printable sheet", "/printableSheet/" + pc.getId());
+            printableSheet.setOpenInNewBrowserTab(true);
+            heroItem.addItem(printableSheet);
 
-        SideNavItem printablePowers = new SideNavItem("Printable powers", "/printablePowers/"+pc.getId());
-        printablePowers.setOpenInNewBrowserTab(true);
-        heroItem.addItem(printablePowers);
+            SideNavItem printablePowers = new SideNavItem("Printable powers", "/printablePowers/" + pc.getId());
+            printablePowers.setOpenInNewBrowserTab(true);
+            heroItem.addItem(printablePowers);
+        }
 
         SideNavItem herodeletion = new SideNavItem("Delete "+pc.getName(), "/herodeletion/"+pc.getId());
         heroItem.addItem(herodeletion);

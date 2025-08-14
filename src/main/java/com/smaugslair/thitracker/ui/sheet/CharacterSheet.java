@@ -47,8 +47,8 @@ public class CharacterSheet extends RegisteredVerticalLayout implements HeroPowe
     private SessionService sessionService;
     private PlayerCharacter pc = null;
     private String color;
-    private DerivedField tsSpace;
-    private DerivedField tsMPH;
+    //private DerivedField tsSpace;
+    //private DerivedField tsMPH;
     private PowerSetEditor powerSetEditor;
     private ConfirmDialog editorDialog;
 
@@ -190,21 +190,21 @@ public class CharacterSheet extends RegisteredVerticalLayout implements HeroPowe
         List<AbilityRow> abilityRows = new ArrayList<>(8);
 
         abilityRows.add(0, new AbilityRow()); //Header row
-        for (int i = 0; i < 6; ++i) {
+        for (int i = 0; i < 5; ++i) {
             //log.info("Char sheet, creating row "+i);
             abilityRows.add(new AbilityRow(
                     pc.getAbilityScores().get(Ability.getAt(i, 0)),
                     pc.getAbilityScores().get(Ability.getAt(i, 1))
             ));
         }
-
+/*
         tsSpace = new DerivedField("Speed (spaces)", "0");
         tsMPH = new DerivedField("Speed (MPH)", "0.0");
 
         abilityRows.add(new AbilityRow(tsSpace));
         abilityRows.add(new AbilityRow(tsMPH));
 
-        calcSpeeds();
+        calcSpeeds();*/
 
         AbilityRowFilter abilityRowFilter = new AbilityRowFilter();
         abilityRowFilter.setShowRows(abilitiesExpanded);
@@ -290,17 +290,8 @@ public class CharacterSheet extends RegisteredVerticalLayout implements HeroPowe
         return BeanFinder.getBean(HeroPowerRepository.class);
     }
 
-    private void calcSpeeds() {
-        int travelSpeed = pc.getAbilityScores().get(Ability.Movement).getPoints()
-                * pc.getAbilityScores().get(Ability.TravelMult).getPoints();
-        tsSpace.getSpan().setText(String.valueOf(travelSpeed));
-        tsMPH.getSpan().setText(String.valueOf(travelSpeed*1.5));
-    }
-
     public void updatePC() {
-        //log.info("updating pc");
         pc = pcUpdater.updatePc(pc);
-        calcSpeeds();
     }
 
     @Override

@@ -288,10 +288,6 @@ public class  Power implements Sheetable, Comparable<Power> {
         createMod(Ability.Movement, value);
     }
 
-    public void setAmTravelMult(Integer value) {
-        createMod(Ability.TravelMult, value);
-    }
-
     public void setAmChoice(Integer value) {
         createMod(Ability.Choice, value);
     }

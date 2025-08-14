@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @PermitAll
 @Route("printablePowers")
@@ -51,7 +52,8 @@ public class PrintablePowers extends AbstractHeroView {
             ArrayList<PrintableHeroPowerSet> powerSets = new ArrayList<>();
 
             List<HeroPowerSet> heroPowerSets = heroPowerSetRepository.findAllByPlayerCharacter(hero);
-            List<HeroPower> heroPowers = heroPowerRepository.findAllByPlayerCharacter(hero);
+            List<HeroPower> heroPowers = heroPowerRepository.findAllByPlayerCharacter(hero)
+                    .stream().sorted().collect(Collectors.toList());
 
             for (HeroPowerSet heroPowerSet : heroPowerSets) {
                 PrintableHeroPowerSet copy = new PrintableHeroPowerSet(heroPowerSet);

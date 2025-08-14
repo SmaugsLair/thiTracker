@@ -14,8 +14,11 @@ import com.vaadin.flow.component.Html;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import org.apache.commons.lang3.tuple.MutableTriple;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @PermitAll
 @Route("printableSheet")
@@ -48,7 +51,8 @@ public class PrintableSheet extends AbstractHeroView {
             root.put("pc", hero);
 
             hero.getAbilityScores().forEach((ability, abilityScore) -> {
-                root.put(ability.getDisplayName(), abilityScore.getPoints());
+                root.put(ability.toString(), abilityScore.getPoints());
+                //log.info("added: " +ability);
             });
 
             Set<String> heroTraits = new HashSet<>();
@@ -78,7 +82,8 @@ public class PrintableSheet extends AbstractHeroView {
 
 
             List<HeroPowerSet> heroPowerSets = heroPowerSetRepository.findAllByPlayerCharacter(hero);
-            List<HeroPower> heroPowers = heroPowerRepository.findAllByPlayerCharacter(hero);
+            List<HeroPower> heroPowers = heroPowerRepository.findAllByPlayerCharacter(hero).stream()
+                    .sorted().collect(Collectors.toList());
 
             int maxPowerRow = Math.max(heroPowers.size()+1, 11);
 

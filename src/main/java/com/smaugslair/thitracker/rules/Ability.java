@@ -13,16 +13,15 @@ public enum Ability {
     SelfControl(3,1, "Self-Control"),
     Initiative(4,0),
     Movement(4, 1),
-    TravelMult(5,1, "Travel Mult", true, 2),
-    Choice(-1);
+    Choice(-1),
+    TravelMult(-1); //Not used, preserved for data integrity
 
     private final int x;
     private final int y;
     private final String displayName;
-    private final boolean multiplier;
-    private final int baseValue;
+    private final int baseValue = 3;
 
-    private static Ability abilityDim[][] = new Ability[6][2];
+    private static Ability abilityDim[][] = new Ability[5][2];
 
     static {
         for (Ability ability : values()) {
@@ -46,15 +45,9 @@ public enum Ability {
     }
 
     Ability(int i, int j, String s) {
-        this(i, j, s, false, 3);
-    }
-
-    Ability(int i, int j, String s, boolean m, int b) {
         x = i;
         y = j;
-        displayName = null;
-        multiplier = m;
-        baseValue = b;
+        displayName = s;
     }
 
     public int getX() {
@@ -80,24 +73,7 @@ public enum Ability {
         return abilityDim[i][j];
     }
 
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("Ability{");
-        sb.append(name()).append(", ");
-        sb.append("x=").append(x);
-        sb.append(", y=").append(y);
-        sb.append(", displayName='").append(displayName).append('\'');
-        sb.append(", multiplier=").append(multiplier);
-        sb.append(", baseValue=").append(baseValue);
-        sb.append('}');
-        return sb.toString();
-    }
-
     public String getRendered(int value) {
-        return getDisplayName() + " " + (multiplier?"*":(value<1?"":"+")) + value;
-    }
-
-    public boolean isMultiplier () {
-        return multiplier;
+        return getDisplayName() + " " + value;
     }
 }

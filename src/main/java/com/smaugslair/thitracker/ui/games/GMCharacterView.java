@@ -24,8 +24,6 @@ public class GMCharacterView extends RegisteredVerticalLayout implements Charact
 
     //private final static Logger log = LoggerFactory.getLogger(GMCharacterView.class);
 
-    private final static int MAX_DRAMA = 10;
-
     private PCUpdater pcUpdater;
     //private SessionService sessionService;
     private PlayerCharacter pc = null;
@@ -135,23 +133,6 @@ public class GMCharacterView extends RegisteredVerticalLayout implements Charact
         pc.getTraits().remove(trait);
         updatePC();
         init();
-    }
-
-
-    private void calculateAbilityScores() {
-        pc.getAbilityScores().forEach((ability, abilityScore) -> abilityScore.reset());
-        List<HeroPowerSet> heroPowerSets = getHeroPowerSetRepository().findAllByPlayerCharacter(pc);
-        heroPowerSets.forEach(heroPowerSet -> {
-            heroPowerSet.getMods().forEach((ability, heroPowerSetMod) -> {
-                pc.getAbilityScores().get(ability).adjustMods(heroPowerSetMod.getValue());
-            });
-        });
-        List<HeroPower> heroPowers = getHeroPowerRepository().findAllByPlayerCharacter(pc);
-        heroPowers.forEach(heroPower -> {
-            heroPower.getMods().forEach((ability, heroPowerMod) -> {
-                pc.getAbilityScores().get(ability).adjustMods(heroPowerMod.getValue());
-            });
-        });
     }
 
     public void setPcUpdater(PCUpdater pcUpdater) {
