@@ -64,7 +64,7 @@ public class GMCharacterView extends RegisteredVerticalLayout implements Charact
                 .collect(Collectors.toList());
         add("Hero Traits");
         traits.forEach(trait -> {
-            TraitField traitField = new TraitField(trait, this);
+            TraitField traitField = new TraitField(trait, false, this);
             add(new PairedComponent(traitField.getLabel(), traitField.getComponent()));
         });
 
@@ -74,7 +74,7 @@ public class GMCharacterView extends RegisteredVerticalLayout implements Charact
                 .collect(Collectors.toList());
         add("Drama Traits");
         traits.forEach(trait ->{
-            TraitField traitField = new TraitField(trait, this);
+            TraitField traitField = new TraitField(trait, false, this);
             add(new PairedComponent(traitField.getLabel(), traitField.getComponent()));
         });
 

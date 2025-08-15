@@ -5,6 +5,7 @@ import com.smaugslair.thitracker.data.pc.TraitType;
 import com.smaugslair.thitracker.ui.components.UserSafeButton;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
@@ -12,20 +13,32 @@ import com.vaadin.flow.component.textfield.TextField;
 public class TraitField implements TraitRow {
 
     private final Trait trait;
-    private final TextField nameField;
+    private final String text;
+
+    private final Component nameField;
     private final IntegerField pointField;
+    //private final boolean editableLabel;
     private HorizontalLayout hl = null;
 
     public TraitField(Trait trait, CharacterEditor editor) {
-        this.trait = trait;
+        this(trait, true, editor);
+    }
 
-        nameField = new TextField();
-        nameField.setValue(trait.getName());
-        //nameField.setReadOnly(true);
-        nameField.addValueChangeListener(event -> {
-            trait.setName(event.getValue());
-            editor.updatePC();
-        });
+    public TraitField(Trait trait, boolean editableLabel, CharacterEditor editor) {
+        this.text = trait.getName();
+        this.trait = trait;
+        if (editableLabel) {
+            TextField textField = new TextField();
+            textField.setValue(trait.getName());
+            textField.addValueChangeListener(event -> {
+                trait.setName(event.getValue());
+                editor.updatePC();
+            });
+            nameField = textField;
+        }
+        else {
+            nameField = new Span(trait.getName());
+        }
 
         pointField = new IntegerField();
         pointField.setValue(trait.getPoints());
@@ -70,16 +83,18 @@ public class TraitField implements TraitRow {
 
     @Override
     public String getLabelValue() {
-        return nameField.getValue();
+        return text;
     }
 
     @Override
     public TraitType getTraitType() {
         return trait.getType();
     }
-
+/*
     public void setReadOnly(boolean readOnly) {
-        nameField.setReadOnly(readOnly);
+        if (nameField instanceof TextField) {
+            ((TextField)nameField).setReadOnly(readOnly);
+        }
         pointField.setReadOnly(readOnly);
-    }
+    }*/
 }
