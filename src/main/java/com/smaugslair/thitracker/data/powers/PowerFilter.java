@@ -2,7 +2,7 @@ package com.smaugslair.thitracker.data.powers;
 
 
 import com.vaadin.flow.data.provider.ListDataProvider;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 
 public class PowerFilter {
 
@@ -70,20 +70,19 @@ public class PowerFilter {
     }
 
     public boolean test(Power power) {
-        if (name.length() > 0 && !StringUtils.containsIgnoreCase(power.getName(), name)) {
+        if (!name.isEmpty() && !Strings.CI.contains(power.getName(), name)) {
             return false;
         }
-        if (powerTag.length() > 0 && !StringUtils.containsIgnoreCase(power.getPowerTag(), powerTag)) {
+        if (!powerTag.isEmpty() && !Strings.CI.contains(power.getPowerTag(), powerTag)) {
             return false;
         }
-        if (tier.length() > 0 && !StringUtils.containsIgnoreCase(power.getLowestTier().toString(), tier)) {
+        if (!tier.isEmpty() && !Strings.CI.contains(power.getLowestTier().toString(), tier)) {
             return false;
         }
-        if (maxTaken.length() > 0 && !StringUtils.containsIgnoreCase(power.getMaxTaken().toString(), maxTaken)) {
+        if (!maxTaken.isEmpty() && !Strings.CI.contains(power.getMaxTaken().toString(), maxTaken)) {
             return false;
         }
-        if (metaPower.length() > 0 && !StringUtils.containsIgnoreCase(
-                String.valueOf(power.getMetaPower()), metaPower)) {
+        if (!metaPower.isEmpty() && Strings.CI.contains(String.valueOf(power.getMetaPower()), metaPower)) {
             return false;
         }
         return true;

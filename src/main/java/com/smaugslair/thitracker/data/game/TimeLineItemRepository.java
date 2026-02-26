@@ -4,7 +4,6 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface TimeLineItemRepository extends JpaRepository<TimeLineItem, Long> {
 
@@ -12,7 +11,8 @@ public interface TimeLineItemRepository extends JpaRepository<TimeLineItem, Long
     List<TimeLineItem> findByPcId(Long pcId);
 
     @Transactional
-    void deleteAllByGameId(Long gameId);
-    Optional<TimeLineItem> findById(Long id);
+    void deleteAllByGameId(Long gameId);/*
+    @NotNull
+    Optional<TimeLineItem> findById(@NotNull Long id);*/
 
 }

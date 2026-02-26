@@ -65,13 +65,12 @@ public class PowerTarget implements Comparable<PowerTarget> {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("PowerTarget{");
-        sb.append("power=").append(power);
-        sb.append(", available=").append(available);
-        sb.append(", taken=").append(taken);
-        sb.append(", heroPowerSet=").append(heroPowerSet);
-        sb.append('}');
-        return sb.toString();
+        String sb = "PowerTarget{" + "power=" + power +
+                ", available=" + available +
+                ", taken=" + taken +
+                ", heroPowerSet=" + heroPowerSet +
+                '}';
+        return sb;
     }
 
     public Integer getTier() {

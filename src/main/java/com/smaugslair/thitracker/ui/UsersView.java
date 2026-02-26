@@ -24,8 +24,8 @@ import org.springframework.stereotype.Component;
 @UIScope
 public class UsersView extends AbstractMainView {
 
-    private ConfirmDialog editUserDialog;
-    private UserForm userForm;
+    private final ConfirmDialog editUserDialog;
+    private final UserForm userForm;
 
     private final UserRepository userRepository;
 
@@ -66,7 +66,7 @@ public class UsersView extends AbstractMainView {
         Grid.Column<User> dnColumn = userGrid.addColumn(User::getDisplayName).setHeader("Display Name");
         Grid.Column<User> emailColumn = userGrid.addColumn(User::getEmail).setHeader("Email");
         Grid.Column<User> adminColumn = userGrid.addColumn(User::isAdmin).setHeader("Admin");
-        userGrid.addComponentColumn(user -> new EditButton(user));
+        userGrid.addComponentColumn(EditButton::new);
 
         HeaderRow filterRow = userGrid.appendHeaderRow();
         //filterRow.getCell(nameColumn).setComponent(new FilterField(filterObject::setName));

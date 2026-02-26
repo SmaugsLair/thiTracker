@@ -5,6 +5,7 @@ import com.smaugslair.thitracker.rules.Ability;
 import com.smaugslair.thitracker.util.AbilityModsRenderer;
 
 import jakarta.persistence.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -106,14 +107,13 @@ public class HeroPower implements Moddable, Comparable<HeroPower> {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("HeroPower{");
-        sb.append("id=").append(id);
-        sb.append(", playerCharacter=").append(playerCharacter);
-        sb.append(", power=").append(power);
-        sb.append(", heroPowerSet=").append(heroPowerSet);
-        sb.append(", mods=").append(mods);
-        sb.append('}');
-        return sb.toString();
+        String sb = "HeroPower{" + "id=" + id +
+                ", playerCharacter=" + playerCharacter +
+                ", power=" + power +
+                ", heroPowerSet=" + heroPowerSet +
+                ", mods=" + mods +
+                '}';
+        return sb;
     }
 
     public Integer getTier() {
@@ -134,7 +134,7 @@ public class HeroPower implements Moddable, Comparable<HeroPower> {
     }
 
     @Override
-    public int compareTo(HeroPower o) {
+    public int compareTo(@NotNull HeroPower o) {
         return Comparator.comparing(HeroPower::getTier)
                 .thenComparing(HeroPower::getPower)
                 .thenComparing(HeroPower::getId)

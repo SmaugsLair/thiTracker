@@ -35,7 +35,7 @@ public class HeroView extends AbstractHeroView implements PCUpdater {
         removeAll();
         CharacterSheet characterSheet = new CharacterSheet();
         characterSheet.setPcUpdater(this);
-        characterSheet.setEditablePowers(true);
+        //characterSheet.setEditablePowers(true);
         characterSheet.setPc(hero);
         //add(new HorizontalLayout(new PCManager(sessionService, pc)));
         add(characterSheet);

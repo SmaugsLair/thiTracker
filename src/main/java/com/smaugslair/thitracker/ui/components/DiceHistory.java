@@ -25,7 +25,7 @@ public class DiceHistory extends RegisteredVerticalLayout {
         setMargin(false);
         setSpacing(false);
         List<Entry> entryList = BeanFinder.getBean(EntryRepository.class).findByGameId(gameId)
-                .stream().sorted().collect(Collectors.toList());
+                .stream().sorted().toList();
         for (Entry entry : entryList) {
             if (entry.getType().equals(EventType.DiceRoll)) {
                 add(new Span(entry.getText()));

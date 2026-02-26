@@ -11,6 +11,7 @@ import com.smaugslair.thitracker.util.BeanFinder;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.textfield.IntegerField;
+import com.vaadin.flow.theme.lumo.Lumo;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +23,9 @@ public class DeltaButton extends Button {
 
     public DeltaButton(TimeLineItem item, GMTimeLineView gmTimeLineView) {
 
+        if (item.getColor()!=null && item.getColor().startsWith("DARK")) {
+            getElement().setAttribute("theme", Lumo.DARK);
+        }
         FormLayout formLayout = new FormLayout();
         int count = 0;
         for (ActionTimeDefault atd : gmTimeLineView.getAtds()) {

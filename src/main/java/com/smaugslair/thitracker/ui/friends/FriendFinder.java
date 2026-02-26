@@ -20,7 +20,7 @@ import java.util.Optional;
 @UIScope
 public class FriendFinder extends VerticalLayout {
 
-    private final SessionService sessionService;
+    //private final SessionService sessionService;
     //private final FriendsView friendsView;
     private final User self;
     private final FriendshipRepository friendshipRepository;
@@ -28,7 +28,7 @@ public class FriendFinder extends VerticalLayout {
     private User friend = null;
 
     public FriendFinder(SessionService sessionService, FriendshipRepository friendshipRepository, UserRepository userRepository) {
-        this.sessionService = sessionService;
+        //this.sessionService = sessionService;
         self = sessionService.getLoggedInUser();
         //this.friendsView = friendsView;
         this.friendshipRepository = friendshipRepository;

@@ -65,9 +65,8 @@ public class PowerSetEditor extends VerticalLayout {
         String psName = heroPowerSet.getPowerSet().getName();
         add(new Span("Choosing "+psName+" powers for " + pc.getName()));
 
-        add(new Button("Remove "+psName+ " power set", event -> {
-            heroPowerSetHolder.removeHeroPowerSet(heroPowerSet);
-        }));
+        add(new Button("Remove "+psName+ " power set",
+                event -> heroPowerSetHolder.removeHeroPowerSet(heroPowerSet)));
 /*
         for (HeroPower heroPower: heroPowers) {
             if (heroPower.getHeroPowerSet().equals(heroPowerSet)) {
@@ -101,7 +100,7 @@ public class PowerSetEditor extends VerticalLayout {
             Tab tab = new Tab(new Span("Tier "+tier + ": " + grid.getTaken()));
             tabs.add(tab);
             tabMap.put(tab, grid);
-            if (tier == currentTier) {
+            if (Objects.equals(tier, currentTier)) {
                 tabTarget.add(grid);
                 tabs.setSelectedTab(tab);
             }
@@ -126,11 +125,7 @@ public class PowerSetEditor extends VerticalLayout {
             if (heroPower.getHeroPowerSet().equals(heroPowerSet)) {
                 ++powersInSet;
             }
-            List<HeroPower> list = map.get(heroPower.getPower());
-            if (list == null) {
-                list = new ArrayList<>();
-                map.put(heroPower.getPower(), list);
-            }
+            List<HeroPower> list = map.computeIfAbsent(heroPower.getPower(), k -> new ArrayList<>());
             list.add(heroPower);
         }
         if (tier > powersInSet + 1) {
@@ -139,11 +134,11 @@ public class PowerSetEditor extends VerticalLayout {
         List<HeroPower> heroPowerList = map.get(power);
         if (heroPowerList != null && !heroPowerList.isEmpty()) {
             availableTaken.setTimesTaken(heroPowerList.size());
-            if (heroPowerList.size() >= Integer.valueOf(power.getMaxTaken())) {
+            if (heroPowerList.size() >= power.getMaxTaken()) {
                 return availableTaken;
             }
         }
-        availableTaken.setAvailable(power.prerequsitesMet(heroPowers.stream().map(HeroPower::getName).collect(Collectors.toList())));
+        availableTaken.setAvailable(power.prerequsitesMet(heroPowers.stream().map(HeroPower::getName).collect(Collectors.toSet())));
         return availableTaken;
     }
 
@@ -199,7 +194,7 @@ public class PowerSetEditor extends VerticalLayout {
     }
 
     public void removePowerTarget(PowerTarget powerTarget) {
-        log.info("removePowerTarget: "+powerTarget);
+        log.info("removePowerTarget: {}", powerTarget);
         //List<HeroPower> heroPowers = sessionService.getHpRepo().findAllByPlayerCharacter(pc);
 
         HeroPower heroPower = null;
@@ -209,11 +204,11 @@ public class PowerSetEditor extends VerticalLayout {
                 heroPower = hp;
             }
         }
-        log.info("removing heroPower "+heroPower);
-        log.info("before size "+heroPowers.size());
+        log.info("removing heroPower {}", heroPower);
+        log.info("before size {}", heroPowers.size());
 
         heroPowers.remove(heroPower);
-        log.info("after size "+heroPowers.size());
+        log.info("after size {}", heroPowers.size());
 
         init();
     }

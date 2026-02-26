@@ -22,7 +22,7 @@ public class UIService {
 
     private final PlayerCharacterRepository pcRepo;
 
-    private Map<Class<? extends AppEventListener>, AppEventListener> appEventListeners = new HashMap<>();
+    private final Map<Class<? extends AppEventListener>, AppEventListener> appEventListeners = new HashMap<>();
 
     public UIService(PlayerCharacterRepository pcRepo) {
         this.pcRepo = pcRepo;

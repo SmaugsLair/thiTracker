@@ -91,14 +91,13 @@ public class AbilityScore {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("AbilityScore{");
-        sb.append("id=").append(id);
-        sb.append(", playerCharacter=").append(playerCharacter.getName());
-        sb.append(", ability=").append(ability.name());
-        sb.append(", base=").append(base);
-        sb.append(", mods=").append(mods);
-        sb.append('}');
-        return sb.toString();
+        String sb = "AbilityScore{" + "id=" + id +
+                ", playerCharacter=" + playerCharacter.getName() +
+                ", ability=" + ability.name() +
+                ", base=" + base +
+                ", mods=" + mods +
+                '}';
+        return sb;
     }
 
     public String getText() {

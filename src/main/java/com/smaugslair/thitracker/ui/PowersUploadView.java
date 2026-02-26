@@ -150,11 +150,11 @@ public class PowersUploadView extends AbstractMainView {
                         validateSheetMetadata(workbook, powerSetTransformer);
                         validateSheetMetadata(workbook, powerTransformer);
 
-                        Map<String, PowerSet> powerSetsInSheet = (Map<String, PowerSet>) loadSheet(workbook, powerSetTransformer);
-                        log.info("PowerSets found:"+ powerSetsInSheet.size());
+                        Map<String, PowerSet> powerSetsInSheet =  loadSheet(workbook, powerSetTransformer);
+                        log.info("PowerSets found:{}", powerSetsInSheet.size());
 
-                        Map<String, Power> powersInSheet = (Map<String, Power>) loadSheet(workbook, powerTransformer);
-                        log.info("Powers found:"+ powersInSheet.size());
+                        Map<String, Power> powersInSheet = loadSheet(workbook, powerTransformer);
+                        log.info("Powers found:{}", powersInSheet.size());
 
 
                         powerSetsInSheet.forEach((name, loadedPowerSet) -> {
@@ -254,13 +254,13 @@ public class PowersUploadView extends AbstractMainView {
     private void handleOrphanedPowers() {
         for (Power power : updatedPowers) {
             if (power.getPowerSets() == null) {
-                log.info("Newly orphaned power " + power.getName());
+                log.info("Newly orphaned power {}", power.getName());
                 deletePowerFromUsers(power);
             }
         }
         for (Power power : unchangedPowers) {
             if (power.getPowerSets() == null) {
-                log.info("Older orphaned power " + power.getName());
+                log.info("Older orphaned power {}", power.getName());
                 deletePowerFromUsers(power);
             }
         }
@@ -320,18 +320,18 @@ public class PowersUploadView extends AbstractMainView {
     }
 
 
-    private Map<String, ? extends Sheetable> loadSheet(XSSFWorkbook workbook, Transformer<? extends Sheetable> transformer) throws TransformerException {
-        Map<String, Sheetable> map = new HashMap<>();
+    private <K extends Sheetable> Map<String, K> loadSheet(XSSFWorkbook workbook, Transformer<K> transformer) throws TransformerException {
+        Map<String, K> map = new HashMap<>();
         XSSFSheet sheet = workbook.getSheet(transformer.getSheetName());
-        log.info("sheet size: "+sheet.getPhysicalNumberOfRows());
+        log.info("sheet size: {}", sheet.getPhysicalNumberOfRows());
         for (int i = 0; i < sheet.getPhysicalNumberOfRows(); ++i) {
             if (i > transformer.getLabelRowIndex()) {
                 if (sheet.getRow(i).getCell(0).toString().equals("ZZSTOP")) {
                     //looking at the last row;
                     break;
                 }
-                Sheetable sheetable = transformer.transformRow(sheet.getRow(i));
-                if (sheetable.getSsid() != null && sheetable.getSsid().length() > 0) {
+                K sheetable = transformer.transformRow(sheet.getRow(i));
+                if (sheetable.getSsid() != null && !sheetable.getSsid().isEmpty()) {
                     map.put(sheetable.getName(), sheetable);
                 }
             }

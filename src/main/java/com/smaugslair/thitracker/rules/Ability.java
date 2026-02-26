@@ -13,15 +13,15 @@ public enum Ability {
     SelfControl(3,1, "Self-Control"),
     Initiative(4,0),
     Movement(4, 1),
-    Choice(-1),
-    TravelMult(-1); //Not used, preserved for data integrity
+    Choice(),
+    TravelMult(); //Not used, preserved for data integrity
 
     private final int x;
     private final int y;
     private final String displayName;
-    private final int baseValue = 3;
+    //private final int baseValue = 3;
 
-    private static Ability abilityDim[][] = new Ability[5][2];
+    private final static Ability[][] abilityDim = new Ability[5][2];
 
     static {
         for (Ability ability : values()) {
@@ -35,8 +35,8 @@ public enum Ability {
         return x >=0;
     }
 
-    Ability(int z) {
-        this(z,z);
+    Ability() {
+        this(-1,-1);
     }
 
 
@@ -66,7 +66,7 @@ public enum Ability {
     }
 
     public int getBaseValue() {
-        return baseValue;
+        return 3;
     }
 
     public static Ability getAt(int i, int j) {

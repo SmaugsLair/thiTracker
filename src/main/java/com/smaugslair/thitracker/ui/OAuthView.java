@@ -17,9 +17,8 @@ public class OAuthView extends VerticalLayout {
     public OAuthView() {
         setClassName("login");
         setSizeFull();
-        Button button = new Button("Login with Google", e -> {
-            UI.getCurrent().getPage().open(OAUTH_URL, "_self");
-        });
+        Button button = new Button("Login with Google",
+                e -> UI.getCurrent().getPage().open(OAUTH_URL, "_self"));
         button.setClassName("login-button");
         add(button);
     }

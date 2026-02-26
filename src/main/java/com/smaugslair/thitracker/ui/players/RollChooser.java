@@ -32,9 +32,8 @@ public class RollChooser extends HorizontalLayout {
     }
 
     private UserSafeButton createRollLauncher(AbilityScore abilityScore) {
-        UserSafeButton button = new UserSafeButton(abilityScore.getAbility().getDisplayName()+" "+abilityScore.getPoints(), buttonClickEvent -> {
-            abilityChoice.setChoice(abilityScore);
-        });
+        UserSafeButton button = new UserSafeButton(abilityScore.getAbility().getDisplayName()+" "+abilityScore.getPoints(),
+                buttonClickEvent -> abilityChoice.setChoice(abilityScore));
         button.setWidthFull();
         return button;
     }

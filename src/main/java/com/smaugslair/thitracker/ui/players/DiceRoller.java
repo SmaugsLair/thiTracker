@@ -297,10 +297,10 @@ public class DiceRoller extends RegisteredVerticalLayout implements AbilityChoic
         }
         Collections.sort(dice);
         List<Integer> dropped = new ArrayList<>();
-        dropped.add(dropLowest());
-        while (dice.size() > maxDice.getValue()) {
+        do {
             dropped.add(dropLowest());
         }
+        while (dice.size() > maxDice.getValue());
         prepareResults(dropped, trait);
         spendToken(trait);
     }

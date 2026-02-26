@@ -13,9 +13,6 @@ public class AbilityRowFilter {
     }
 
     public boolean test(AbilityRow abilityRow) {
-        if (!showRows && !abilityRow.isHeader()) {
-            return false;
-        }
-        return true;
+        return showRows || abilityRow.isHeader();
     }
 }

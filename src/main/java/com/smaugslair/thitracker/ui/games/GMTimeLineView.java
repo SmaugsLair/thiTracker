@@ -33,6 +33,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.spring.annotation.UIScope;
+import com.vaadin.flow.theme.lumo.Lumo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -43,7 +44,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@CssImport(value = "./styles/color.css", themeFor = "vaadin-grid")
+//@CssImport(value = "./styles/color.css", themeFor = "vaadin-grid")
 @CssImport(value = "./styles/minPadding.css", themeFor = "vaadin-grid")
 @UIScope
 @org.springframework.stereotype.Component
@@ -186,7 +187,8 @@ public class GMTimeLineView extends VerticalLayout implements AppEventListener, 
         icon.setSize("16px");
         grid.addComponentColumn(item -> new DeltaButton(item, this)).setHeader(icon);
 
-        grid.setClassNameGenerator(item -> item.getColor());
+        grid.setPartNameGenerator(TimeLineItem::getColor);
+
         grid.getColumns().forEach(itemColumn -> {
             itemColumn.setAutoWidth(true);
             itemColumn.setTextAlign(ColumnTextAlign.CENTER);
@@ -199,9 +201,10 @@ public class GMTimeLineView extends VerticalLayout implements AppEventListener, 
         grid.addComponentColumn(item -> {
                 MenuBar menuBar = new MenuBar();
                 menuBar.addThemeVariants(MenuBarVariant.LUMO_TERTIARY);
-                menuBar.addItem("Color", event -> {
-                    colorDialog.openWith(item);
-                });
+                if (item.getColor()!=null && item.getColor().startsWith("DARK")) {
+                    menuBar.getElement().setAttribute("theme", Lumo.DARK);
+                }
+                menuBar.addItem("Color", event -> colorDialog.openWith(item));
                 menuBar.addItem("Duplicate", event -> {
                     TimeLineItem copy = new TimeLineItem();
                     copy.setTime(item.getTime());
@@ -282,9 +285,7 @@ public class GMTimeLineView extends VerticalLayout implements AppEventListener, 
     public void showHeroDetails(TimeLineItem item) {
         GMSession gmSession = applicationContext.getBean(GMSession.class);
         if (item.getPcId() != null) {
-            playerCharacterRepository.findById(item.getPcId()).ifPresent(playerCharacter -> {
-                gmSession.setHero(playerCharacter);
-            });
+            playerCharacterRepository.findById(item.getPcId()).ifPresent(gmSession::setHero);
         }
         else {
             gmSession.setHero(null);
@@ -359,10 +360,8 @@ public class GMTimeLineView extends VerticalLayout implements AppEventListener, 
         });
 
         List<PlayerCharacter> pcs = new ArrayList<>();
-        userIds.forEach(id -> {
-            pcs.addAll(playerCharacterRepository.findAllByUserId(id).stream()
-                    .filter(pc -> pc.getGameId() == null ).collect(Collectors.toList()));
-        });
+        userIds.forEach(id -> pcs.addAll(playerCharacterRepository.findAllByUserId(id).stream()
+                .filter(pc -> pc.getGameId() == null ).collect(Collectors.toList())));
 
         NewItemForm newItemForm = new NewItemForm(pcs);
         ConfirmDialog addItemDialog = new ConfirmDialog(newItemForm);
@@ -406,7 +405,7 @@ public class GMTimeLineView extends VerticalLayout implements AppEventListener, 
             ciGrid.setThemeName("min-padding");
             ciGrid.setItems(collectedItems);
             ciGrid.setAllRowsVisible(true);
-            ciGrid.setClassNameGenerator(item -> item.getColor());
+            ciGrid.setPartNameGenerator(CollectedItem::getColor);
             ciGrid.getColumns().forEach(itemColumn -> itemColumn.setAutoWidth(true));
             ciGrid.addColumn(CollectedItem::getName);
             ciGrid.addComponentColumn((CollectedItem item1) -> new ImportButton(item1, getGameId()));

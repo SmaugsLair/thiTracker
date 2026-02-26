@@ -5,13 +5,13 @@ import com.vaadin.flow.component.Component;
 
 public interface TraitRow  {
 
-    public Component getLabel();
+    Component getLeft();
 
-    public Component getComponent();
+    Component getRight();
 
-    public String getColor();
+    String getColor();
 
-    public String getLabelValue();
+    String getLeftValue();
 
-    public TraitType getTraitType();
+    TraitType getTraitType();
 }

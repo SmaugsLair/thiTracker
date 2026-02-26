@@ -26,12 +26,12 @@ public class ProgressionPoint implements TraitRow {
 
 
     @Override
-    public Component getLabel() {
+    public Component getLeft() {
         return label;
     }
 
     @Override
-    public Component getComponent() {
+    public Component getRight() {
         return pointField;
     }
 
@@ -41,7 +41,7 @@ public class ProgressionPoint implements TraitRow {
     }
 
     @Override
-    public String getLabelValue() {
+    public String getLeftValue() {
         return labelStr;
     }
 

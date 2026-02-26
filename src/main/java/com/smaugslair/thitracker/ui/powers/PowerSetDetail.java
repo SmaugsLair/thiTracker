@@ -26,7 +26,7 @@ import java.util.*;
 @JsModule("./src/copytoclipboard.js")
 public class PowerSetDetail extends VerticalLayout {
 
-    private Map<String, Object> root = new HashMap<>();
+    private final Map<String, Object> root = new HashMap<>();
 
     private final TextArea textArea = new TextArea();
     private final Dialog dialog = new Dialog();

@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 @UIScope
@@ -44,7 +43,7 @@ public class TimeLineHistory extends VerticalLayout implements AppEventListener 
             return;
         }
         List<Entry> entryList = entryRepository.findByGameId(game.getId())
-                .stream().sorted().collect(Collectors.toList());
+                .stream().sorted().toList();
         for (Entry entry : entryList) {
             if (EventType.GMAction.equals(entry.getType())) {
                 add(new Span(entry.getText()));

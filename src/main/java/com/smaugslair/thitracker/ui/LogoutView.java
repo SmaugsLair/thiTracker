@@ -35,7 +35,7 @@ public class LogoutView extends VerticalLayout {
 	@PostConstruct
 	public void init() {
 		String email = sessionService.getUser().getEmail();
-		log.info("Logging out user: " + email);
+        log.info("Logging out user: {}", email);
 		sessionService.setUser(null);
 		sessionService.logout();
 		add(new Span("User logged out"));

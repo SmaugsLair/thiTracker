@@ -21,8 +21,8 @@ public class TemplateView extends AbstractMainView {
 
     private final TemplateRepository templateRepository;
 
-    private ConfirmDialog editTemplateDialog;
-    private TemplateForm templateForm;
+    private final ConfirmDialog editTemplateDialog;
+    private final TemplateForm templateForm;
 
     public TemplateView( TitleBar titleBar, TemplateRepository templateRepository) {
         super(titleBar);
@@ -69,7 +69,7 @@ public class TemplateView extends AbstractMainView {
         //filterRow.getCell(adminColumn).setComponent(new FilterField(filterObject::setAdmin, "50px"));
 
         add(templateGrid);
-        templateGrid.addComponentColumn(template -> new EditButton(template));
+        templateGrid.addComponentColumn(EditButton::new);
 
        /* });
         GridContextMenu<Template> contextMenu = new GridContextMenu<>(templateGrid);

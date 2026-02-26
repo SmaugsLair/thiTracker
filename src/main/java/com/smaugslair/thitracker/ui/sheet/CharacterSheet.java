@@ -11,7 +11,6 @@ import com.smaugslair.thitracker.data.user.User;
 import com.smaugslair.thitracker.data.user.UserRepository;
 import com.smaugslair.thitracker.rules.Ability;
 import com.smaugslair.thitracker.services.PowersCache;
-import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.ui.components.ConfirmDialog;
 import com.smaugslair.thitracker.ui.components.MultiColumnLayout;
 import com.smaugslair.thitracker.ui.components.UserSafeButton;
@@ -25,7 +24,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.provider.ListDataProvider;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,7 +32,7 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.stream.Collectors;
 
-@CssImport(value = "./styles/color.css", themeFor = "vaadin-grid")
+//@CssImport(value = "./styles/color.css", themeFor = "vaadin-grid")
 @CssImport(value = "./styles/minPadding.css", themeFor = "vaadin-grid")
 public class CharacterSheet extends RegisteredVerticalLayout implements HeroPowerSetHolder, CharacterEditor {
 
@@ -42,9 +41,9 @@ public class CharacterSheet extends RegisteredVerticalLayout implements HeroPowe
     private final static int MAX_DRAMA = 10;
 
     private PCUpdater pcUpdater;
-    private boolean editablePowers;
-    private boolean editingPowers = false;
-    private SessionService sessionService;
+    //private boolean editablePowers;
+    //private boolean editingPowers = false;
+    //private SessionService sessionService;
     private PlayerCharacter pc = null;
     private String color;
     //private DerivedField tsSpace;
@@ -89,7 +88,7 @@ public class CharacterSheet extends RegisteredVerticalLayout implements HeroPowe
         }
         User user = BeanFinder.getBean(UserRepository.class).findById(pc.getUserId()).orElse(new User());
         List<TraitRow> traitRows = new ArrayList<>(9);
-        traitRows.add(new MetaRow(pc.getName(), user.getDisplayName(), color));
+        traitRows.add(new TopRow(user.getDisplayName(), color, this));
         traitRows.add(new CivilianName(pc, this));
         traitRows.add(new ProgressionPoint(pc, this));
 
@@ -103,19 +102,15 @@ public class CharacterSheet extends RegisteredVerticalLayout implements HeroPowe
         //AtomicInteger sortOrder = new AtomicInteger();
 
         traitRows.add(new MetaRow("Hero Traits"));
-        traits.forEach(trait -> {
-            traitRows.add(new TraitField(trait, this));
-        });
+        traits.forEach(trait -> traitRows.add(new TraitField(trait, this)));
 
         traits = pc.getTraits().stream()
                 .filter(trait -> trait.getType().equals(TraitType.Drama))
-                .sorted().collect(Collectors.toList());
+                .sorted().toList();
 
         traitCount += traits.size();
         traitRows.add(new MetaRow("Drama Traits"));
-        traits.forEach(trait -> {
-            traitRows.add(new TraitField(trait, this));
-        });
+        traits.forEach(trait -> traitRows.add(new TraitField(trait, this)));
 
 
         if (traits.size() < MAX_DRAMA) {
@@ -146,13 +141,13 @@ public class CharacterSheet extends RegisteredVerticalLayout implements HeroPowe
         dataProvider.setFilter(filter::test);
         grid.setDataProvider(dataProvider);
 
-        grid.addComponentColumn(TraitRow::getLabel);//.setFlexGrow(2);
-        grid.addComponentColumn(TraitRow::getComponent);//.setTextAlign(ColumnTextAlign.END);
+        grid.addComponentColumn(TraitRow::getLeft);//.setFlexGrow(2);
+        grid.addComponentColumn(TraitRow::getRight);//.setTextAlign(ColumnTextAlign.END);
 
-        grid.setClassNameGenerator(item -> item.getColor());
+        grid.setPartNameGenerator(TraitRow::getColor);
 
         grid.addItemClickListener(event -> {
-            switch (event.getItem().getLabelValue()) {
+            switch (event.getItem().getLeftValue()) {
                 case "Hero Traits":
                     heroExpanded = !heroExpanded;
                     filter.setShowHero(heroExpanded);
@@ -231,11 +226,9 @@ public class CharacterSheet extends RegisteredVerticalLayout implements HeroPowe
         abilityRowGrid.addComponentColumn(AbilityRow::getComponent2).setFlexGrow(1);
 
         abilityRowGrid.setAllRowsVisible(true);
-        abilityRowGrid.getColumns().forEach(itemColumn -> {
-            itemColumn.setAutoWidth(true);
-        });
+        abilityRowGrid.getColumns().forEach(itemColumn -> itemColumn.setAutoWidth(true));
 
-        abilityRowGrid.setClassNameGenerator(item -> item.getColor());
+        abilityRowGrid.setPartNameGenerator(AbilityRow::getColor);
         add(abilityRowGrid);
 
         List<HeroPowerSet> heroPowerSets = getHeroPowerSetRepository().findAllByPlayerCharacter(pc);
@@ -249,9 +242,7 @@ public class CharacterSheet extends RegisteredVerticalLayout implements HeroPowe
             --needed;
         }
         while (needed > 0) {
-            heroPowersLayout.add(new Button("Choose power set", startEvent -> {
-                openPowerSetDialog(heroPowerSets);
-            }));
+            heroPowersLayout.add(new Button("Choose power set", startEvent -> openPowerSetDialog(heroPowerSets)));
             --needed;
         }
         add(heroPowersLayout);
@@ -282,6 +273,7 @@ public class CharacterSheet extends RegisteredVerticalLayout implements HeroPowe
 
     }
 
+
     private HeroPowerSetRepository getHeroPowerSetRepository() {
         return BeanFinder.getBean(HeroPowerSetRepository.class);
     }
@@ -298,9 +290,7 @@ public class CharacterSheet extends RegisteredVerticalLayout implements HeroPowe
     protected void handleMessage(Entry entry) {
         if (EventType.PCUpdate.equals(entry.getType())) {
             if (pc != null && entry.getPcId().equals(pc.getId())) {
-                BeanFinder.getBean(PlayerCharacterRepository.class).findById(pc.getId()).ifPresent(playerCharacter -> {
-                    pc = playerCharacter;
-                });
+                BeanFinder.getBean(PlayerCharacterRepository.class).findById(pc.getId()).ifPresent(playerCharacter -> pc = playerCharacter);
                 init();
             }
         }
@@ -324,7 +314,7 @@ public class CharacterSheet extends RegisteredVerticalLayout implements HeroPowe
 
             List<HeroPower> edited = powerSetEditor.getHeroPowers();
 
-            Collection<HeroPower> intersection = CollectionUtils.intersection(starting, edited);
+            //Collection<HeroPower> intersection = CollectionUtils.intersection(starting, edited);
             Collection<HeroPower> disjunction = CollectionUtils.disjunction(starting, edited);
 
             //log.info("updating all: "+intersection);
@@ -353,9 +343,7 @@ public class CharacterSheet extends RegisteredVerticalLayout implements HeroPowe
     private void openPowerSetDialog(List<HeroPowerSet> heroPowerSetList) {
         List<PowerSet> excludes = new ArrayList<>();
         if (heroPowerSetList != null) {
-            heroPowerSetList.forEach(heroPowerSet -> {
-                excludes.add(heroPowerSet.getPowerSet());
-            });
+            heroPowerSetList.forEach(heroPowerSet -> excludes.add(heroPowerSet.getPowerSet()));
         }
 
         MultiColumnLayout multiColumnLayout = new MultiColumnLayout(3);
@@ -451,7 +439,11 @@ public class CharacterSheet extends RegisteredVerticalLayout implements HeroPowe
         this.pcUpdater = pcUpdater;
     }
 
+    public PlayerCharacter getPC() {
+        return pc;
+    }
+/*
     public void setEditablePowers(boolean editablePowers) {
         this.editablePowers = editablePowers;
-    }
+    }*/
 }

@@ -2,12 +2,13 @@ package com.smaugslair.thitracker.data.powers;
 
 import com.smaugslair.thitracker.rules.Ability;
 import com.smaugslair.thitracker.util.AbilityModsRenderer;
-import org.apache.commons.lang3.StringUtils;
+import jakarta.persistence.*;
+import org.apache.commons.lang3.Strings;
+import org.jetbrains.annotations.NotNull;
 import org.mariuszgromada.math.mxparser.Expression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.persistence.*;
 import java.util.*;
 
 @Entity
@@ -117,7 +118,7 @@ public class  Power implements Sheetable, Comparable<Power> {
 
     public void setMaxTaken(Integer maxTaken) {
         if (maxTaken == null && !ssid.isEmpty()) {
-            log.error("setting maxtaken to null:" +this, new Exception());
+            log.error("setting maxtaken to null:{}", this, new Exception());
         }
         this.maxTaken = maxTaken;
     }
@@ -146,7 +147,7 @@ public class  Power implements Sheetable, Comparable<Power> {
         this.hasPrerequisite = hasPrerequisite;
     }
 
-    public void parsePrerequisite(List<String> powerNames) {
+    public void parsePrerequisite(Set<String> powerNames) {
         if (prerequisite.isEmpty() || prerequisite.toLowerCase().startsWith("see text")) {
             hasPrerequisite = false;
             badPrerequisite = false;
@@ -187,7 +188,7 @@ public class  Power implements Sheetable, Comparable<Power> {
     }
 
 
-    public boolean prerequsitesMet(List<String> powerNames) {
+    public boolean prerequsitesMet(Set<String> powerNames) {
         if (!hasPrerequisite) {
             return true;
         }
@@ -233,7 +234,7 @@ public class  Power implements Sheetable, Comparable<Power> {
             return andPrereqs;
         }
         if (prerequisite != null) {
-            return Arrays.asList(prerequisite);
+            return List.of(prerequisite);
         }
         return new ArrayList<>();
     }
@@ -335,7 +336,9 @@ public class  Power implements Sheetable, Comparable<Power> {
         for (Map.Entry<String, Integer> entry: powerSetMap.entrySet()) {
             sb.append(entry.getKey()).append(":").append(entry.getValue()).append(", ");
         }
-        powerSets = StringUtils.removeEnd(sb.toString(), ", ");
+        powerSets = Strings.CS.removeEnd(sb.toString(), ", ");
+
+
     }
 
     @Transient Integer lowestTier;
@@ -400,7 +403,7 @@ public class  Power implements Sheetable, Comparable<Power> {
     }
 
     @Override
-    public int compareTo(Power o) {
+    public int compareTo(@NotNull Power o) {
         return Comparator.comparing(Power::getName).compare(this, o);
     }
 
@@ -425,27 +428,26 @@ public class  Power implements Sheetable, Comparable<Power> {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("Power{");
-        sb.append("ssid='").append(ssid).append('\'');
-        sb.append(", name='").append(name).append('\'');
-        sb.append(", shortDescr='").append(shortDescr).append('\'');
-        sb.append(", fullDescr='").append(fullDescr).append('\'');
-        sb.append(", powerTag='").append(powerTag).append('\'');
-        sb.append(", assRules='").append(assRules).append('\'');
-        sb.append(", maxTaken='").append(maxTaken).append('\'');
-        sb.append(", prerequisite='").append(prerequisite).append('\'');
-        sb.append(", powerMods=").append(powerMods);
-        sb.append(", metaPower=").append(metaPower);
-        sb.append(", subPowers='").append(subPowers).append('\'');
-        sb.append(", powerSets='").append(powerSets).append('\'');
-        sb.append(", powerSetMap=").append(powerSetMap);
-        sb.append(", badPrerequisite=").append(badPrerequisite);
-        sb.append(", hasPrerequisite=").append(hasPrerequisite);
-        sb.append(", orPrereqs=").append(orPrereqs);
-        sb.append(", andPrereqs=").append(andPrereqs);
-        sb.append(", tier=").append(lowestTier);
-        sb.append(", abilityMods='").append(abilityMods).append('\'');
-        sb.append('}');
-        return sb.toString();
+        String sb = "Power{" + "ssid='" + ssid + '\'' +
+                ", name='" + name + '\'' +
+                ", shortDescr='" + shortDescr + '\'' +
+                ", fullDescr='" + fullDescr + '\'' +
+                ", powerTag='" + powerTag + '\'' +
+                ", assRules='" + assRules + '\'' +
+                ", maxTaken='" + maxTaken + '\'' +
+                ", prerequisite='" + prerequisite + '\'' +
+                ", powerMods=" + powerMods +
+                ", metaPower=" + metaPower +
+                ", subPowers='" + subPowers + '\'' +
+                ", powerSets='" + powerSets + '\'' +
+                ", powerSetMap=" + powerSetMap +
+                ", badPrerequisite=" + badPrerequisite +
+                ", hasPrerequisite=" + hasPrerequisite +
+                ", orPrereqs=" + orPrereqs +
+                ", andPrereqs=" + andPrereqs +
+                ", tier=" + lowestTier +
+                ", abilityMods='" + abilityMods + '\'' +
+                '}';
+        return sb;
     }
 }

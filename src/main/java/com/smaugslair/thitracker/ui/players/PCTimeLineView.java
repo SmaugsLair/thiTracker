@@ -19,21 +19,22 @@ import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.RouteScope;
 import jakarta.annotation.security.PermitAll;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @PermitAll
-@CssImport(value = "./styles/color.css", themeFor = "vaadin-grid")
+//@CssImport(value = "./styles/color.css", themeFor = "vaadin-grid")
 @CssImport(value = "./styles/minPadding.css", themeFor = "vaadin-grid")
 @Route(value = "pcTimeLineView")
 @Component
 @RouteScope
 public class PCTimeLineView extends RegisteredVerticalLayout implements AppEventListener, HasUrlParameter<Long> {
 
-    //private static final Logger log = LoggerFactory.getLogger(PCTimeLineView.class);
+    private static final Logger log = LoggerFactory.getLogger(PCTimeLineView.class);
 
     private final UIService uiService;
     private final TimeLineItemRepository timeLineItemRepository;
@@ -45,11 +46,11 @@ public class PCTimeLineView extends RegisteredVerticalLayout implements AppEvent
         this.timeLineItemRepository = timeLineItemRepository;
 
         uiService.addAppEventListener(this);
-        //log.info("PCTimeLineView created");
+        log.info("PCTimeLineView created");
     }
 
     public void init() {
-        //log.info("PCTimeLineView init");
+        log.info("PCTimeLineView init");
         removeAll();
 
         //final Game game = uiService.getGame();
@@ -82,7 +83,8 @@ public class PCTimeLineView extends RegisteredVerticalLayout implements AppEvent
         grid.addColumn(TimeLineItem::getTime).setHeader("Time");
         grid.addColumn(TimeLineItem::getReactTime).setHeader("React");
 
-        grid.setClassNameGenerator(item -> item.getColor());
+
+        grid.setPartNameGenerator(TimeLineItem::getColor);
         grid.getColumns().forEach(itemColumn -> itemColumn.setAutoWidth(true));
 
         add(grid);
@@ -109,13 +111,7 @@ public class PCTimeLineView extends RegisteredVerticalLayout implements AppEvent
 
     @Override
     public void setParameter(BeforeEvent beforeEvent, Long gameId) {
-        Optional<Game> optionalGame = BeanFinder.getBean(GameRepository.class).findById(gameId);
-        if (optionalGame.isPresent()) {
-            game = optionalGame.get();
-        }
-        else {
-            game = null;
-        }
+        game = BeanFinder.getBean(GameRepository.class).findById(gameId).orElse(null);
         init();
     }
 }

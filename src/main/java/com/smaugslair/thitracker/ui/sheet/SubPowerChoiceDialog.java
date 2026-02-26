@@ -19,7 +19,7 @@ public class SubPowerChoiceDialog extends ConfirmDialog implements MultiSelectio
 
     private final Integer choices;
     //private final UserSafeButton saveButton = new UserSafeButton("Save");
-    private CheckboxGroup<Power> checkboxGroup;
+    private final CheckboxGroup<Power> checkboxGroup;
 
     public SubPowerChoiceDialog(Power power, SortedSet<Power> allPowers, List<Power> herosPowers, Button saveButton) {
         setConfirmButton(saveButton);
@@ -31,11 +31,9 @@ public class SubPowerChoiceDialog extends ConfirmDialog implements MultiSelectio
 
         setHeaderTitle("Choose "+choices+" from "+tag+ " subpowers");
 
-        Button tagBrowser = new UserSafeButton("Subpower details", event -> {
-            getUI().ifPresent(ui -> {
-                ui.getPage().open("powerbrowser/"+tag, tag);
-            });
-        });
+        Button tagBrowser = new UserSafeButton("Subpower details", event -> getUI().ifPresent(ui -> {
+            ui.getPage().open("powerbrowser/"+tag, tag);
+        }));
         add(tagBrowser);
         List<Power> subpowers = new ArrayList<>();
         for (Power p : allPowers) {
@@ -47,9 +45,7 @@ public class SubPowerChoiceDialog extends ConfirmDialog implements MultiSelectio
         checkboxGroup.setItemLabelGenerator(Power::getName);
         checkboxGroup.addSelectionListener(this);
         checkboxGroup.addThemeVariants(CheckboxGroupVariant.LUMO_VERTICAL);
-        checkboxGroup.setItemEnabledProvider(power1 -> {
-           return power1.prerequsitesMet(herosPowers.stream().map(Power::getName).collect(Collectors.toList()));
-        });
+        checkboxGroup.setItemEnabledProvider(power1 -> power1.prerequsitesMet(herosPowers.stream().map(Power::getName).collect(Collectors.toSet())));
         add(checkboxGroup);
     }
 

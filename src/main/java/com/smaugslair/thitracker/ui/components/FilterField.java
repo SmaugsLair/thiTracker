@@ -18,9 +18,7 @@ public class FilterField extends TextField {
         }
         setPlaceholder("Filter");
         getElement().setAttribute("focus-target", "");
-        addValueChangeListener(event -> {
-            consumer.accept(event.getValue());
-        });
+        addValueChangeListener(event -> consumer.accept(event.getValue()));
     }
 
     public FilterField(Consumer<String> consumer) {

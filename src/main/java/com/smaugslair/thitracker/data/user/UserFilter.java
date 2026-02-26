@@ -2,7 +2,7 @@ package com.smaugslair.thitracker.data.user;
 
 
 import com.vaadin.flow.data.provider.ListDataProvider;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,14 +51,13 @@ public class UserFilter {
 
 
     public boolean test(User user) {
-        if (email.length() > 0 && !StringUtils.containsIgnoreCase(user.getEmail(), email)) {
+        if (!email.isEmpty() && !Strings.CI.contains(user.getEmail(), email)) {
             return false;
         }
-        if (displayName.length() > 0 && !StringUtils.containsIgnoreCase(user.getDisplayName(), displayName)) {
+        if (!displayName.isEmpty() && !Strings.CI.contains(user.getDisplayName(), displayName)) {
             return false;
         }
-        if (admin.length() > 0 && !StringUtils.containsIgnoreCase(
-                String.valueOf(user.isAdmin()), admin)) {
+        if (!admin.isEmpty() && !Strings.CI.contains(String.valueOf(user.isAdmin()), admin)) {
             return false;
         }
         return true;

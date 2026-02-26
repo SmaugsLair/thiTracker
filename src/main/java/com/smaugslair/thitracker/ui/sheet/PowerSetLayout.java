@@ -62,10 +62,7 @@ public class PowerSetLayout extends VerticalLayout {
         if (characterSheet != null) {
             UserSafeButton button =
                     new UserSafeButton("Choose new " + powerSet.getPowerSet().getName() +" power",
-                            event -> {
-                                characterSheet.showPowerChoiceDialog(powerSet);
-
-                            });
+                            event -> characterSheet.showPowerChoiceDialog(powerSet));
             add(button);
         }
 

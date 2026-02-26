@@ -35,8 +35,8 @@ public class PairedComponent extends HorizontalLayout {
         field.setMax(9);
         layout.add(field);
         //IntegerField size = new IntegerField();
-        log.info("field size: " + field.getWidth());
-        log.info("field min w: " + field.getMinWidth());
+        log.info("field size: {}", field.getWidth());
+        log.info("field min w: {}", field.getMinWidth());
         /*size.setValue(Integer.valueOf(field.getWidth()));
         size.setStepButtonsVisible(true);
         size.addValueChangeListener(e -> {

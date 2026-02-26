@@ -1,5 +1,7 @@
 package com.smaugslair.thitracker.ui.games;
 
+import com.smaugslair.thitracker.data.game.TimeLineItem;
+import com.smaugslair.thitracker.data.game.TimeLineItemRepository;
 import com.smaugslair.thitracker.data.log.Entry;
 import com.smaugslair.thitracker.data.log.EventType;
 import com.smaugslair.thitracker.data.pc.*;
@@ -18,7 +20,7 @@ import com.vaadin.flow.component.html.Paragraph;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@CssImport(value = "./styles/color.css", themeFor = "vaadin-grid")
+//@CssImport(value = "./styles/color.css", themeFor = "vaadin-grid")
 @CssImport(value = "./styles/minPadding.css", themeFor = "vaadin-grid")
 public class GMCharacterView extends RegisteredVerticalLayout implements CharacterEditor {
 
@@ -27,7 +29,7 @@ public class GMCharacterView extends RegisteredVerticalLayout implements Charact
     private PCUpdater pcUpdater;
     //private SessionService sessionService;
     private PlayerCharacter pc = null;
-    //private String color;
+    private String color = "";
 
 
     public GMCharacterView() {
@@ -38,6 +40,19 @@ public class GMCharacterView extends RegisteredVerticalLayout implements Charact
 
     public void setPc(PlayerCharacter pc) {
         this.pc = pc;
+        color = "";
+        if (pc != null && pc.getGameId() != null) {
+            //NameValue nameValue = new NameValue("gameId", pc.getGameId());
+            //Loading the whole list so that the cache is not loaded with only a single item
+            //List<TimeLineItem> items = cacheService.getTliCache().findManyByProperty(nameValue);
+            List<TimeLineItem> items = BeanFinder.getBean(TimeLineItemRepository.class).findByGameId(pc.getGameId());
+            for (TimeLineItem item : items) {
+                if (pc.getId().equals(item.getPcId())) {
+                    color = item.getColor();
+                    break;
+                }
+            }
+        }
         init();
     }
 
@@ -49,13 +64,15 @@ public class GMCharacterView extends RegisteredVerticalLayout implements Charact
         }
         User user = BeanFinder.getBean(UserRepository.class).findById(pc.getUserId()).orElse(new User());
         //List<TraitRow> traitRows = new ArrayList<>(9);
-        add(new PairedComponent(pc.getName(), user.getDisplayName()));
+        PairedComponent nameComponent = new PairedComponent(pc.getName(), user.getDisplayName());
+        nameComponent.setClassName(color);
+        add(nameComponent);
         //traitRows.add(new MetaRow(pc.getName(), user.getDisplayName(), color));
         add(new PairedComponent("aka", pc.getCivilianId()));
         //traitRows.add(new CivilianName(pc, null));
         //add(new PairedComponent("Prog points", pc.getProgressionTokens().toString()));
         ProgressionPoint pp = new ProgressionPoint(pc, this);
-        add(new PairedComponent(pp.getLabel(), pp.getComponent()));
+        add(new PairedComponent(pp.getLeft(), pp.getRight()));
         //traitRows.add(new ProgressionPoint(pc, null));
 
         List<Trait> traits = pc.getTraits().stream()
@@ -65,17 +82,17 @@ public class GMCharacterView extends RegisteredVerticalLayout implements Charact
         add("Hero Traits");
         traits.forEach(trait -> {
             TraitField traitField = new TraitField(trait, false, this);
-            add(new PairedComponent(traitField.getLabel(), traitField.getComponent()));
+            add(new PairedComponent(traitField.getLeft(), traitField.getRight()));
         });
 
         traits = pc.getTraits().stream()
                 .filter(trait -> trait.getType().equals(TraitType.Drama))
                 .sorted()
-                .collect(Collectors.toList());
+                .toList();
         add("Drama Traits");
         traits.forEach(trait ->{
             TraitField traitField = new TraitField(trait, false, this);
-            add(new PairedComponent(traitField.getLabel(), traitField.getComponent()));
+            add(new PairedComponent(traitField.getLeft(), traitField.getRight()));
         });
 
         add("Ability Scores");
@@ -120,9 +137,7 @@ public class GMCharacterView extends RegisteredVerticalLayout implements Charact
     protected void handleMessage(Entry entry) {
         if (EventType.PCUpdate.equals(entry.getType())) {
             if (pc != null && entry.getPcId().equals(pc.getId())) {
-                BeanFinder.getBean(PlayerCharacterRepository.class).findById(pc.getId()).ifPresent(playerCharacter -> {
-                    pc = playerCharacter;
-                });
+                BeanFinder.getBean(PlayerCharacterRepository.class).findById(pc.getId()).ifPresent(hero -> pc = hero);
                 init();
             }
         }

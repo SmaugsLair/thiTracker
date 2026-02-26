@@ -55,6 +55,7 @@ public class PowerBrowserView extends Grid<Power> implements HasUrlParameter<Str
         for (Power power : powersCache.getPowers()) {
             if (power.isBadPrerequisite()) {
                 showBugs = true;
+                break;
             }
         }
 

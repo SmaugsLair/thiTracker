@@ -3,7 +3,7 @@ package com.smaugslair.thitracker.ui.components.events;
 public class AppEvent {
 
     public enum AppEventType {
-        HeroChosen, GameChosen, MenuChange;
+        HeroChosen, GameChosen, MenuChange
     }
 
     private final Long objectId;

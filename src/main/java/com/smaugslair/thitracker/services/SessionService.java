@@ -62,9 +62,8 @@ public class SessionService {
             if (email != null) {
                 Optional<User> optionalUser = userRepository.findUserByEmail(email);
                 if (optionalUser.isPresent()) {
-                    log.info("Logged in user:"+ email);
+                    log.info("Logged in user:{}", email);
                     user = optionalUser.get();
-                    return user;
                 }
                 else {
                     User newUser = new User();
@@ -73,23 +72,23 @@ public class SessionService {
                     String first = principal.getAttribute("given_name");
                     String last = principal.getAttribute("family_name");
 
-                    String displayName = findAvailableDisplayName(first + last.substring(0, 1), 0, userRepository);
+                    String displayName = findAvailableDisplayName(first + last.charAt(0), 0, userRepository);
 
                     newUser.setDisplayName(displayName);
                     newUser.setFriendCode(generateFriendCode());
 
-                    log.info("Added and logged in new user:"+ email);
+                    log.info("Added and logged in new user:{}", email);
                     newUser = userRepository.save(newUser);
                     user = newUser;
-                    return user;
                 }
+                return user;
             }
         }
         return null;
     }
 
     private String findAvailableDisplayName(String displayName, Integer count, UserRepository userRepository) {
-        log.info("Finding available display name: " + displayName+", count"+count);
+        log.info("Finding available display name: {}, count:{}", displayName, count);
         String testname = displayName;
         if (count > 0) {
             testname = displayName + count;

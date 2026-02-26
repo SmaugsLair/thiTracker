@@ -39,7 +39,6 @@ public class PlayerCharacter implements Comparable<PlayerCharacter> {
     @MapKey(name = "ability")
     Map<Ability, AbilityScore> abilityScores = new HashMap<>();
 
-
     public Long getId() {
         return id;
     }
@@ -158,11 +157,10 @@ public class PlayerCharacter implements Comparable<PlayerCharacter> {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("PlayerCharacter{");
-        sb.append("id=").append(id);
-        sb.append(", name='").append(name).append('\'');
-        sb.append(", pcPlayerName='").append(pcPlayerName).append('\'');
-        sb.append('}');
-        return sb.toString();
+        String sb = "PlayerCharacter{" + "id=" + id +
+                ", name='" + name + '\'' +
+                ", pcPlayerName='" + pcPlayerName + '\'' +
+                '}';
+        return sb;
     }
 }

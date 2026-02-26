@@ -14,11 +14,8 @@ import com.vaadin.flow.component.Html;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import org.apache.commons.lang3.tuple.MutableTriple;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @PermitAll
 @Route("printableSheet")
@@ -83,7 +80,7 @@ public class PrintableSheet extends AbstractHeroView {
 
             List<HeroPowerSet> heroPowerSets = heroPowerSetRepository.findAllByPlayerCharacter(hero);
             List<HeroPower> heroPowers = heroPowerRepository.findAllByPlayerCharacter(hero).stream()
-                    .sorted().collect(Collectors.toList());
+                    .sorted().toList();
 
             int maxPowerRow = Math.max(heroPowers.size()+1, 11);
 
@@ -105,23 +102,29 @@ public class PrintableSheet extends AbstractHeroView {
                 for (HeroPower heroPower : heroPowers) {
                     if (heroPower.getHeroPowerSet().equals(heroPowerSet)) {
 
-                        String more = "";
+                        //String more = "";
+
+                        StringBuilder sb = new StringBuilder();
 
                         if (!heroPower.getMods().isEmpty()) {
-                            more = ": " + heroPower.getModText();
+                            sb.append(": ").append(heroPower.getModText());
+                            //more = ": " + heroPower.getModText();
                         }
                         if (!heroPower.getSubPowers().isEmpty()) {
-                            more += ": ";
+                            sb.append(": ");
+                            //more += ": ";
                             for (HeroSubPower subPower : heroPower.getSubPowers()) {
-                                more += subPower.getName() +", ";
+                                sb.append(subPower.getName()).append(", ");
+                                //more += subPower.getName() +", ";
                             }
-                            more = more.substring(0, more.length() - 2);
+                            sb.delete(sb.length()-2, sb.length());
+                            //more = more.substring(0, more.length() - 2);
                         }
                         if (psi == 0) {
-                            powers.get(hpCount).setMiddle(heroPower.getName()+ more);
+                            powers.get(hpCount).setMiddle(heroPower.getName()+ sb);
                         }
                         else {
-                            powers.get(hpCount).setRight(heroPower.getName()+ more);
+                            powers.get(hpCount).setRight(heroPower.getName()+ sb);
                         }
                         ++hpCount;
                         ++totalPowers;

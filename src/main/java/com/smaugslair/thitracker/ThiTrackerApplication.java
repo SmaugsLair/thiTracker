@@ -54,7 +54,7 @@ public class ThiTrackerApplication {
                 user.setEmail("naganalf@gmail.com");
                 user.setAdmin(true);
                 user.setFriendCode("9876");
-                user = userRepository.save(user);
+                userRepository.save(user);
 
 
                 user = new User();
@@ -62,7 +62,7 @@ public class ThiTrackerApplication {
                 user.setEmail("andya@giantsdancegames.com");
                 user.setAdmin(true);
                 user.setFriendCode("4321");
-                user = userRepository.save(user);
+                userRepository.save(user);
 
             }/*
             List<Game> games = gameRepository.findAll();

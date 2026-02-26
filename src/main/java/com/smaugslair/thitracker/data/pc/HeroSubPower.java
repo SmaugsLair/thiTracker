@@ -54,12 +54,11 @@ public class HeroSubPower {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("HeroSubPower{");
-        sb.append("id=").append(id);
-        sb.append(", power=").append(power);
-        sb.append(", heroPower=").append(heroPower);
-        sb.append('}');
-        return sb.toString();
+        String sb = "HeroSubPower{" + "id=" + id +
+                ", power=" + power +
+                ", heroPower=" + heroPower +
+                '}';
+        return sb;
     }
 
 }

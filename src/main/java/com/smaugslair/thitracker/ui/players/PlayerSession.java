@@ -30,12 +30,12 @@ public class PlayerSession extends AbstractHeroView {
 
     private static final Logger log = LoggerFactory.getLogger(PlayerSession.class);
 
-    private TabSheet tabSheet;
+    //private TabSheet tabSheet;
 
     private final PCTimeLineView pcTimeLineView;
 
 
-    private CharacterSheet characterSheet;
+    //private CharacterSheet characterSheet;
 
     protected PlayerSession(UIService uiService, GameRepository gameRepository, PlayerCharacterRepository playerCharacterRepository,
                             TitleBar titleBar, PCTimeLineView pcTimeLineView) {
@@ -49,7 +49,7 @@ public class PlayerSession extends AbstractHeroView {
     public void init() {
         removeAll();
 
-        tabSheet = new TabSheet();
+        TabSheet tabSheet = new TabSheet();
         tabSheet.setHeightFull();
         tabSheet.setWidthFull();
 
@@ -66,10 +66,10 @@ public class PlayerSession extends AbstractHeroView {
 
         titleBar.setTitle(hero.getName()+ " in " + game.getName());
 
-        characterSheet = new CharacterSheet();
+        CharacterSheet characterSheet = new CharacterSheet();
 
         characterSheet.setPcUpdater(this::updatePc);
-        characterSheet.setEditablePowers(false);
+        //characterSheet.setEditablePowers(false);
         characterSheet.setPc(hero);
         characterSheet.setWidthFull();
 

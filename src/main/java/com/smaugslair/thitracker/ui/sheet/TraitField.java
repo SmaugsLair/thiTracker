@@ -64,12 +64,12 @@ public class TraitField implements TraitRow {
     }
 
     @Override
-    public Component getLabel() {
+    public Component getLeft() {
         return nameField;
     }
 
     @Override
-    public Component getComponent() {
+    public Component getRight() {
         if (hl != null) {
             return hl;
         }
@@ -82,7 +82,7 @@ public class TraitField implements TraitRow {
     }
 
     @Override
-    public String getLabelValue() {
+    public String getLeftValue() {
         return text;
     }
 

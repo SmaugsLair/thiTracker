@@ -16,8 +16,6 @@ public class PowerTargetRemoveButton extends UserSafeNativeButton {
         }
         setText("-");
         setEnabled(true);
-        addClickListener(event -> {
-            powerSetEditor.removePowerTarget(powerTarget);
-        });
+        addClickListener(event -> powerSetEditor.removePowerTarget(powerTarget));
     }
 }

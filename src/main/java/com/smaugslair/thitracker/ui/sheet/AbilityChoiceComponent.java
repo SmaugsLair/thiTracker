@@ -9,7 +9,7 @@ public class AbilityChoiceComponent extends HorizontalLayout {
 
 
     private final Ability ability;
-    private IntegerField integerField = new IntegerField();
+    private final IntegerField integerField = new IntegerField();
 
     public AbilityChoiceComponent(Ability ability) {
         setJustifyContentMode(JustifyContentMode.BETWEEN);

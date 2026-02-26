@@ -7,7 +7,6 @@ import com.smaugslair.thitracker.data.pc.PlayerCharacter;
 import com.smaugslair.thitracker.data.pc.PlayerCharacterRepository;
 import com.smaugslair.thitracker.data.user.MessageRepository;
 import com.smaugslair.thitracker.data.user.User;
-import com.smaugslair.thitracker.data.user.UserRepository;
 import com.smaugslair.thitracker.services.SessionService;
 import com.smaugslair.thitracker.services.UIService;
 import com.smaugslair.thitracker.ui.components.TitleBar;
@@ -35,23 +34,22 @@ import com.vaadin.flow.router.AfterNavigationEvent;
 import com.vaadin.flow.router.AfterNavigationObserver;
 import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @UIScope
 public class MainView extends AppLayout implements AfterNavigationObserver, AppEventListener {
 
-    private static final Logger log = LoggerFactory.getLogger(MainView.class);
+    //private static final Logger log = LoggerFactory.getLogger(MainView.class);
 
     private final SessionService sessionService;
 
-    private final UIService uiService;
+    //private final UIService uiService;
 
-    private final UserRepository userRepository;
+    //private final UserRepository userRepository;
 
     private final PlayerCharacterRepository playerCharacterRepository;
 
@@ -60,23 +58,24 @@ public class MainView extends AppLayout implements AfterNavigationObserver, AppE
     private final MessageRepository messageRepository;
     private final HeroPowerRepository heroPowerSetRepository;
 
-    private final TitleBar titleBar;
+    //private final TitleBar titleBar;
 
-    private boolean newUI = true;
+    //private boolean newUI = true;
     SideNavItem messagesItem;
-    private SideNav sideNav;
+    private final SideNav sideNav;
     //private ApplicationContext context;
     private SideNavItem heroesItem, gamesItem;
 
-    public MainView(SessionService sessionService, UIService uiService, UserRepository userRepository, PlayerCharacterRepository playerCharacterRepository, GameRepository gameRepository, MessageRepository messageRepository, HeroPowerRepository heroPowerSetRepository, TitleBar titleBar) {
+    public MainView(SessionService sessionService, UIService uiService, PlayerCharacterRepository playerCharacterRepository,
+                    GameRepository gameRepository, MessageRepository messageRepository, HeroPowerRepository heroPowerSetRepository, TitleBar titleBar) {
         this.sessionService = sessionService;
-        this.uiService = uiService;
-        this.userRepository = userRepository;
+        //this.uiService = uiService;
+        //this.userRepository = userRepository;
         this.playerCharacterRepository = playerCharacterRepository;
         this.gameRepository = gameRepository;
         this.messageRepository = messageRepository;
         this.heroPowerSetRepository = heroPowerSetRepository;
-        this.titleBar = titleBar;
+        //this.titleBar = titleBar;
 
         uiService.addAppEventListener(this);
 
@@ -89,10 +88,7 @@ public class MainView extends AppLayout implements AfterNavigationObserver, AppE
         appTitle.setClassName("appTitle");
 
         sideNav = new SideNav();
-        getPrimaryNavigation(user)
-                .stream().forEach(sideNavItem -> {
-                    sideNav.addItem(sideNavItem);}
-        );
+        getPrimaryNavigation(user).forEach(sideNavItem -> sideNav.addItem(sideNavItem));
         //sideNav.addItem(getPrimaryNavigation(user));
         //sideNav = getPrimaryNavigation(user);
 
@@ -186,15 +182,18 @@ public class MainView extends AppLayout implements AfterNavigationObserver, AppE
         String name = pc.getName();
         Game game = null;
         if (pc.getGameId() != null) {
-            game = gameRepository.findById(pc.getGameId()).orElse(null);
-            name += " ("+game.getName()+")";
+            Optional<Game> oGame = gameRepository.findById(pc.getGameId());
+            if (oGame.isPresent()) {
+                game = oGame.get();
+                name += " ("+game.getName()+")";
+            }
         }
         SideNavItem heroItem = new SideNavItem(name,"/hero/"+pc.getId());
         if (game != null) {
             heroItem.addItem(new SideNavItem("Join "+game.getName(), "/playersession/"+pc.getId()));
         }
 
-        if (heroPowerSetRepository.findAllByPlayerCharacter(pc).size() > 0) {
+        if (!heroPowerSetRepository.findAllByPlayerCharacter(pc).isEmpty()) {
             SideNavItem printableSheet = new SideNavItem("Printable sheet", "/printableSheet/" + pc.getId());
             printableSheet.setOpenInNewBrowserTab(true);
             heroItem.addItem(printableSheet);
@@ -203,6 +202,9 @@ public class MainView extends AppLayout implements AfterNavigationObserver, AppE
             printablePowers.setOpenInNewBrowserTab(true);
             heroItem.addItem(printablePowers);
         }
+
+        SideNavItem heroNotes = new SideNavItem("Notes", "/pcnotes/"+pc.getId());
+        heroItem.addItem(heroNotes);
 
         SideNavItem herodeletion = new SideNavItem("Delete "+pc.getName(), "/herodeletion/"+pc.getId());
         heroItem.addItem(herodeletion);
@@ -241,10 +243,7 @@ public class MainView extends AppLayout implements AfterNavigationObserver, AppE
             boolean heroesOpen = heroesItem.isExpanded();
             boolean gamesOpen = gamesItem.isExpanded();
             sideNav.removeAll();
-            getPrimaryNavigation(sessionService.getUser())
-                    .stream().forEach(sideNavItem -> {
-                        sideNav.addItem(sideNavItem);}
-                    );
+            getPrimaryNavigation(sessionService.getUser()).forEach(sideNavItem -> sideNav.addItem(sideNavItem));
             heroesItem.setExpanded(heroesOpen);
             gamesItem.setExpanded(gamesOpen);
         }

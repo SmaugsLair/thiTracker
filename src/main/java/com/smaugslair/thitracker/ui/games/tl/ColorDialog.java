@@ -10,7 +10,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 
-@CssImport(value = "./styles/color.css", themeFor = "vaadin-grid")
+//@CssImport(value = "./styles/color.css", themeFor = "vaadin-grid")
 @CssImport(value = "./styles/minPadding.css", themeFor = "vaadin-grid")
 public class ColorDialog extends Dialog {
 
@@ -32,10 +32,11 @@ public class ColorDialog extends Dialog {
             //grid.addColumn(ColorCollection.Color::getName);
             grid.addComponentColumn(ColorButton::new);
 
-            grid.setClassNameGenerator(item -> item.getName());
+            grid.setPartNameGenerator(ColorCollection.Color::name);
         }
         add(horizontalLayout);
-        setWidthFull();
+        setWidth("50%");
+        //setHeightFull();
     }
 
     public void openWith(TimeLineItem item) {
@@ -46,9 +47,9 @@ public class ColorDialog extends Dialog {
     private class ColorButton extends Div {
 
         ColorButton(ColorCollection.Color color) {
-            setText(color.getName());
+            setText(color.name());
             addClickListener(event -> {
-                item.setColor(color.getName());
+                item.setColor(color.name());
                 gmTimeLineView.updateItem(item);
                 close();
             });

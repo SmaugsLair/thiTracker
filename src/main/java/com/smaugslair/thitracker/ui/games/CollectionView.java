@@ -54,7 +54,8 @@ public class CollectionView extends AbstractMainView {
         grid.setThemeName("min-padding");
         grid.setItems(items);
         grid.setAllRowsVisible(true);
-        grid.setClassNameGenerator(item -> item.getColor());
+
+        grid.setPartNameGenerator(CollectedItem::getColor);
         grid.getColumns().forEach(itemColumn -> itemColumn.setAutoWidth(true));
         grid.addColumn(CollectedItem::getName);
         grid.addComponentColumn((CollectedItem item1) -> new DeleteButton(item1, this));

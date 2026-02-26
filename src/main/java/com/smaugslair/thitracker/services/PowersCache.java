@@ -76,7 +76,7 @@ public class PowersCache {
                 }
             });
         });
-        List<String> powerNames = new ArrayList<>();
+        Set<String> powerNames = new HashSet<>();
         powers.forEach( power -> powerNames.add(power.getName()));
         powers.forEach( power -> power.parsePrerequisite(powerNames));
     }

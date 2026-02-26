@@ -57,7 +57,7 @@ public class GameCreationView extends VerticalLayout {
         dialog.setConfirmButton(confirmButton);
         dialog.open();
 
-        add(new UserSafeButton("Create game", event -> {dialog.open();}));
+        add(new UserSafeButton("Create game", event -> dialog.open()));
 
     }
 

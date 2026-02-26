@@ -4,5 +4,5 @@ import com.smaugslair.thitracker.data.pc.AbilityScore;
 
 public interface AbilityChoice {
 
-    public void setChoice(AbilityScore abilityScore);
+    void setChoice(AbilityScore abilityScore);
 }

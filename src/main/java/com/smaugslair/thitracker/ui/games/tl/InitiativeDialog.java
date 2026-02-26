@@ -42,9 +42,7 @@ public class InitiativeDialog extends Dialog {
         vl.add(grid);
         HorizontalLayout buttonRow = new HorizontalLayout();
         vl.add(buttonRow);
-        buttonRow.add(new UserSafeButton("Close", event -> {
-            close();
-        }));
+        buttonRow.add(new UserSafeButton("Close", event -> close()));
         //setWidthFull();
     }
 }

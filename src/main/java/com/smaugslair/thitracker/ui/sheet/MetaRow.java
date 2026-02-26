@@ -24,19 +24,13 @@ public class MetaRow implements TraitRow {
         this.traitType = traitType;
     }
 
-    public MetaRow(String heroName, String displayName, String color) {
-        label.setText(heroName);
-        component = new Span(displayName);
-        this.color = color;
-    }
-
     @Override
-    public Component getLabel() {
+    public Component getLeft() {
         return label;
     }
 
     @Override
-    public Component getComponent() {
+    public Component getRight() {
         return component;
     }
 
@@ -46,7 +40,7 @@ public class MetaRow implements TraitRow {
     }
 
     @Override
-    public String getLabelValue() {
+    public String getLeftValue() {
         return label.getText();
     }
 
